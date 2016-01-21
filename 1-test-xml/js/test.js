@@ -13,13 +13,13 @@ Test.state = new Kiwi.State( "state" );
 
 Test.state.preload = function() {
 
-	var brd, component,
+	var brd,
 		xhttp = new XMLHttpRequest();
 
-	brd = "xml/adafruit-cc3000-breakout.brd.xml";
-	// brd = "xml/adafruit-flora-mainboard-2.brd";
-	// brd = "xml/adafruit-pro-trinket-3v3.brd";
-	// brd = "xml/adafruit-pro-trinket-5v0.brd";
+	brd = "../brd/adafruit-cc3000-breakout.brd";
+	// brd = "../brd/adafruit-flora-mainboard-2.brd";
+	// brd = "../brd/adafruit-pro-trinket-3v3.brd";
+	// brd = "../brd/adafruit-pro-trinket-5v0.brd";
 
 	xhttp.onreadystatechange = function() {
 		if ( xhttp.readyState === 4 && xhttp.status === 200 ) {
@@ -52,7 +52,7 @@ Test.state.parseXml = function( xml ) {
 	* @param xml {Document} An XML document to parse
 	*/
 
-	var arr, i,
+	var arr, component, i,
 		eagle = xml.getElementsByTagName( "eagle" )[ 0 ],
 		drawing = eagle.getElementsByTagName( "drawing" )[ 0 ],
 		board = drawing.getElementsByTagName( "board" )[ 0 ],
