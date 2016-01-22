@@ -1,6 +1,6 @@
 var gameOptions = {
 		renderer: Kiwi.RENDERER_WEBGL,
-		plugins: [ "Primitives" ]
+		plugins: [ "Primitives", "Text" ]
 	},
 	Test = {};
 
@@ -32,6 +32,8 @@ Test.state.preload = function() {
 
 
 Test.state.create = function() {
+
+	this.game.stage.color = "#fff";
 
 	// Helper text
 	this.caption = new Kiwi.GameObjects.TextField(
@@ -72,13 +74,22 @@ Test.state.parseXml = function( xml ) {
 	this.elements = elements;
 
 	/**
+	* Factor by which units are inflated
+	*
+	* @property scaleFactor
+	* @type number
+	* @default 10
+	*/
+	this.scaleFactor = 10;
+
+	/**
 	* Group to hold primitives
 	*
 	* @property pGroup
 	* @type Kiwi.Group
 	*/
 	this.pGroup = new Kiwi.Group( this );
-	this.pGroup.scale = 10;
+	this.pGroup.scale = this.scaleFactor;
 	this.pGroup.scaleY *= -1;
 	this.addChild( this.pGroup );
 
@@ -196,7 +207,7 @@ Test.state.parseComponent = function( component ) {
 					// What's a technology? Just a name...
 					break;
 				case "text":
-					// TODO Figure out text rendering
+					geo = this.drawText( el );
 					break;
 				case "variant":
 					// What's a variant?
@@ -310,7 +321,6 @@ Test.state.drawElement = function( el ) {
 			}
 		}
 	}
-
 };
 
 
@@ -398,12 +408,109 @@ Test.state.drawRectangle = function( el ) {
 };
 
 
+Test.state.drawText = function( el ) {
+
+	/**
+	* Draw a text primitive derived from the XML element.
+	*
+	* @method drawText
+	* @param el {Element} XML element containing data
+	* @return Kiwi.Entity
+	*/
+
+	var align = el.getAttribute( "align" ),
+		ang = el.getAttribute( "rot" ),
+		geo = new Kiwi.Plugins.Text( {
+			state: this,
+			text: "" + el.childNodes[ 0 ].data,
+			x: parseFloat( el.getAttribute( "x" ) ),
+			y: parseFloat( el.getAttribute( "y" ) ),
+			color: "#000",
+			alpha: 0.5,
+			size: parseFloat( el.getAttribute( "size" ) ) *
+				this.scaleFactor * 1.5,
+			fontFamily: "monospace"
+		} );
+
+	// Pretouch text to get accurate measurements
+	geo.renderText();
+
+	// Determine alignment
+	// Note that alignment appears to work from the top line only.
+	// In the event of multi-line text, evidence suggests
+	// it only considers the first line.
+	if ( !align ) {
+		align = "bottom-left";
+	}
+	switch ( align ) {
+		case "bottom-left":
+			geo.anchorPointY = geo.fontSize;
+			geo.y -= geo.anchorPointY;
+			break;
+		case "bottom-center":
+			geo.textAlign = Kiwi.Plugins.Text.TEXT_ALIGN_CENTER;
+			geo.anchorPointY = geo.fontSize;
+			geo.y -= geo.anchorPointY;
+			break;
+		case "bottom-right":
+			geo.textAlign = Kiwi.Plugins.Text.TEXT_ALIGN_RIGHT;
+			geo.anchorPointY = geo.fontSize;
+			geo.y -= geo.anchorPointY;
+			break;
+		case "center-left":
+			geo.anchorPointY = geo.fontSize / 2;
+			geo.y -= geo.anchorPointY;
+			break;
+		case "center":
+			geo.textAlign = Kiwi.Plugins.Text.TEXT_ALIGN_CENTER;
+			geo.anchorPointY = geo.fontSize / 2;
+			geo.y -= geo.anchorPointY;
+			break;
+		case "center-right":
+			geo.textAlign = Kiwi.Plugins.Text.TEXT_ALIGN_RIGHT;
+			geo.anchorPointY = geo.fontSize / 2;
+			geo.y -= geo.anchorPointY;
+			break;
+		case "top-left":
+			break;
+		case "top-center":
+			geo.textAlign = Kiwi.Plugins.Text.TEXT_ALIGN_CENTER;
+			break;
+		case "top-right":
+			geo.textAlign = Kiwi.Plugins.Text.TEXT_ALIGN_RIGHT;
+			break;
+	}
+
+	// Because TextField uses raster text, it can't be too small.
+	// Font size is increased, and display size is decreased.
+	geo.scale = 1 / this.scaleFactor;
+
+	// I don't know why, but text appears to render upside-down.
+	geo.scaleY *= -1;
+
+	Kiwi.Log.log( "#debug", "Text reads", geo.text );
+
+	if ( ang ) {
+
+		// Rotate
+		geo.rotation = this.parseAngle( ang );
+
+		// Mirror
+		if ( ang[ 0 ] === "M" ) {
+			geo.scaleX *= -1;
+		}
+	}
+
+	return geo;
+};
+
+
 Test.state.drawVia = function( el ) {
 
 	/**
 	* Draw a via primitive derived from the XML element.
 	*
-	* @method drawPolygon
+	* @method drawVia
 	* @param el {Element} XML element containing data
 	* @return Kiwi.Entity
 	*/
@@ -428,7 +535,7 @@ Test.state.drawWire = function( el ) {
 	/**
 	* Draw a wire primitive derived from the XML element.
 	*
-	* @method drawPolygon
+	* @method drawWire
 	* @param el {Element} XML element containing data
 	* @return Kiwi.Entity
 	*/
