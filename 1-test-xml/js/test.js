@@ -16,10 +16,10 @@ Test.state.preload = function() {
 	var brd,
 		xhttp = new XMLHttpRequest();
 
-	brd = "../brd/adafruit-cc3000-breakout.brd";
+	// brd = "../brd/adafruit-cc3000-breakout.brd";
 	// brd = "../brd/adafruit-flora-mainboard-2.brd";
 	// brd = "../brd/adafruit-pro-trinket-3v3.brd";
-	// brd = "../brd/adafruit-pro-trinket-5v0.brd";
+	brd = "../brd/adafruit-pro-trinket-5v0.brd";
 
 	xhttp.onreadystatechange = function() {
 		if ( xhttp.readyState === 4 && xhttp.status === 200 ) {
@@ -274,9 +274,19 @@ Test.state.drawElement = function( el ) {
 	* @return Kiwi.Entity
 	*/
 
-	var ang, group, i, j, lib, name, pack, packages,
+	var ang, group, i, lib, name, pack, packages,
 		libName = el.getAttribute( "library" ),
 		packName = el.getAttribute( "package" );
+
+	/**
+	* Cached reference of element for children to examine
+	*
+	* @property _referenceElement
+	* @type Element
+	* @default undefined
+	* @private
+	*/
+	this._referenceElement = el;
 
 	// Get appropriate library
 	for ( i = 0; i < this.libraries.childNodes.length; i++ ) {
@@ -292,6 +302,7 @@ Test.state.drawElement = function( el ) {
 	if ( lib ) {
 		packages = lib.getElementsByTagName( "packages" )[ 0 ];
 		if ( !packages ) {
+			this._referenceElement = null;
 			return null;
 		}
 	}
@@ -317,10 +328,13 @@ Test.state.drawElement = function( el ) {
 					}
 				}
 
+				this._referenceElement = null;
 				return group;
 			}
 		}
 	}
+
+	this._referenceElement = null;
 };
 
 
@@ -418,19 +432,41 @@ Test.state.drawText = function( el ) {
 	* @return Kiwi.Entity
 	*/
 
-	var align = el.getAttribute( "align" ),
+	var geo,
+		align = el.getAttribute( "align" ),
 		ang = el.getAttribute( "rot" ),
-		geo = new Kiwi.Plugins.Text( {
-			state: this,
-			text: "" + el.childNodes[ 0 ].data,
-			x: parseFloat( el.getAttribute( "x" ) ),
-			y: parseFloat( el.getAttribute( "y" ) ),
-			color: "#000",
-			alpha: 0.5,
-			size: parseFloat( el.getAttribute( "size" ) ) *
-				this.scaleFactor * 1.5,
-			fontFamily: "monospace"
-		} );
+		text = "" + el.childNodes[ 0 ].data;
+
+	// Parse references
+	if ( text.toUpperCase() === ">NAME" ) {
+		text = this._referenceElement.getAttribute( "name" );
+		if ( text == null ) {
+			text = ">NAME";
+		}
+	}
+	if ( text.toUpperCase() === ">VALUE" ) {
+		text = this._referenceElement.getAttribute( "value" );
+		if ( text == null ) {
+			text = ">VALUE";
+		}
+	}
+
+	// Don't waste resources rendering an empty text field
+	if ( text === "" ) {
+		return;
+	}
+
+	geo = new Kiwi.Plugins.Text( {
+		state: this,
+		text: text,
+		x: parseFloat( el.getAttribute( "x" ) ),
+		y: parseFloat( el.getAttribute( "y" ) ),
+		color: "#000",
+		alpha: 0.5,
+		size: parseFloat( el.getAttribute( "size" ) ) *
+			this.scaleFactor * 1.5,
+		fontFamily: "monospace"
+	} );
 
 	// Pretouch text to get accurate measurements
 	geo.renderText();
@@ -632,16 +668,16 @@ Test.state.parseAngle = function( ang ) {
 	* @return number
 	*/
 
-	var mirror = false;
+	var mirror = 1;
 
 	if ( ang[ 0 ] === "M" ) {
 		ang = ang.slice( 1 );
-		mirror = true;
+		mirror = -1;
 	}
 
 	ang = ang.slice( 1 );
 
-	return parseFloat( ang ) * Math.PI / 180;
+	return parseFloat( ang ) * mirror * Math.PI / 180;
 };
 
 
