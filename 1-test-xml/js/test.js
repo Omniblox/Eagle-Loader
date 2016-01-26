@@ -94,12 +94,40 @@ Test.state.parseXml = function( xml ) {
 	this.addChild( this.pGroup );
 
 	// Viewing systems
+
+	// Mouse trace
 	component = new Kiwi.Component( this.pGroup, "ViewingComponent" );
 	this.pGroup.components.add( component );
 	component.update = function() {
 		this.owner.x = this.game.input.x;
 		this.owner.y = this.game.input.y;
 	};
+
+	// Zoom
+	this.game.input.mouse.onWheel.add( function( dx, dy ) {
+		var tween,
+			s = 1 + ( dy / 512 ),
+			targX = this.pGroup.scaleX * s,
+			targY = this.pGroup.scaleY * s;
+
+		if ( targX < 1 ) {
+			targX = 1;
+		}
+		if ( targY > -1 ) {
+			targY = -1;
+		}
+
+		tween = this.game.tweens.create( this.pGroup );
+		tween.to(
+			{
+				scaleX: targX,
+				scaleY: targY
+			},
+			500 );
+		tween.start();
+	}, this );
+
+
 
 	Kiwi.Log.log(
 		"#parse",
