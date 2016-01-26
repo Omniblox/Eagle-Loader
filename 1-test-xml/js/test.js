@@ -376,7 +376,10 @@ Test.state.drawPolygon = function( el ) {
 	// use triangle strips and the conversion is non-trivial
 	// TODO: Fill.
 	// TODO: EAGLE seems to support non-closing polygons.
+	// If the last vertex is the first vertex, it is "ignored".
 	// TODO: Curve notations.
+	// NOTE: Filled polygons automatically avoid other signals.
+	// There are some rules surrounding this. Orphans etc.
 
 	var geo = new Kiwi.Plugins.Primitives.Line( {
 			state: this,
@@ -583,10 +586,20 @@ Test.state.drawWire = function( el ) {
 	// manufacturers might be using to complete connections.
 	// TODO: Curve notations.
 
-	var geo = new Kiwi.Plugins.Primitives.Line( {
+	// If width === 0, this is probably a board outline notation.
+	// This is properly noted through the "Dimension" layer.
+	var cut, geo, width;
+
+	width = parseFloat( el.getAttribute( "width" ) );
+	if ( width === 0 ) {
+		cut = true;
+		width = 0.1;
+	}
+
+	geo = new Kiwi.Plugins.Primitives.Line( {
 			state: this,
-			strokeWidth: parseFloat( el.getAttribute( "width" ) ),
-			strokeColor: "#00f",
+			strokeWidth: width,
+			strokeColor: cut ? "#000" : "#00f",
 			alpha: 0.5,
 			points: [
 				[
