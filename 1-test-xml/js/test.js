@@ -123,7 +123,8 @@ Test.state.parseXml = function( xml ) {
 				scaleX: targX,
 				scaleY: targY
 			},
-			500 );
+			500,
+			Kiwi.Animations.Tweens.Easing.Sinusoidal.InOut );
 		tween.start();
 	}, this );
 
@@ -211,7 +212,7 @@ Test.state.parseComponent = function( component ) {
 					// What's a label? Looks like text...
 					break;
 				case "pad":
-					// TODO Figure out what all the parts of a pad do
+					geo = this.drawPad( el );
 					break;
 				case "part":
 					// What's a part? Probably a library entry...
@@ -229,7 +230,7 @@ Test.state.parseComponent = function( component ) {
 					geo = this.drawRectangle( el );
 					break;
 				case "smd":
-					// What's an SMD? It has cream...
+					geo = this.drawSmd( el );
 					break;
 				case "technology":
 					// What's a technology? Just a name...
@@ -390,6 +391,127 @@ Test.state.drawHole = function( el ) {
 };
 
 
+Test.state.drawPad = function( el ) {
+
+	/**
+	* Draw a pad primitive derived from the XML element.
+	*
+	* Pads all have drills, plus an annular ring in some geometric form.
+	*
+	* @method drawPad
+	* @param el {Element} XML element containing data
+	* @return Kiwi.Entity
+	*/
+
+	var geo, pad, drill,
+		ang = el.getAttribute( "rot" ),
+		diameter = parseFloat( el.getAttribute( "diameter" ) ),
+		length = 1;
+
+	// NOTE: `length` is related to `long` shape pads.
+	// It defaults to 1.
+	// This is apparently described in board design rules.
+
+	// Group components
+	geo = new Kiwi.Group( this );
+	geo.x = parseFloat( el.getAttribute( "x" ) );
+	geo.y = parseFloat( el.getAttribute( "y" ) );
+
+	// Orient pad
+	if ( ang ) {
+		geo.rotation = this.parseAngle( ang );
+		if ( ang[ 0 ] === "M" ) {
+			geo.scaleX *= -1;
+		}
+	}
+
+	// Fill in `shape`, rather than use a switch default,
+	// because an unexpected `case` should fail,
+	// not default to round.
+	switch ( el.getAttribute( "shape" ) || "round" ) {
+		case "round":
+			pad = new Kiwi.Plugins.Primitives.Ellipse( {
+				state: this,
+				drawStroke: false,
+				centerOnTransform: true,
+				radius: diameter / 2
+			} );
+			geo.addChild( pad );
+			break;
+		case "square":
+			pad = new Kiwi.Plugins.Primitives.Rectangle( {
+				state: this,
+				drawStroke: false,
+				centerOnTransform: true,
+				width: diameter,
+				height: diameter
+			} );
+			geo.addChild( pad );
+			break;
+		case "octagon":
+			pad = new Kiwi.Plugins.Primitives.Ellipse( {
+				state: this,
+				drawStroke: false,
+				centerOnTransform: true,
+				radius: diameter / 2,
+				segments: 8,
+				rotation: Math.PI / 8
+			} );
+			geo.addChild( pad );
+			break;
+		case "long":
+		case "offset": /* TODO Can't find solid information on this */
+			pad = new Kiwi.Plugins.Primitives.Ellipse( {
+				state: this,
+				drawStroke: false,
+				centerOnTransform: true,
+				radius: diameter / 2,
+				x: -diameter * length
+			} );
+			geo.addChild( pad );
+			pad = new Kiwi.Plugins.Primitives.Ellipse( {
+				state: this,
+				drawStroke: false,
+				centerOnTransform: true,
+				radius: diameter / 2,
+				x: diameter * length
+			} );
+			geo.addChild( pad );
+			pad = new Kiwi.Plugins.Primitives.Rectangle( {
+				state: this,
+				drawStroke: false,
+				centerOnTransform: true,
+				width: diameter * length,
+				height: diameter
+			} );
+			geo.addChild( pad );
+			break;
+	}
+
+	if ( !pad ) {
+		return;
+	}
+
+	// Apply ring coloration
+	if ( pad.color ) {
+		pad.color = [ 0, 0.5, 0 ];
+		pad.alpha = 0.5;
+	}
+
+	// Create drill
+	drill = new Kiwi.Plugins.Primitives.Ellipse( {
+		state: this,
+		drawStroke: false,
+		radius: this.getDrill( el ),
+		centerOnTransform: true,
+		color: "#000"
+	} );
+	geo.addChild( drill );
+
+	return geo;
+};
+
+
 Test.state.drawPolygon = function( el ) {
 
 	/**
@@ -447,6 +569,43 @@ Test.state.drawRectangle = function( el ) {
 
 	if ( ang ) {
 		geo.rotation = parseAngle( ang );
+	}
+
+	return geo;
+};
+
+
+Test.state.drawSmd = function( el ) {
+
+	/**
+	* Draw a SMD pad primitive derived from the XML element.
+	*
+	* SMD, or Surface Mount Device, is a rectangular pad
+	* to which a component can be attached.
+	*
+	* @method drawSmd
+	* @param el {Element} XML element containing data
+	* @return Kiwi.Entity
+	*/
+
+	var ang = el.getAttribute( "rot" ),
+		geo = new Kiwi.Plugins.Primitives.Rectangle( {
+			state: this,
+			drawStroke: false,
+			x: parseFloat( el.getAttribute( "x" ) ),
+			y: parseFloat( el.getAttribute( "y" ) ),
+			width: parseFloat( el.getAttribute( "dx" ) ),
+			height: parseFloat( el.getAttribute( "dy" ) ),
+			color: "#080",
+			alpha: 0.5,
+			centerOnTransform: true
+		} );
+
+	if ( ang ) {
+		geo.rotation = this.parseAngle( ang );
+		if ( ang[ 0 ] === "M" ) {
+			geo.scaleX *= -1;
+		}
 	}
 
 	return geo;
@@ -725,5 +884,3 @@ Test.state.parseAngle = function( ang ) {
 // Init game
 Test.game.states.addState( Test.state );
 Test.game.states.switchState( "state" );
-
-// TODO Ascertain whether Y is a top-left or bottom-left coordinate
