@@ -307,6 +307,8 @@ Test.state.drawElement = function( el ) {
 		libName = el.getAttribute( "library" ),
 		packName = el.getAttribute( "package" );
 
+	Kiwi.Log.log( "#debug", "Library: ", libName, "Package: ", packName );
+
 	/**
 	* Cached reference of element for children to examine
 	*
@@ -425,75 +427,73 @@ Test.state.drawPad = function( el ) {
 		}
 	}
 
-	// Fill in `shape`, rather than use a switch default,
-	// because an unexpected `case` should fail,
-	// not default to round.
-	switch ( el.getAttribute( "shape" ) || "round" ) {
-		case "round":
-			pad = new Kiwi.Plugins.Primitives.Ellipse( {
-				state: this,
-				drawStroke: false,
-				centerOnTransform: true,
-				radius: diameter / 2
-			} );
-			geo.addChild( pad );
-			break;
-		case "square":
-			pad = new Kiwi.Plugins.Primitives.Rectangle( {
-				state: this,
-				drawStroke: false,
-				centerOnTransform: true,
-				width: diameter,
-				height: diameter
-			} );
-			geo.addChild( pad );
-			break;
-		case "octagon":
-			pad = new Kiwi.Plugins.Primitives.Ellipse( {
-				state: this,
-				drawStroke: false,
-				centerOnTransform: true,
-				radius: diameter / 2,
-				segments: 8,
-				rotation: Math.PI / 8
-			} );
-			geo.addChild( pad );
-			break;
-		case "long":
-		case "offset": /* TODO Can't find solid information on this */
-			pad = new Kiwi.Plugins.Primitives.Ellipse( {
-				state: this,
-				drawStroke: false,
-				centerOnTransform: true,
-				radius: diameter / 2,
-				x: -diameter * length
-			} );
-			geo.addChild( pad );
-			pad = new Kiwi.Plugins.Primitives.Ellipse( {
-				state: this,
-				drawStroke: false,
-				centerOnTransform: true,
-				radius: diameter / 2,
-				x: diameter * length
-			} );
-			geo.addChild( pad );
-			pad = new Kiwi.Plugins.Primitives.Rectangle( {
-				state: this,
-				drawStroke: false,
-				centerOnTransform: true,
-				width: diameter * length,
-				height: diameter
-			} );
-			geo.addChild( pad );
-			break;
-	}
-
-	if ( !pad ) {
-		return;
+	if ( diameter ) {
+		// Fill in `shape`, rather than use a switch default,
+		// because an unexpected `case` should fail,
+		// not default to round.
+		switch ( el.getAttribute( "shape" ) || "round" ) {
+			case "round":
+				pad = new Kiwi.Plugins.Primitives.Ellipse( {
+					state: this,
+					drawStroke: false,
+					centerOnTransform: true,
+					radius: diameter / 2
+				} );
+				geo.addChild( pad );
+				break;
+			case "square":
+				pad = new Kiwi.Plugins.Primitives.Rectangle( {
+					state: this,
+					drawStroke: false,
+					centerOnTransform: true,
+					width: diameter,
+					height: diameter
+				} );
+				geo.addChild( pad );
+				break;
+			case "octagon":
+				pad = new Kiwi.Plugins.Primitives.Ellipse( {
+					state: this,
+					drawStroke: false,
+					centerOnTransform: true,
+					radius: diameter / 2,
+					segments: 8,
+					rotation: Math.PI / 8
+				} );
+				geo.addChild( pad );
+				break;
+			case "long":
+			case "offset": /* TODO Can't find solid information on this */
+				pad = new Kiwi.Plugins.Primitives.Ellipse( {
+					state: this,
+					drawStroke: false,
+					centerOnTransform: true,
+					radius: diameter / 2,
+					x: -diameter * length
+				} );
+				geo.addChild( pad );
+				pad = new Kiwi.Plugins.Primitives.Ellipse( {
+					state: this,
+					drawStroke: false,
+					centerOnTransform: true,
+					radius: diameter / 2,
+					x: diameter * length
+				} );
+				geo.addChild( pad );
+				pad = new Kiwi.Plugins.Primitives.Rectangle( {
+					state: this,
+					drawStroke: false,
+					centerOnTransform: true,
+					width: diameter * length,
+					height: diameter
+				} );
+				geo.addChild( pad );
+				break;
+		}
 	}
 
 	// Apply ring coloration
-	if ( pad.color ) {
+	if ( pad && pad.color ) {
 		pad.color = [ 0, 0.5, 0 ];
 		pad.alpha = 0.5;
 	}
@@ -714,8 +714,6 @@ Test.state.drawText = function( el ) {
 	// I don't know why, but text appears to render upside-down.
 	geo.scaleY *= -1;
 
-	Kiwi.Log.log( "#debug", "Text reads", geo.text );
-
 	if ( ang ) {
 
 		// Rotate
@@ -734,23 +732,79 @@ Test.state.drawText = function( el ) {
 Test.state.drawVia = function( el ) {
 
 	/**
-	* Draw a via primitive derived from the XML element.
+	* Draw a pad primitive derived from the XML element.
+	*
+	* Vias may have annular rings, similar to pads.
 	*
 	* @method drawVia
 	* @param el {Element} XML element containing data
 	* @return Kiwi.Entity
 	*/
 
-	var geo = new Kiwi.Plugins.Primitives.Ellipse( {
-			state: this,
-			drawStroke: false,
-			color: "#f0f",
-			alpha: 0.5,
-			centerOnTransform: true,
-			radius: this.getDrill( el ),
-			x: parseFloat( el.getAttribute( "x" ) ),
-			y: parseFloat( el.getAttribute( "y" ) )
-		} );
+	var geo, pad, drill,
+		diameter = parseFloat( el.getAttribute( "diameter" ) );
+
+	// Group components
+	geo = new Kiwi.Group( this );
+	geo.x = parseFloat( el.getAttribute( "x" ) );
+	geo.y = parseFloat( el.getAttribute( "y" ) );
+
+	// Vias with no diameter don't get an annular ring.
+	if ( diameter ) {
+		Kiwi.Log.log("#debug", "Diameter", diameter);
+
+		// Fill in `shape`, rather than use a switch default,
+		// because an unexpected `case` should fail,
+		// not default to round.
+		switch ( el.getAttribute( "shape" ) || "round" ) {
+			case "round":
+				pad = new Kiwi.Plugins.Primitives.Ellipse( {
+					state: this,
+					drawStroke: false,
+					centerOnTransform: true,
+					radius: diameter / 2
+				} );
+				geo.addChild( pad );
+				break;
+			case "square":
+				pad = new Kiwi.Plugins.Primitives.Rectangle( {
+					state: this,
+					drawStroke: false,
+					centerOnTransform: true,
+					width: diameter,
+					height: diameter
+				} );
+				geo.addChild( pad );
+				break;
+			case "octagon":
+				pad = new Kiwi.Plugins.Primitives.Ellipse( {
+					state: this,
+					drawStroke: false,
+					centerOnTransform: true,
+					radius: diameter / 2,
+					segments: 8,
+					rotation: Math.PI / 8
+				} );
+				geo.addChild( pad );
+				break;
+		}
+	}
+
+	// Apply ring coloration
+	if ( pad && pad.color ) {
+		pad.color = [ 1, 0, 1 ];
+		pad.alpha = 0.5;
+	}
+
+	// Create drill
+	drill = new Kiwi.Plugins.Primitives.Ellipse( {
+		state: this,
+		drawStroke: false,
+		radius: this.getDrill( el ),
+		centerOnTransform: true,
+		color: "#000"
+	} );
+	geo.addChild( drill );
 
 	return geo;
 };
