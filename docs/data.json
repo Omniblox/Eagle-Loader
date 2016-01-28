@@ -1,0 +1,196 @@
+{
+    "project": {
+        "name": "EagleBrdViz",
+        "description": "Visualize EAGLE .brd files in the browser.",
+        "version": "1.0.0",
+        "url": "http://www.kiwijs.org"
+    },
+    "files": {
+        "src/eagle-brd-renderer.js": {
+            "name": "src/eagle-brd-renderer.js",
+            "modules": {
+                "EagleBrdRenderer": 1
+            },
+            "classes": {
+                "Board": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        }
+    },
+    "modules": {
+        "EagleBrdRenderer": {
+            "name": "EagleBrdRenderer",
+            "submodules": {},
+            "elements": {},
+            "classes": {
+                "Board": 1
+            },
+            "fors": {},
+            "namespaces": {},
+            "tag": "module",
+            "file": "src/eagle-brd-renderer.js",
+            "line": 44
+        }
+    },
+    "classes": {
+        "Board": {
+            "name": "Board",
+            "shortname": "Board",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "EagleBrdRenderer",
+            "namespace": "",
+            "file": "src/eagle-brd-renderer.js",
+            "line": 44,
+            "description": "Creator of board renders. Reads XML and composites the appropriate\ntextures and geometry.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "xml",
+                    "description": "XML document to parse",
+                    "type": "Document"
+                }
+            ]
+        }
+    },
+    "elements": {},
+    "classitems": [
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 31,
+            "description": "Return a rendered board.",
+            "params": [
+                {
+                    "name": "xml",
+                    "description": "XML document to parse",
+                    "type": "Document"
+                }
+            ],
+            "return": {
+                "description": "EagleBrdRenderer.Board"
+            },
+            "class": "Board",
+            "module": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 53,
+            "description": "XML document that contains the board data",
+            "itemtype": "property",
+            "name": "xml",
+            "type": "Document",
+            "class": "Board",
+            "module": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 60,
+            "description": "PCB layers to be combined into the final board",
+            "itemtype": "property",
+            "name": "layers",
+            "type": "Array",
+            "default": "[]",
+            "class": "Board",
+            "module": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 83,
+            "description": "Set `designRules` to contain important circuit rules from XML.",
+            "itemtype": "method",
+            "name": "_parseDesignRules",
+            "access": "private",
+            "tagname": "",
+            "class": "Board",
+            "module": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 94,
+            "description": "Design rules for this PCB layout. These are used in determining\nvarious important layout characteristics.",
+            "itemtype": "property",
+            "name": "designRules",
+            "type": "Object",
+            "default": "{}",
+            "class": "Board",
+            "module": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 112,
+            "description": "Determine and record the boundaries of the board surface.\nThis is derived from `eagle.drawing.board.plain` wires.",
+            "itemtype": "method",
+            "name": "_parseBoardBounds",
+            "access": "private",
+            "tagname": "",
+            "class": "Board",
+            "module": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 165,
+            "description": "Information on physical bounds of board, in mm.",
+            "itemtype": "property",
+            "name": "bounds",
+            "type": "Object",
+            "class": "Board",
+            "module": "EagleBrdRenderer",
+            "subprops": [
+                {
+                    "name": "maxX",
+                    "description": "",
+                    "type": "Number"
+                },
+                {
+                    "name": "maxY",
+                    "description": "",
+                    "type": "Number"
+                },
+                {
+                    "name": "minX",
+                    "description": "",
+                    "type": "Number"
+                },
+                {
+                    "name": "minY",
+                    "description": "",
+                    "type": "Number"
+                },
+                {
+                    "name": "width",
+                    "description": "",
+                    "type": "Number"
+                },
+                {
+                    "name": "height",
+                    "description": "",
+                    "type": "Number"
+                }
+            ]
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 191,
+            "description": "Return a list of `[ x, y ]` coordinate pairs\nrepresenting the cardinal points of a circle described by the\ncurvature of the wire parameter. This list may be length 0.",
+            "itemtype": "method",
+            "name": "_getChordPoints",
+            "return": {
+                "description": "array"
+            },
+            "access": "private",
+            "tagname": "",
+            "class": "Board",
+            "module": "EagleBrdRenderer"
+        }
+    ],
+    "warnings": [
+        {
+            "message": "Missing item type\nReturn a rendered board.",
+            "line": " src/eagle-brd-renderer.js:31"
+        }
+    ]
+}

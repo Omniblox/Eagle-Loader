@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>src/eagle-brd-renderer.js - EagleBrdViz</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="icon" href="../assets/favicon.ico">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+                <h1><img src="../assets/css/logo.png" title="EagleBrdViz" width="117" height="52"></h1>
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 1.0.0</em>
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+                    <h2 class="off-left">APIs</h2>
+                    <div id="api-tabview" class="tabview">
+                        <ul class="tabs">
+                            <li><a href="#api-classes">Classes</a></li>
+                            <li><a href="#api-modules">Modules</a></li>
+                        </ul>
+                
+                        <div id="api-tabview-filter">
+                            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+                        </div>
+                
+                        <div id="api-tabview-panel">
+                            <ul id="api-classes" class="apis classes">
+                                <li><a href="../classes/Board.html">Board</a></li>
+                            </ul>
+                
+                
+                            <ul id="api-modules" class="apis modules">
+                                <li><a href="../modules/EagleBrdRenderer.html">EagleBrdRenderer</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+                    Show:
+                    <label for="api-show-inherited">
+                        <input type="checkbox" id="api-show-inherited" checked>
+                        Inherited
+                    </label>
+            
+                    <label for="api-show-protected">
+                        <input type="checkbox" id="api-show-protected">
+                        Protected
+                    </label>
+            
+                    <label for="api-show-private">
+                        <input type="checkbox" id="api-show-private">
+                        Private
+                    </label>
+                    <label for="api-show-deprecated">
+                        <input type="checkbox" id="api-show-deprecated">
+                        Deprecated
+                    </label>
+            
+                </div>
+            
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<h1 class="file-heading">File: src/eagle-brd-renderer.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/*
+
+EAGLE .BRD Renderer
+
+Benjamin D. Richards, Gamelab
+
+This script generates a model of a PCB (printed circuit board)
+based on XML data in a BRD file. Cadsoft EAGLE BRD files use XML from version
+6.0 onwards.
+
+The model includes &#x60;Connectors&#x60; with which the PCB may be added
+as a component to a larger hardware system.
+
+This visualisation should be regarded as indicative only.
+Although every care has been taken to represent the actual data,
+it is not guaranteed to be completely accurate.
+
+*/
+
+
+/**
+@module EagleBrdRenderer
+**/
+
+
+var EagleBrdRenderer = {};
+
+
+EagleBrdRenderer.getBoard = function( xml ) {
+
+	/**
+	Return a rendered board.
+
+	@param xml {Document} XML document to parse
+	@return EagleBrdRenderer.Board
+	**/
+
+	return new EagleBrdRenderer.Board( xml );
+};
+
+
+EagleBrdRenderer.Board = function( xml ) {
+
+	/**
+	Creator of board renders. Reads XML and composites the appropriate
+	textures and geometry.
+
+	@class Board
+	@constructor
+	@param xml {Document} XML document to parse
+	**/
+
+	/**
+	XML document that contains the board data
+
+	@property xml {Document}
+	**/
+	this.xml = xml;
+
+	/**
+	PCB layers to be combined into the final board
+
+	@property layers {array}
+	@default []
+	**/
+	this.layers = [];
+
+	this._parseDesignRules();
+
+	this._parseBoardBounds();
+
+	// TODO Init layers
+	// We probably want a proper layer manager here, rather than
+	// a naïve array. On the other hand, the BRD does specify the complete
+	// layer list.  On the first hand again, most of them are unused.
+
+	// TODO Parse BRD into layers
+};
+
+
+EagleBrdRenderer.Board.prototype._parseDesignRules = function() {
+
+	/**
+	Set &#x60;designRules&#x60; to contain important circuit rules from XML.
+
+	@method _parseDesignRules
+	@private
+	**/
+
+	var i,
+		rules = this.xml.getElementsByTagName( &quot;designrules&quot; )[ 0 ]
+			.getElementsByTagName( &quot;param&quot; );
+
+	/**
+	Design rules for this PCB layout. These are used in determining
+	various important layout characteristics.
+
+	@property designRules {object}
+	@default {}
+	**/
+	this.designRules = {};
+
+	for ( i = 0; i &lt; rules.length; i++ ) {
+		this.designRules[ rules[ i ].getAttribute( &quot;name&quot; ) ] =
+			rules[ i ].getAttribute( &quot;value&quot; );
+	}
+};
+
+
+EagleBrdRenderer.Board.prototype._parseBoardBounds = function() {
+
+	/**
+	Determine and record the boundaries of the board surface.
+	This is derived from &#x60;eagle.drawing.board.plain&#x60; wires.
+
+	@method _parseBoardBounds
+	@private
+	**/
+
+	var curve, chordPoints, i, j, k, x, y,
+		testMinMax = function( x, y ) {
+			minX = Math.min( x, minX );
+			minY = Math.min( y, minY );
+			maxX = Math.max( x, maxX );
+			maxY = Math.max( y, maxY );
+		},
+		maxX = 0,
+		maxY = 0,
+		minX = 0,
+		minY = 0,
+		wires = this.xml.getElementsByTagName( &quot;plain&quot; )[ 0 ]
+			.getElementsByTagName( &quot;wire&quot; );
+
+	/*
+	Some wires may be curved. Under rare circumstances, this might disrupt
+	normal minmax point estimates of bounds.
+
+	Solution: chord checking. This is simple and robust.
+	Wire curve is a circular chord. If the chord sweep takes in
+	any cardinal direction (top, bottom, left, right), that cardinal point
+	is a minmax candidate. As we know the start and end points of the chord,
+	we can compute this easily.
+	*/
+
+	// Assemble boundaries
+	for ( i = 0; i &lt; wires.length; i++ ) {
+
+		// Simple minmax point test
+		for ( j = 1; j &lt;= 2; j++ ) {
+			x = wires[ i ].getAttribute( &quot;x&quot; + j );
+			y = wires[ i ].getAttribute( &quot;y&quot; + j );
+			testMinMax( x, y );
+		}
+
+		// Cord checks
+		curve = wires[ i ].getAttribute( &quot;curve&quot; );
+		if ( curve ) {
+			chordPoints = this._getChordPoints( wires[ i ] );
+			for ( k = 0; k &lt; chordPoints.length; k++ ) {
+				testMinMax( chordPoints[ k ][ 0 ], chordPoints[ k ][ 1 ] );
+			}
+		}
+	}
+
+	/**
+	Information on physical bounds of board, in mm.
+
+	@property bounds {object}
+		@property bounds.maxX {number}
+		@property bounds.maxY {number}
+		@property bounds.minX {number}
+		@property bounds.minY {number}
+		@property bounds.width {number}
+		@property bounds.height {number}
+	**/
+	this.bounds = {
+		minX: minX,
+		minY: minY,
+		maxX: maxX,
+		maxY: maxY,
+		width: maxX - minX,
+		height: maxY - minY
+	};
+
+	// TODO slots
+};
+
+
+EagleBrdRenderer.Board.prototype._getChordPoints = function( wire ) {
+
+	/**
+	Return a list of &#x60;[ x, y ]&#x60; coordinate pairs
+	representing the cardinal points of a circle described by the
+	curvature of the wire parameter. This list may be length 0.
+
+	@method _getChordPoints
+	@return array
+	@private
+	**/
+
+	var ang, bearing, centroidX, centroidY, dx, dy, len, radius,
+		sweepMin, sweepMax,
+		x1, x2, y1, y2,
+		curve = parseFloat( wire.getAttribute( &quot;curve&quot; ) ) * Math.PI / 180,
+		points = [];
+
+	// Zero-curvature points are straight. Obviously.
+	if ( curve === 0 ) {
+		return points;
+	}
+
+	// Get coords.
+	x1 = parseFloat( wire.getAttribute( &quot;x1&quot; ) );
+	y1 = parseFloat( wire.getAttribute( &quot;y1&quot; ) );
+	x2 = parseFloat( wire.getAttribute( &quot;x2&quot; ) );
+	y2 = parseFloat( wire.getAttribute( &quot;y2&quot; ) );
+	dx = x2 - x1;
+	dy = y2 - y1;
+	len = Math.sqrt( Math.pow( dx, 2 ) + Math.pow( dy, 2 ) );
+	bearing = Math.atan2( dy, dx );
+
+	// Determine circle characteristics.
+	// Per chord identities, chord length = 2 * radius * sin( angle / 2 )
+	radius = len / ( 2 * Math.sin( curve / 2 ) );
+
+	// Determine sidedness
+	if ( curve &gt; 0 ) {
+		ang = bearing + Math.PI / 2 - curve / 2;
+	} else {
+		ang = bearing - Math.PI / 2 + curve / 2;
+	}
+	centroidX = x1 + radius * Math.cos( ang );
+	centroidY = y1 + radius * Math.sin( ang );
+
+	// Determine angular sweep from point 1 to point 2.
+	// The sweep may be greater than PI.
+	sweepMin = Math.atan2( centroidY - y1, centroidX - x1 );
+	sweepMax = Math.atan2( centroidY - y2, centroidX - x2 );
+	if ( sweepMin &gt; sweepMax ) {
+		sweepMax += Math.PI * 2;
+	}
+
+	// Determine points that fall within sweep.
+	// Must check extra points, as &#x60;sweepMax&#x60; may be as high as PI * 3.
+	// Note that perfect matches are discarded,
+	// as this indicates the wire point is on that cardinal point.
+	if ( sweepMin &lt; -Math.PI / 2 &amp;&amp; sweepMax &gt; -Math.PI / 2 ) {
+		points.push( [ centroidX, centroidY + radius ] );
+	}
+	if ( sweepMin &lt; 0 &amp;&amp; sweepMax &gt; 0 ) {
+		points.push( [ centroidX - radius, centroidY ] );
+	}
+	if ( sweepMin &lt; Math.PI / 2 &amp;&amp; sweepMax &gt; Math.PI / 2 ) {
+		points.push( [ centroidX, centroidY - radius ] );
+	}
+	if ( sweepMin &lt; Math.PI &amp;&amp; sweepMax &gt; Math.PI ) {
+		points.push( [ centroidX + radius, centroidY ] );
+	}
+	if ( sweepMax &gt; Math.PI * 1.5 ) {
+		points.push( [ centroidX, centroidY + radius ] );
+	}
+	if ( sweepMax &gt; Math.PI * 2 ) {
+		points.push( [ centroidX - radius, centroidY ] );
+	}
+	if ( sweepMax &gt; Math.PI * 2.5 ) {
+		points.push( [ centroidX, centroidY - radius ] );
+	}
+	if ( sweepMax &gt; Math.PI * 3 ) {
+		points.push( [ centroidX + radius, centroidY ] );
+	}
+
+	return points;
+};
+
+    </pre>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>

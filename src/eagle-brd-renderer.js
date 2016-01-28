@@ -53,16 +53,14 @@ EagleBrdRenderer.Board = function( xml ) {
 	/**
 	XML document that contains the board data
 
-	@property xml
-	@type Document
+	@property xml {Document}
 	**/
 	this.xml = xml;
 
 	/**
 	PCB layers to be combined into the final board
 
-	@property layers
-	@type array
+	@property layers {array}
 	@default []
 	**/
 	this.layers = [];
@@ -97,8 +95,7 @@ EagleBrdRenderer.Board.prototype._parseDesignRules = function() {
 	Design rules for this PCB layout. These are used in determining
 	various important layout characteristics.
 
-	@property designRules
-	@type object
+	@property designRules {object}
 	@default {}
 	**/
 	this.designRules = {};
@@ -168,26 +165,13 @@ EagleBrdRenderer.Board.prototype._parseBoardBounds = function() {
 	/**
 	Information on physical bounds of board, in mm.
 
-	@property bounds
-	@type object
-
-	@property bounds.minX
-	@type number
-
-	@property bounds.maxX
-	@type number
-
-	@property bounds.minY
-	@type number
-
-	@property bounds.maxY
-	@type number
-
-	@property bounds.width
-	@type number
-
-	@property bounds.height
-	@type number
+	@property bounds {object}
+		@property bounds.maxX {number}
+		@property bounds.maxY {number}
+		@property bounds.minX {number}
+		@property bounds.minY {number}
+		@property bounds.width {number}
+		@property bounds.height {number}
 	**/
 	this.bounds = {
 		minX: minX,

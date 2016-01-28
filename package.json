@@ -1,0 +1,13 @@
+{
+  "name": "EagleBrdViz",
+  "version": "1.0.0",
+  "description": "Visualize EAGLE .brd files in the browser.",
+  "author": "GameLab",
+  "homepage": "http://www.kiwijs.org",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-clean": "^0.7.0",
+    "grunt-contrib-copy": "^0.8.2",
+    "grunt-contrib-yuidoc": "^0.10.0"
+  }
+}
