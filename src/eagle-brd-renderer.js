@@ -23,32 +23,24 @@ it is not guaranteed to be completely accurate.
 **/
 
 
-var EagleBrdRenderer = {};
-
-
-EagleBrdRenderer.getBoard = function( xml ) {
-
-	/**
-	Return a rendered board.
-
-	@param xml {Document} XML document to parse
-	@return EagleBrdRenderer.Board
-	**/
-
-	return new EagleBrdRenderer.Board( xml );
-};
-
-
-EagleBrdRenderer.Board = function( xml ) {
+var EagleBrdRenderer = function( xml, params ) {
 
 	/**
 	Creator of board renders. Reads XML and composites the appropriate
 	textures and geometry.
 
-	@class Board
+	@class EagleBrdRenderer
 	@constructor
 	@param xml {Document} XML document to parse
+	@param [params] {object} Composite parameter object
 	**/
+
+	/**
+	Optional parameters used to configure render.
+
+	@property params {object}
+	**/
+	this.params = params;
 
 	/**
 	XML document that contains the board data
@@ -78,7 +70,7 @@ EagleBrdRenderer.Board = function( xml ) {
 };
 
 
-EagleBrdRenderer.Board.prototype._parseDesignRules = function() {
+EagleBrdRenderer.prototype._parseDesignRules = function() {
 
 	/**
 	Set `designRules` to contain important circuit rules from XML.
@@ -107,7 +99,7 @@ EagleBrdRenderer.Board.prototype._parseDesignRules = function() {
 };
 
 
-EagleBrdRenderer.Board.prototype._parseBoardBounds = function() {
+EagleBrdRenderer.prototype._parseBoardBounds = function() {
 
 	/**
 	Determine and record the boundaries of the board surface.
@@ -132,8 +124,9 @@ EagleBrdRenderer.Board.prototype._parseBoardBounds = function() {
 			.getElementsByTagName( "wire" );
 
 	/*
-	Some wires may be curved. Under rare circumstances, this might disrupt
-	normal minmax point estimates of bounds.
+	Some wires may be curved. Under rare circumstances,
+	such as a curved line between two horizontally-aligned points,
+	this might disrupt normal minmax point estimates of bounds.
 
 	Solution: chord checking. This is simple and robust.
 	Wire curve is a circular chord. If the chord sweep takes in
@@ -186,7 +179,7 @@ EagleBrdRenderer.Board.prototype._parseBoardBounds = function() {
 };
 
 
-EagleBrdRenderer.Board.prototype._getChordPoints = function( wire ) {
+EagleBrdRenderer.prototype._getChordPoints = function( wire ) {
 
 	/**
 	Return a list of `[ x, y ]` coordinate pairs
