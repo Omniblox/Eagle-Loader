@@ -69,6 +69,8 @@ EagleBrdRenderer.Board = function( xml ) {
 
 	this._parseDesignRules();
 
+	this._parseBoardBounds();
+
 	// TODO Init layers
 	// We probably want a proper layer manager here, rather than
 	// a naïve array. On the other hand, the BRD does specify the complete
@@ -105,4 +107,183 @@ EagleBrdRenderer.Board.prototype._parseDesignRules = function() {
 		this.designRules[ rules[ i ].getAttribute( "name" ) ] =
 			rules[ i ].getAttribute( "value" );
 	}
+};
+
+
+EagleBrdRenderer.Board.prototype._parseBoardBounds = function() {
+
+	/**
+	Determine and record the boundaries of the board surface.
+	This is derived from `eagle.drawing.board.plain` wires.
+
+	@method _parseBoardBounds
+	@private
+	**/
+
+	var curve, chordPoints, i, j, k, x, y,
+		testMinMax = function( x, y ) {
+			minX = Math.min( x, minX );
+			minY = Math.min( y, minY );
+			maxX = Math.max( x, maxX );
+			maxY = Math.max( y, maxY );
+		},
+		maxX = 0,
+		maxY = 0,
+		minX = 0,
+		minY = 0,
+		wires = this.xml.getElementsByTagName( "plain" )[ 0 ]
+			.getElementsByTagName( "wire" );
+
+	/*
+	Some wires may be curved. Under rare circumstances, this might disrupt
+	normal minmax point estimates of bounds.
+
+	Solution: chord checking. This is simple and robust.
+	Wire curve is a circular chord. If the chord sweep takes in
+	any cardinal direction (top, bottom, left, right), that cardinal point
+	is a minmax candidate. As we know the start and end points of the chord,
+	we can compute this easily.
+	*/
+
+	// Assemble boundaries
+	for ( i = 0; i < wires.length; i++ ) {
+
+		// Simple minmax point test
+		for ( j = 1; j <= 2; j++ ) {
+			x = wires[ i ].getAttribute( "x" + j );
+			y = wires[ i ].getAttribute( "y" + j );
+			testMinMax( x, y );
+		}
+
+		// Cord checks
+		curve = wires[ i ].getAttribute( "curve" );
+		if ( curve ) {
+			chordPoints = this._getChordPoints( wires[ i ] );
+			for ( k = 0; k < chordPoints.length; k++ ) {
+				testMinMax( chordPoints[ k ][ 0 ], chordPoints[ k ][ 1 ] );
+			}
+		}
+	}
+
+	/**
+	Information on physical bounds of board, in mm.
+
+	@property bounds
+	@type object
+
+	@property bounds.minX
+	@type number
+
+	@property bounds.maxX
+	@type number
+
+	@property bounds.minY
+	@type number
+
+	@property bounds.maxY
+	@type number
+
+	@property bounds.width
+	@type number
+
+	@property bounds.height
+	@type number
+	**/
+	this.bounds = {
+		minX: minX,
+		minY: minY,
+		maxX: maxX,
+		maxY: maxY,
+		width: maxX - minX,
+		height: maxY - minY
+	};
+
+	// TODO slots
+};
+
+
+EagleBrdRenderer.Board.prototype._getChordPoints = function( wire ) {
+
+	/**
+	Return a list of `[ x, y ]` coordinate pairs
+	representing the cardinal points of a circle described by the
+	curvature of the wire parameter. This list may be length 0.
+
+	@method _getChordPoints
+	@return array
+	@private
+	**/
+
+	var ang, bearing, centroidX, centroidY, dx, dy, len, radius,
+		sweepMin, sweepMax,
+		x1, x2, y1, y2,
+		curve = parseFloat( wire.getAttribute( "curve" ) ) * Math.PI / 180,
+		points = [];
+
+	// Zero-curvature points are straight. Obviously.
+	if ( curve === 0 ) {
+		return points;
+	}
+
+	// Get coords.
+	x1 = parseFloat( wire.getAttribute( "x1" ) );
+	y1 = parseFloat( wire.getAttribute( "y1" ) );
+	x2 = parseFloat( wire.getAttribute( "x2" ) );
+	y2 = parseFloat( wire.getAttribute( "y2" ) );
+	dx = x2 - x1;
+	dy = y2 - y1;
+	len = Math.sqrt( Math.pow( dx, 2 ) + Math.pow( dy, 2 ) );
+	bearing = Math.atan2( dy, dx );
+
+	// Determine circle characteristics.
+	// Per chord identities, chord length = 2 * radius * sin( angle / 2 )
+	radius = len / ( 2 * Math.sin( curve / 2 ) );
+
+	// Determine sidedness
+	if ( curve > 0 ) {
+		ang = bearing + Math.PI / 2 - curve / 2;
+	} else {
+		ang = bearing - Math.PI / 2 + curve / 2;
+	}
+	centroidX = x1 + radius * Math.cos( ang );
+	centroidY = y1 + radius * Math.sin( ang );
+
+	// Determine angular sweep from point 1 to point 2.
+	// The sweep may be greater than PI.
+	sweepMin = Math.atan2( centroidY - y1, centroidX - x1 );
+	sweepMax = Math.atan2( centroidY - y2, centroidX - x2 );
+	if ( sweepMin > sweepMax ) {
+		sweepMax += Math.PI * 2;
+	}
+
+	// Determine points that fall within sweep.
+	// Must check extra points, as `sweepMax` may be as high as PI * 3.
+	// Note that perfect matches are discarded,
+	// as this indicates the wire point is on that cardinal point.
+	if ( sweepMin < -Math.PI / 2 && sweepMax > -Math.PI / 2 ) {
+		points.push( [ centroidX, centroidY + radius ] );
+	}
+	if ( sweepMin < 0 && sweepMax > 0 ) {
+		points.push( [ centroidX - radius, centroidY ] );
+	}
+	if ( sweepMin < Math.PI / 2 && sweepMax > Math.PI / 2 ) {
+		points.push( [ centroidX, centroidY - radius ] );
+	}
+	if ( sweepMin < Math.PI && sweepMax > Math.PI ) {
+		points.push( [ centroidX + radius, centroidY ] );
+	}
+	if ( sweepMax > Math.PI * 1.5 ) {
+		points.push( [ centroidX, centroidY + radius ] );
+	}
+	if ( sweepMax > Math.PI * 2 ) {
+		points.push( [ centroidX - radius, centroidY ] );
+	}
+	if ( sweepMax > Math.PI * 2.5 ) {
+		points.push( [ centroidX, centroidY - radius ] );
+	}
+	if ( sweepMax > Math.PI * 3 ) {
+		points.push( [ centroidX + radius, centroidY ] );
+	}
+
+	return points;
 };
