@@ -33,6 +33,9 @@ var EagleBrdRenderer = function( xml, params ) {
 	@constructor
 	@param xml {Document} XML document to parse
 	@param [params] {object} Composite parameter object
+		@param [params.pixelMicrons=35] {number} Resolution of texture maps.
+			By default, this is 35 microns, equal to the thickness
+			of a default copper layer.
 	**/
 
 	/**
@@ -57,6 +60,8 @@ var EagleBrdRenderer = function( xml, params ) {
 	**/
 	this.layers = [];
 
+	this._setDefaultParams();
+
 	this._parseDesignRules();
 
 	this._parseBoardBounds();
@@ -67,6 +72,93 @@ var EagleBrdRenderer = function( xml, params ) {
 	// layer list.  On the first hand again, most of them are unused.
 
 	// TODO Parse BRD into layers
+};
+
+
+EagleBrdRenderer.prototype._getChordPoints = function( wire ) {
+
+	/**
+	Return a list of `[ x, y ]` coordinate pairs
+	representing the cardinal points of a circle described by the
+	curvature of the wire parameter. This list may be length 0.
+
+	@method _getChordPoints
+	@return array
+	@private
+	**/
+
+	var ang, bearing, centroidX, centroidY, dx, dy, len, radius,
+		sweepMin, sweepMax,
+		x1, x2, y1, y2,
+		curve = parseFloat( wire.getAttribute( "curve" ) ) * Math.PI / 180,
+		points = [];
+
+	// Zero-curvature points are straight. Obviously.
+	if ( curve === 0 ) {
+		return points;
+	}
+
+	// Get coords.
+	x1 = parseFloat( wire.getAttribute( "x1" ) );
+	y1 = parseFloat( wire.getAttribute( "y1" ) );
+	x2 = parseFloat( wire.getAttribute( "x2" ) );
+	y2 = parseFloat( wire.getAttribute( "y2" ) );
+	dx = x2 - x1;
+	dy = y2 - y1;
+	len = Math.sqrt( Math.pow( dx, 2 ) + Math.pow( dy, 2 ) );
+	bearing = Math.atan2( dy, dx );
+
+	// Determine circle characteristics.
+	// Per chord identities, chord length = 2 * radius * sin( angle / 2 )
+	radius = len / ( 2 * Math.sin( curve / 2 ) );
+
+	// Determine sidedness
+	if ( curve > 0 ) {
+		ang = bearing + Math.PI / 2 - curve / 2;
+	} else {
+		ang = bearing - Math.PI / 2 + curve / 2;
+	}
+	centroidX = x1 + radius * Math.cos( ang );
+	centroidY = y1 + radius * Math.sin( ang );
+
+	// Determine angular sweep from point 1 to point 2.
+	// The sweep may be greater than PI.
+	sweepMin = Math.atan2( centroidY - y1, centroidX - x1 );
+	sweepMax = Math.atan2( centroidY - y2, centroidX - x2 );
+	if ( sweepMin > sweepMax ) {
+		sweepMax += Math.PI * 2;
+	}
+
+	// Determine points that fall within sweep.
+	// Must check extra points, as `sweepMax` may be as high as PI * 3.
+	// Note that perfect matches are discarded,
+	// as this indicates the wire point is on that cardinal point.
+	if ( sweepMin < -Math.PI / 2 && sweepMax > -Math.PI / 2 ) {
+		points.push( [ centroidX, centroidY + radius ] );
+	}
+	if ( sweepMin < 0 && sweepMax > 0 ) {
+		points.push( [ centroidX - radius, centroidY ] );
+	}
+	if ( sweepMin < Math.PI / 2 && sweepMax > Math.PI / 2 ) {
+		points.push( [ centroidX, centroidY - radius ] );
+	}
+	if ( sweepMin < Math.PI && sweepMax > Math.PI ) {
+		points.push( [ centroidX + radius, centroidY ] );
+	}
+	if ( sweepMax > Math.PI * 1.5 ) {
+		points.push( [ centroidX, centroidY + radius ] );
+	}
+	if ( sweepMax > Math.PI * 2 ) {
+		points.push( [ centroidX - radius, centroidY ] );
+	}
+	if ( sweepMax > Math.PI * 2.5 ) {
+		points.push( [ centroidX, centroidY - radius ] );
+	}
+	if ( sweepMax > Math.PI * 3 ) {
+		points.push( [ centroidX + radius, centroidY ] );
+	}
+
+	return points;
 };
 
 
@@ -175,92 +267,38 @@ EagleBrdRenderer.prototype._parseBoardBounds = function() {
 		height: maxY - minY
 	};
 
+	/**
+	Horizontal resolution of this board's texture maps.
+
+	@property width {number}
+	**/
+	this.width = Math.ceil( this.bounds.width * this.params.pixelMicrons );
+
+	/**
+	Vertical resolution of this board's texture maps.
+
+	@property height {number}
+	**/
+	this.height = Math.ceil( this.bounds.height * this.params.pixelMicrons );
+
 	// TODO slots
+
+	// TODO draw outline mask
 };
 
 
-EagleBrdRenderer.prototype._getChordPoints = function( wire ) {
+EagleBrdRenderer.prototype._setDefaultParams = function() {
 
 	/**
-	Return a list of `[ x, y ]` coordinate pairs
-	representing the cardinal points of a circle described by the
-	curvature of the wire parameter. This list may be length 0.
+	Ensure that required params are set.
 
-	@method _getChordPoints
-	@return array
+	@method _setDefaultParams
 	@private
 	**/
 
-	var ang, bearing, centroidX, centroidY, dx, dy, len, radius,
-		sweepMin, sweepMax,
-		x1, x2, y1, y2,
-		curve = parseFloat( wire.getAttribute( "curve" ) ) * Math.PI / 180,
-		points = [];
-
-	// Zero-curvature points are straight. Obviously.
-	if ( curve === 0 ) {
-		return points;
+	if ( !this.params ) {
+		this.params = {};
 	}
 
-	// Get coords.
-	x1 = parseFloat( wire.getAttribute( "x1" ) );
-	y1 = parseFloat( wire.getAttribute( "y1" ) );
-	x2 = parseFloat( wire.getAttribute( "x2" ) );
-	y2 = parseFloat( wire.getAttribute( "y2" ) );
-	dx = x2 - x1;
-	dy = y2 - y1;
-	len = Math.sqrt( Math.pow( dx, 2 ) + Math.pow( dy, 2 ) );
-	bearing = Math.atan2( dy, dx );
-
-	// Determine circle characteristics.
-	// Per chord identities, chord length = 2 * radius * sin( angle / 2 )
-	radius = len / ( 2 * Math.sin( curve / 2 ) );
-
-	// Determine sidedness
-	if ( curve > 0 ) {
-		ang = bearing + Math.PI / 2 - curve / 2;
-	} else {
-		ang = bearing - Math.PI / 2 + curve / 2;
-	}
-	centroidX = x1 + radius * Math.cos( ang );
-	centroidY = y1 + radius * Math.sin( ang );
-
-	// Determine angular sweep from point 1 to point 2.
-	// The sweep may be greater than PI.
-	sweepMin = Math.atan2( centroidY - y1, centroidX - x1 );
-	sweepMax = Math.atan2( centroidY - y2, centroidX - x2 );
-	if ( sweepMin > sweepMax ) {
-		sweepMax += Math.PI * 2;
-	}
-
-	// Determine points that fall within sweep.
-	// Must check extra points, as `sweepMax` may be as high as PI * 3.
-	// Note that perfect matches are discarded,
-	// as this indicates the wire point is on that cardinal point.
-	if ( sweepMin < -Math.PI / 2 && sweepMax > -Math.PI / 2 ) {
-		points.push( [ centroidX, centroidY + radius ] );
-	}
-	if ( sweepMin < 0 && sweepMax > 0 ) {
-		points.push( [ centroidX - radius, centroidY ] );
-	}
-	if ( sweepMin < Math.PI / 2 && sweepMax > Math.PI / 2 ) {
-		points.push( [ centroidX, centroidY - radius ] );
-	}
-	if ( sweepMin < Math.PI && sweepMax > Math.PI ) {
-		points.push( [ centroidX + radius, centroidY ] );
-	}
-	if ( sweepMax > Math.PI * 1.5 ) {
-		points.push( [ centroidX, centroidY + radius ] );
-	}
-	if ( sweepMax > Math.PI * 2 ) {
-		points.push( [ centroidX - radius, centroidY ] );
-	}
-	if ( sweepMax > Math.PI * 2.5 ) {
-		points.push( [ centroidX, centroidY - radius ] );
-	}
-	if ( sweepMax > Math.PI * 3 ) {
-		points.push( [ centroidX + radius, centroidY ] );
-	}
-
-	return points;
+	this.params.pixelMicrons = this.params.pixelMicrons || 35;
 };
