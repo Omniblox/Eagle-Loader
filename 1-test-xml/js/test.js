@@ -654,9 +654,14 @@ Test.state.drawText = function( el ) {
 		color: "#000",
 		alpha: 0.5,
 		size: parseFloat( el.getAttribute( "size" ) ) *
-			this.scaleFactor * 1.5,
-		fontFamily: "monospace"
+			this.scaleFactor * 1.25,
+		fontFamily: "OCR A Std"
 	} );
+
+	// TODO: Ensure that correct font family is used.
+	// Default/vector is OCR A (available on OSX as OCR A Std).
+	// "Proportional" is said to be generally Helvetica.
+	// "Fixed" is said to be generally Courier.
 
 	// Pretouch text to get accurate measurements
 	geo.renderText();
