@@ -70,6 +70,15 @@ var EagleBrdRenderer = function( xml, params ) {
 
 	this._setDefaultParams();
 
+	/**
+	Scale factor for converting from millimeters to pixels.
+	Coords in the XML should be multiplied by this before drawing.
+
+	@property coordScale {number}
+	@default 28.57
+	**/
+	this.coordScale = 1 / ( this.params.pixelMicrons * 0.001 );
+
 	this._parseDesignRules();
 
 	this._parseBoardBounds();
@@ -80,92 +89,6 @@ var EagleBrdRenderer = function( xml, params ) {
 	// layer list.  On the first hand again, most of them are unused.
 
 	// TODO Parse BRD into layers
-};
-
-
-EagleBrdRenderer.prototype.getChordPoints = function( wire ) {
-
-	/**
-	Return a list of `[ x, y ]` coordinate pairs
-	representing the cardinal points of a circle described by the
-	curvature of the wire parameter. This list may be length 0.
-
-	@method getChordPoints
-	@return array
-	**/
-
-	var ang, bearing, centroidX, centroidY, dx, dy, len, radius,
-		sweepMin, sweepMax,
-		x1, x2, y1, y2,
-		curve = parseFloat( wire.getAttribute( "curve" ) ) * Math.PI / 180,
-		points = [];
-
-	// Zero-curvature points are straight. Obviously.
-	if ( curve === 0 ) {
-		return points;
-	}
-
-	// Get coords.
-	x1 = parseFloat( wire.getAttribute( "x1" ) );
-	y1 = parseFloat( wire.getAttribute( "y1" ) );
-	x2 = parseFloat( wire.getAttribute( "x2" ) );
-	y2 = parseFloat( wire.getAttribute( "y2" ) );
-	dx = x2 - x1;
-	dy = y2 - y1;
-	len = Math.sqrt( Math.pow( dx, 2 ) + Math.pow( dy, 2 ) );
-	bearing = Math.atan2( dy, dx );
-
-	// Determine circle characteristics.
-	// Per chord identities, chord length = 2 * radius * sin( angle / 2 )
-	radius = len / ( 2 * Math.sin( curve / 2 ) );
-
-	// Determine sidedness
-	if ( curve > 0 ) {
-		ang = bearing + Math.PI / 2 - curve / 2;
-	} else {
-		ang = bearing - Math.PI / 2 + curve / 2;
-	}
-	centroidX = x1 + radius * Math.cos( ang );
-	centroidY = y1 + radius * Math.sin( ang );
-
-	// Determine angular sweep from point 1 to point 2.
-	// The sweep may be greater than PI.
-	sweepMin = Math.atan2( centroidY - y1, centroidX - x1 );
-	sweepMax = Math.atan2( centroidY - y2, centroidX - x2 );
-	if ( sweepMin > sweepMax ) {
-		sweepMax += Math.PI * 2;
-	}
-
-	// Determine points that fall within sweep.
-	// Must check extra points, as `sweepMax` may be as high as PI * 3.
-	// Note that perfect matches are discarded,
-	// as this indicates the wire point is on that cardinal point.
-	if ( sweepMin < -Math.PI / 2 && sweepMax > -Math.PI / 2 ) {
-		points.push( [ centroidX, centroidY + radius ] );
-	}
-	if ( sweepMin < 0 && sweepMax > 0 ) {
-		points.push( [ centroidX - radius, centroidY ] );
-	}
-	if ( sweepMin < Math.PI / 2 && sweepMax > Math.PI / 2 ) {
-		points.push( [ centroidX, centroidY - radius ] );
-	}
-	if ( sweepMin < Math.PI && sweepMax > Math.PI ) {
-		points.push( [ centroidX + radius, centroidY ] );
-	}
-	if ( sweepMax > Math.PI * 1.5 ) {
-		points.push( [ centroidX, centroidY + radius ] );
-	}
-	if ( sweepMax > Math.PI * 2 ) {
-		points.push( [ centroidX - radius, centroidY ] );
-	}
-	if ( sweepMax > Math.PI * 2.5 ) {
-		points.push( [ centroidX, centroidY - radius ] );
-	}
-	if ( sweepMax > Math.PI * 3 ) {
-		points.push( [ centroidX + radius, centroidY ] );
-	}
-
-	return points;
 };
 
 
@@ -208,7 +131,8 @@ EagleBrdRenderer.prototype._parseBoardBounds = function() {
 	@private
 	**/
 
-	var buffer, ctx, curve, chordPoints, i, j, k, x, y,
+	var buffer, ctx, curve, chordData, chordPoints, i, j, k,
+		x, y, lastX, lastY,
 		testMinMax = function( x, y ) {
 			minX = Math.min( x, minX );
 			minY = Math.min( y, minY );
@@ -290,7 +214,19 @@ EagleBrdRenderer.prototype._parseBoardBounds = function() {
 	**/
 	this.height = Math.ceil( this.bounds.height * this.params.pixelMicrons );
 
-	// TODO slots
+	/**
+	Horizontal offset for drawing pixels
+
+	@property offsetX {number}
+	**/
+	this.offsetX = -Math.ceil( this.bounds.minX * this.params.pixelMicrons );
+
+	/**
+	Vertical offset for drawing pixels
+
+	@property offsetY {number}
+	**/
+	this.offsetY = -Math.ceil( this.bounds.minY * this.params.pixelMicrons );
 
 	if ( !( this.width > 1 && this.height > 1 ) ) {
 		console.error( "Error: Texture dimensions too small.",
@@ -306,9 +242,61 @@ EagleBrdRenderer.prototype._parseBoardBounds = function() {
 
 	ctx = buffer.getContext( "2d" );
 
-	ctx.fillStyle = "rgba( 0.1, 0.8, 0.1, 0.5 )";
+	// Setup draw style
+	ctx.fillStyle = "rgb( 32, 192, 32 )";
+
+	// EAGLE coordinates are bottom-left, not top-left
+	ctx.scale( 1, -1 );
+	ctx.translate( 0, -this.height );
+
 	ctx.beginPath();
-	ctx.fill();
+
+	if ( wires.length ) {
+		lastX = this.parseCoord(
+			wires[ 0 ].getAttribute( "x1" ) ) + this.offsetX;
+		lastY = this.parseCoord(
+			wires[ 0 ].getAttribute( "y1" ) ) + this.offsetY;
+		ctx.moveTo( lastX, lastY );
+	}
+
+	for ( i = 0; i < wires.length; i++ ) {
+
+		x = this.parseCoord( wires[ i ].getAttribute( "x1" ) ) + this.offsetX;
+		y = this.parseCoord( wires[ i ].getAttribute( "y1" ) ) + this.offsetY;
+
+		// Check for line breaks
+		if ( x !== lastX || y !== lastY ) {
+			ctx.moveTo(
+				this.parseCoord(
+					wires[ i ].getAttribute( "x1" ) ) + this.offsetX,
+				this.parseCoord(
+					wires[ i ].getAttribute( "y1" ) ) + this.offsetY );
+		}
+
+		lastX = this.parseCoord(
+			wires[ i ].getAttribute( "x2" ) ) + this.offsetX;
+		lastY = this.parseCoord(
+			wires[ i ].getAttribute( "y2" ) ) + this.offsetY;
+
+		// Connect segment
+		if ( wires[ i ].hasAttribute( "curve" ) ) {
+			chordData = new EagleBrdRenderer.ChordData( wires[ i ] );
+			ctx.arc(
+				chordData.x * this.coordScale + this.offsetX,
+				chordData.y * this.coordScale + this.offsetY,
+				chordData.radius * this.coordScale,
+				chordData.bearing1, chordData.bearing2 );
+		} else {
+			ctx.lineTo( lastX, lastY );
+		}
+	}
+
+	ctx.closePath();
+	ctx.fill( "evenodd" );
+	ctx.stroke();
+
+	// Diagnostic
+	document.body.appendChild( buffer );
 };
 
 
@@ -326,6 +314,87 @@ EagleBrdRenderer.prototype._setDefaultParams = function() {
 	}
 
 	this.params.pixelMicrons = this.params.pixelMicrons || 35;
+};
+
+
+EagleBrdRenderer.prototype.getChordPoints = function( wire ) {
+
+	/**
+	Return a list of `[ x, y ]` coordinate pairs
+	representing the cardinal points of a circle described by the
+	curvature of the wire parameter. This list may be length 0.
+
+	@method getChordPoints
+	@return array
+	**/
+
+	var centroidX, centroidY, curve, radius, sweepMin, sweepMax,
+		x1, x2, y1, y2,
+		chordData = new EagleBrdRenderer.ChordData( wire ),
+		points = [];
+
+	// Pull data from chord analytics
+	curve = chordData.curve;
+	centroidX = chordData.centroidX;
+	centroidY = chordData.centroidY;
+	radius = chordData.radius;
+	x1 = chordData.x1;
+	y1 = chordData.y1;
+	x2 = chordData.x2;
+	y2 = chordData.y2;
+
+	// Determine angular sweep from point 1 to point 2.
+	// The sweep may be greater than PI.
+	sweepMin = Math.atan2( centroidY - y1, centroidX - x1 );
+	sweepMax = Math.atan2( centroidY - y2, centroidX - x2 );
+	if ( sweepMin > sweepMax ) {
+		sweepMax += Math.PI * 2;
+	}
+
+	// Determine points that fall within sweep.
+	// Must check extra points, as `sweepMax` may be as high as PI * 3.
+	// Note that perfect matches are discarded,
+	// as this indicates the wire point is on that cardinal point.
+	if ( sweepMin < -Math.PI / 2 && sweepMax > -Math.PI / 2 ) {
+		points.push( [ centroidX, centroidY + radius ] );
+	}
+	if ( sweepMin < 0 && sweepMax > 0 ) {
+		points.push( [ centroidX - radius, centroidY ] );
+	}
+	if ( sweepMin < Math.PI / 2 && sweepMax > Math.PI / 2 ) {
+		points.push( [ centroidX, centroidY - radius ] );
+	}
+	if ( sweepMin < Math.PI && sweepMax > Math.PI ) {
+		points.push( [ centroidX + radius, centroidY ] );
+	}
+	if ( sweepMax > Math.PI * 1.5 ) {
+		points.push( [ centroidX, centroidY + radius ] );
+	}
+	if ( sweepMax > Math.PI * 2 ) {
+		points.push( [ centroidX - radius, centroidY ] );
+	}
+	if ( sweepMax > Math.PI * 2.5 ) {
+		points.push( [ centroidX, centroidY - radius ] );
+	}
+	if ( sweepMax > Math.PI * 3 ) {
+		points.push( [ centroidX + radius, centroidY ] );
+	}
+
+	return points;
+};
+
+
+EagleBrdRenderer.prototype.parseCoord = function( coord ) {
+
+	/**
+	Convert a string coord into a pixel number.
+
+	@method parseCoord
+	@param coord {string} String that represents a number in mm
+	@return {number} Coord in pixels
+	**/
+
+	return parseFloat( coord ) * this.coordScale;
 };
 
 
@@ -418,21 +487,35 @@ EagleBrdRenderer.ChordData = function( wire ) {
 	this.radius = this.chord / ( 2 * Math.sin( this.curve / 2 ) );
 
 	// Determine sidedness
-	ang = curve > 0 ?
-		bearing + Math.PI / 2 - curve / 2 :
-		bearing - Math.PI / 2 + curve / 2;
+	ang = this.curve > 0 ?
+		this.bearing + Math.PI / 2 - this.curve / 2 :
+		this.bearing - Math.PI / 2 + this.curve / 2;
 
 	/**
 	Horizontal position of arc origin
 
 	@property x {number}
 	**/
-	this.x = this.x1 + radius * Math.cos( ang );
+	this.x = this.x1 + this.radius * Math.cos( ang );
 
 	/**
 	Vertical position of arc origin
 
 	@property y {number}
 	**/
-	this.y = this.y1 + radius * Math.sin( ang );
+	this.y = this.y1 + this.radius * Math.sin( ang );
+
+	/**
+	Angle from origin to wire start
+
+	@property bearing1 {number}
+	**/
+	this.bearing1 = Math.atan2( this.y1 - this.y, this.x1 - this.x );
+
+	/**
+	Angle from origin to wire end
+
+	@property bearing2 {number}
+	**/
+	this.bearing2 = Math.atan2( this.y2 - this.y, this.x2 - this.x );
 };
