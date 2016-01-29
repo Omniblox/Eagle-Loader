@@ -131,7 +131,7 @@ EagleBrdRenderer.prototype._parseBoardBounds = function() {
 	@private
 	**/
 
-	var buffer, ctx, curve, chordData, chordPoints, i, j, k,
+	var buffer, ctx, curve, chordData, chordPoints, i, j, k, wires,
 		x, y, lastX, lastY,
 		testMinMax = function( x, y ) {
 			minX = Math.min( x, minX );
@@ -142,11 +142,14 @@ EagleBrdRenderer.prototype._parseBoardBounds = function() {
 		maxX = 0,
 		maxY = 0,
 		minX = 0,
-		minY = 0,
+		minY = 0;
+
 		wires = this.xml.getElementsByTagName( "plain" )[ 0 ]
 			.getElementsByTagName( "wire" );
 
-	// TODO Get wires by layer, rather than by element `plain`
+	// Get wires that draw to layer 20
+	// wires = this.getElementsByTagNameAndLayer( "wire", "20" );
+	// TODO: Collect wires as drawn, omitting library definitions
 
 	/*
 	Some wires may be curved. Under rare circumstances,
@@ -381,6 +384,32 @@ EagleBrdRenderer.prototype.getChordPoints = function( wire ) {
 	}
 
 	return points;
+};
+
+
+EagleBrdRenderer.prototype.getElementsByTagNameAndLayer =
+function( tag, layer ) {
+
+	/**
+	Return a list of all specified tags on a specified layer.
+
+	@method getElementsByTagNameAndLayer
+	@param tag {string} Tag name
+	@param layer {string} Layer number (note: still a string)
+	@return array
+	**/
+
+	var i,
+		out = [],
+		tags = this.xml.getElementsByTagName( tag );
+
+	for ( i = 0; i < tags.length; i++ ) {
+		if ( tags[ i ].getAttribute( "layer" ) === layer ) {
+			out.push( tags[ i ] );
+		}
+	}
+
+	return out;
 };
 
 
