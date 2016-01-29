@@ -302,3 +302,112 @@ EagleBrdRenderer.prototype._setDefaultParams = function() {
 
 	this.params.pixelMicrons = this.params.pixelMicrons || 35;
 };
+
+
+
+
+
+EagleBrdRenderer.ChordData = function( wire ) {
+
+	/**
+	Analysis of the chord and circular segment described
+	by a curving wire element.
+
+	@namespace EagleBrdRenderer
+	@class ChordData
+	@constructor
+	@param wire {Element} EAGLE BRD `wire` XML element
+	**/
+
+	var ang;
+
+	/**
+	Curvature of wire segment
+
+	@property curve {number}
+	**/
+	this.curve = parseFloat( wire.getAttribute( "curve" ) ) * Math.PI / 180;
+
+	/**
+	Horizontal coodinate of wire start
+
+	@property x1 {number}
+	**/
+	this.x1 = parseFloat( wire.getAttribute( "x1" ) );
+
+	/**
+	Vertical coodinate of wire start
+
+	@property y1 {number}
+	**/
+	this.y1 = parseFloat( wire.getAttribute( "y1" ) );
+
+	/**
+	Horizontal coodinate of wire end
+
+	@property x2 {number}
+	**/
+	this.x2 = parseFloat( wire.getAttribute( "x2" ) );
+
+	/**
+	Vertical coodinate of wire end
+
+	@property y2 {number}
+	**/
+	this.y2 = parseFloat( wire.getAttribute( "y2" ) );
+
+	/**
+	Horizontal wire displacement
+
+	@property dx {number}
+	**/
+	this.dx = this.x2 - this.x1;
+
+	/**
+	Vertical wire displacement
+
+	@property dy {number}
+	**/
+	this.dy = this.y2 - this.y1;
+
+	/**
+	Distance between start and end points of wire.
+
+	@property chord {number}
+	**/
+	this.chord = Math.sqrt( Math.pow( this.dx, 2 ) + Math.pow( this.dy, 2 ) );
+
+	/**
+	Angle from start to end points of wire.
+
+	@property bearing {number}
+	**/
+	this.bearing = Math.atan2( this.dy, this.dx );
+
+	/**
+	Radius of chord arc. Per chord identity,
+	chord = 2 * radius * sin( angle / 2 ), rearranged to acquire radius.
+
+	@property radius {number}
+	**/
+	this.radius = this.chord / ( 2 * Math.sin( this.curve / 2 ) );
+
+	// Determine sidedness
+	ang = curve > 0 ?
+		bearing + Math.PI / 2 - curve / 2 :
+		bearing - Math.PI / 2 + curve / 2;
+
+	/**
+	Horizontal position of arc origin
+
+	@property x {number}
+	**/
+	this.x = this.x1 + radius * Math.cos( ang );
+
+	/**
+	Vertical position of arc origin
+
+	@property y {number}
+	**/
+	this.y = this.y1 + radius * Math.sin( ang );
+};
