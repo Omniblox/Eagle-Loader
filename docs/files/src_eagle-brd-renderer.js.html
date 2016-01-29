@@ -38,7 +38,8 @@
                 
                         <div id="api-tabview-panel">
                             <ul id="api-classes" class="apis classes">
-                                <li><a href="../classes/Board.html">Board</a></li>
+                                <li><a href="../classes/EagleBrdRenderer.html">EagleBrdRenderer</a></li>
+                                <li><a href="../classes/EagleBrdRenderer.ChordData.html">EagleBrdRenderer.ChordData</a></li>
                             </ul>
                 
                 
@@ -106,32 +107,27 @@ it is not guaranteed to be completely accurate.
 **/
 
 
-var EagleBrdRenderer = {};
-
-
-EagleBrdRenderer.getBoard = function( xml ) {
-
-	/**
-	Return a rendered board.
-
-	@param xml {Document} XML document to parse
-	@return EagleBrdRenderer.Board
-	**/
-
-	return new EagleBrdRenderer.Board( xml );
-};
-
-
-EagleBrdRenderer.Board = function( xml ) {
+var EagleBrdRenderer = function( xml, params ) {
 
 	/**
 	Creator of board renders. Reads XML and composites the appropriate
 	textures and geometry.
 
-	@class Board
+	@class EagleBrdRenderer
 	@constructor
 	@param xml {Document} XML document to parse
+	@param [params] {object} Composite parameter object
+		@param [params.pixelMicrons=35] {number} Resolution of texture maps.
+			By default, this is 35 microns, equal to the thickness
+			of a default copper layer.
 	**/
+
+	/**
+	Optional parameters used to configure render.
+
+	@property params {object}
+	**/
+	this.params = params;
 
 	/**
 	XML document that contains the board data
@@ -141,12 +137,31 @@ EagleBrdRenderer.Board = function( xml ) {
 	this.xml = xml;
 
 	/**
+	Named textures. Includes layer textures and other data.
+
+	@property buffers {object}
+	@default {}
+	**/
+	this.buffers = {};
+
+	/**
 	PCB layers to be combined into the final board
 
 	@property layers {array}
 	@default []
 	**/
 	this.layers = [];
+
+	this._setDefaultParams();
+
+	/**
+	Scale factor for converting from millimeters to pixels.
+	Coords in the XML should be multiplied by this before drawing.
+
+	@property coordScale {number}
+	@default 28.57
+	**/
+	this.coordScale = 1 / ( this.params.pixelMicrons * 0.001 );
 
 	this._parseDesignRules();
 
@@ -161,7 +176,7 @@ EagleBrdRenderer.Board = function( xml ) {
 };
 
 
-EagleBrdRenderer.Board.prototype._parseDesignRules = function() {
+EagleBrdRenderer.prototype._parseDesignRules = function() {
 
 	/**
 	Set &#x60;designRules&#x60; to contain important circuit rules from XML.
@@ -190,7 +205,7 @@ EagleBrdRenderer.Board.prototype._parseDesignRules = function() {
 };
 
 
-EagleBrdRenderer.Board.prototype._parseBoardBounds = function() {
+EagleBrdRenderer.prototype._parseBoardBounds = function() {
 
 	/**
 	Determine and record the boundaries of the board surface.
@@ -200,7 +215,8 @@ EagleBrdRenderer.Board.prototype._parseBoardBounds = function() {
 	@private
 	**/
 
-	var curve, chordPoints, i, j, k, x, y,
+	var buffer, ctx, curve, chordData, chordPoints, i, j, k, wires,
+		x, y, lastX, lastY,
 		testMinMax = function( x, y ) {
 			minX = Math.min( x, minX );
 			minY = Math.min( y, minY );
@@ -210,13 +226,19 @@ EagleBrdRenderer.Board.prototype._parseBoardBounds = function() {
 		maxX = 0,
 		maxY = 0,
 		minX = 0,
-		minY = 0,
+		minY = 0;
+
 		wires = this.xml.getElementsByTagName( &quot;plain&quot; )[ 0 ]
 			.getElementsByTagName( &quot;wire&quot; );
 
+	// Get wires that draw to layer 20
+	// wires = this.getElementsByTagNameAndLayer( &quot;wire&quot;, &quot;20&quot; );
+	// TODO: Collect wires as drawn, omitting library definitions
+
 	/*
-	Some wires may be curved. Under rare circumstances, this might disrupt
-	normal minmax point estimates of bounds.
+	Some wires may be curved. Under rare circumstances,
+	such as a curved line between two horizontally-aligned points,
+	this might disrupt normal minmax point estimates of bounds.
 
 	Solution: chord checking. This is simple and robust.
 	Wire curve is a circular chord. If the chord sweep takes in
@@ -238,7 +260,7 @@ EagleBrdRenderer.Board.prototype._parseBoardBounds = function() {
 		// Cord checks
 		curve = wires[ i ].getAttribute( &quot;curve&quot; );
 		if ( curve ) {
-			chordPoints = this._getChordPoints( wires[ i ] );
+			chordPoints = this.getChordPoints( wires[ i ] );
 			for ( k = 0; k &lt; chordPoints.length; k++ ) {
 				testMinMax( chordPoints[ k ][ 0 ], chordPoints[ k ][ 1 ] );
 			}
@@ -265,55 +287,148 @@ EagleBrdRenderer.Board.prototype._parseBoardBounds = function() {
 		height: maxY - minY
 	};
 
-	// TODO slots
+	/**
+	Horizontal resolution of this board&#x27;s texture maps.
+
+	@property width {number}
+	**/
+	this.width = Math.ceil( this.bounds.width * this.params.pixelMicrons );
+
+	/**
+	Vertical resolution of this board&#x27;s texture maps.
+
+	@property height {number}
+	**/
+	this.height = Math.ceil( this.bounds.height * this.params.pixelMicrons );
+
+	/**
+	Horizontal offset for drawing pixels
+
+	@property offsetX {number}
+	**/
+	this.offsetX = -Math.ceil( this.bounds.minX * this.params.pixelMicrons );
+
+	/**
+	Vertical offset for drawing pixels
+
+	@property offsetY {number}
+	**/
+	this.offsetY = -Math.ceil( this.bounds.minY * this.params.pixelMicrons );
+
+	if ( !( this.width &gt; 1 &amp;&amp; this.height &gt; 1 ) ) {
+		console.error( &quot;Error: Texture dimensions too small.&quot;,
+			&quot;BRD boundaries not found, or too many microns per pixel.&quot; );
+		return;
+	}
+
+	// Draw outline mask
+	buffer = document.createElement( &quot;canvas&quot; );
+	buffer.width = this.width;
+	buffer.height = this.height;
+	this.buffers.bounds = buffer;
+
+	ctx = buffer.getContext( &quot;2d&quot; );
+
+	// Setup draw style
+	ctx.fillStyle = &quot;rgb( 32, 192, 32 )&quot;;
+
+	// EAGLE coordinates are bottom-left, not top-left
+	ctx.scale( 1, -1 );
+	ctx.translate( 0, -this.height );
+
+	ctx.beginPath();
+
+	if ( wires.length ) {
+		lastX = this.parseCoord(
+			wires[ 0 ].getAttribute( &quot;x1&quot; ) ) + this.offsetX;
+		lastY = this.parseCoord(
+			wires[ 0 ].getAttribute( &quot;y1&quot; ) ) + this.offsetY;
+		ctx.moveTo( lastX, lastY );
+	}
+
+	for ( i = 0; i &lt; wires.length; i++ ) {
+
+		x = this.parseCoord( wires[ i ].getAttribute( &quot;x1&quot; ) ) + this.offsetX;
+		y = this.parseCoord( wires[ i ].getAttribute( &quot;y1&quot; ) ) + this.offsetY;
+
+		// Check for line breaks
+		if ( x !== lastX || y !== lastY ) {
+			ctx.moveTo(
+				this.parseCoord(
+					wires[ i ].getAttribute( &quot;x1&quot; ) ) + this.offsetX,
+				this.parseCoord(
+					wires[ i ].getAttribute( &quot;y1&quot; ) ) + this.offsetY );
+		}
+
+		lastX = this.parseCoord(
+			wires[ i ].getAttribute( &quot;x2&quot; ) ) + this.offsetX;
+		lastY = this.parseCoord(
+			wires[ i ].getAttribute( &quot;y2&quot; ) ) + this.offsetY;
+
+		// Connect segment
+		if ( wires[ i ].hasAttribute( &quot;curve&quot; ) ) {
+			chordData = new EagleBrdRenderer.ChordData( wires[ i ] );
+			ctx.arc(
+				chordData.x * this.coordScale + this.offsetX,
+				chordData.y * this.coordScale + this.offsetY,
+				chordData.radius * this.coordScale,
+				chordData.bearing1, chordData.bearing2 );
+		} else {
+			ctx.lineTo( lastX, lastY );
+		}
+	}
+
+	ctx.closePath();
+	ctx.fill( &quot;evenodd&quot; );
+	ctx.stroke();
+
+	// Diagnostic
+	document.body.appendChild( buffer );
 };
 
 
-EagleBrdRenderer.Board.prototype._getChordPoints = function( wire ) {
+EagleBrdRenderer.prototype._setDefaultParams = function() {
+
+	/**
+	Ensure that required params are set.
+
+	@method _setDefaultParams
+	@private
+	**/
+
+	if ( !this.params ) {
+		this.params = {};
+	}
+
+	this.params.pixelMicrons = this.params.pixelMicrons || 35;
+};
+
+
+EagleBrdRenderer.prototype.getChordPoints = function( wire ) {
 
 	/**
 	Return a list of &#x60;[ x, y ]&#x60; coordinate pairs
 	representing the cardinal points of a circle described by the
 	curvature of the wire parameter. This list may be length 0.
 
-	@method _getChordPoints
+	@method getChordPoints
 	@return array
-	@private
 	**/
 
-	var ang, bearing, centroidX, centroidY, dx, dy, len, radius,
-		sweepMin, sweepMax,
+	var centroidX, centroidY, curve, radius, sweepMin, sweepMax,
 		x1, x2, y1, y2,
-		curve = parseFloat( wire.getAttribute( &quot;curve&quot; ) ) * Math.PI / 180,
+		chordData = new EagleBrdRenderer.ChordData( wire ),
 		points = [];
 
-	// Zero-curvature points are straight. Obviously.
-	if ( curve === 0 ) {
-		return points;
-	}
-
-	// Get coords.
-	x1 = parseFloat( wire.getAttribute( &quot;x1&quot; ) );
-	y1 = parseFloat( wire.getAttribute( &quot;y1&quot; ) );
-	x2 = parseFloat( wire.getAttribute( &quot;x2&quot; ) );
-	y2 = parseFloat( wire.getAttribute( &quot;y2&quot; ) );
-	dx = x2 - x1;
-	dy = y2 - y1;
-	len = Math.sqrt( Math.pow( dx, 2 ) + Math.pow( dy, 2 ) );
-	bearing = Math.atan2( dy, dx );
-
-	// Determine circle characteristics.
-	// Per chord identities, chord length = 2 * radius * sin( angle / 2 )
-	radius = len / ( 2 * Math.sin( curve / 2 ) );
-
-	// Determine sidedness
-	if ( curve &gt; 0 ) {
-		ang = bearing + Math.PI / 2 - curve / 2;
-	} else {
-		ang = bearing - Math.PI / 2 + curve / 2;
-	}
-	centroidX = x1 + radius * Math.cos( ang );
-	centroidY = y1 + radius * Math.sin( ang );
+	// Pull data from chord analytics
+	curve = chordData.curve;
+	centroidX = chordData.centroidX;
+	centroidY = chordData.centroidY;
+	radius = chordData.radius;
+	x1 = chordData.x1;
+	y1 = chordData.y1;
+	x2 = chordData.x2;
+	y2 = chordData.y2;
 
 	// Determine angular sweep from point 1 to point 2.
 	// The sweep may be greater than PI.
@@ -353,6 +468,169 @@ EagleBrdRenderer.Board.prototype._getChordPoints = function( wire ) {
 	}
 
 	return points;
+};
+
+
+EagleBrdRenderer.prototype.getElementsByTagNameAndLayer =
+function( tag, layer ) {
+
+	/**
+	Return a list of all specified tags on a specified layer.
+
+	@method getElementsByTagNameAndLayer
+	@param tag {string} Tag name
+	@param layer {string} Layer number (note: still a string)
+	@return array
+	**/
+
+	var i,
+		out = [],
+		tags = this.xml.getElementsByTagName( tag );
+
+	for ( i = 0; i &lt; tags.length; i++ ) {
+		if ( tags[ i ].getAttribute( &quot;layer&quot; ) === layer ) {
+			out.push( tags[ i ] );
+		}
+	}
+
+	return out;
+};
+
+
+EagleBrdRenderer.prototype.parseCoord = function( coord ) {
+
+	/**
+	Convert a string coord into a pixel number.
+
+	@method parseCoord
+	@param coord {string} String that represents a number in mm
+	@return {number} Coord in pixels
+	**/
+
+	return parseFloat( coord ) * this.coordScale;
+};
+
+
+
+
+
+EagleBrdRenderer.ChordData = function( wire ) {
+
+	/**
+	Analysis of the chord and circular segment described
+	by a curving wire element.
+
+	@namespace EagleBrdRenderer
+	@class ChordData
+	@constructor
+	@param wire {Element} EAGLE BRD &#x60;wire&#x60; XML element
+	**/
+
+	var ang;
+
+	/**
+	Curvature of wire segment
+
+	@property curve {number}
+	**/
+	this.curve = parseFloat( wire.getAttribute( &quot;curve&quot; ) ) * Math.PI / 180;
+
+	/**
+	Horizontal coodinate of wire start
+
+	@property x1 {number}
+	**/
+	this.x1 = parseFloat( wire.getAttribute( &quot;x1&quot; ) );
+
+	/**
+	Vertical coodinate of wire start
+
+	@property y1 {number}
+	**/
+	this.y1 = parseFloat( wire.getAttribute( &quot;y1&quot; ) );
+
+	/**
+	Horizontal coodinate of wire end
+
+	@property x2 {number}
+	**/
+	this.x2 = parseFloat( wire.getAttribute( &quot;x2&quot; ) );
+
+	/**
+	Vertical coodinate of wire end
+
+	@property y2 {number}
+	**/
+	this.y2 = parseFloat( wire.getAttribute( &quot;y2&quot; ) );
+
+	/**
+	Horizontal wire displacement
+
+	@property dx {number}
+	**/
+	this.dx = this.x2 - this.x1;
+
+	/**
+	Vertical wire displacement
+
+	@property dy {number}
+	**/
+	this.dy = this.y2 - this.y1;
+
+	/**
+	Distance between start and end points of wire.
+
+	@property chord {number}
+	**/
+	this.chord = Math.sqrt( Math.pow( this.dx, 2 ) + Math.pow( this.dy, 2 ) );
+
+	/**
+	Angle from start to end points of wire.
+
+	@property bearing {number}
+	**/
+	this.bearing = Math.atan2( this.dy, this.dx );
+
+	/**
+	Radius of chord arc. Per chord identity,
+	chord = 2 * radius * sin( angle / 2 ), rearranged to acquire radius.
+
+	@property radius {number}
+	**/
+	this.radius = this.chord / ( 2 * Math.sin( this.curve / 2 ) );
+
+	// Determine sidedness
+	ang = this.curve &gt; 0 ?
+		this.bearing + Math.PI / 2 - this.curve / 2 :
+		this.bearing - Math.PI / 2 + this.curve / 2;
+
+	/**
+	Horizontal position of arc origin
+
+	@property x {number}
+	**/
+	this.x = this.x1 + this.radius * Math.cos( ang );
+
+	/**
+	Vertical position of arc origin
+
+	@property y {number}
+	**/
+	this.y = this.y1 + this.radius * Math.sin( ang );
+
+	/**
+	Angle from origin to wire start
+
+	@property bearing1 {number}
+	**/
+	this.bearing1 = Math.atan2( this.y1 - this.y, this.x1 - this.x );
+
+	/**
+	Angle from origin to wire end
+
+	@property bearing2 {number}
+	**/
+	this.bearing2 = Math.atan2( this.y2 - this.y, this.x2 - this.x );
 };
 
     </pre>

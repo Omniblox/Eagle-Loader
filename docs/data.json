@@ -12,10 +12,13 @@
                 "EagleBrdRenderer": 1
             },
             "classes": {
-                "Board": 1
+                "EagleBrdRenderer": 1,
+                "EagleBrdRenderer.ChordData": 1
             },
             "fors": {},
-            "namespaces": {}
+            "namespaces": {
+                "EagleBrdRenderer": 1
+            }
         }
     },
     "modules": {
@@ -24,28 +27,31 @@
             "submodules": {},
             "elements": {},
             "classes": {
-                "Board": 1
+                "EagleBrdRenderer": 1,
+                "EagleBrdRenderer.ChordData": 1
             },
             "fors": {},
-            "namespaces": {},
+            "namespaces": {
+                "EagleBrdRenderer": 1
+            },
             "tag": "module",
             "file": "src/eagle-brd-renderer.js",
-            "line": 44
+            "line": 435
         }
     },
     "classes": {
-        "Board": {
-            "name": "Board",
-            "shortname": "Board",
+        "EagleBrdRenderer": {
+            "name": "EagleBrdRenderer",
+            "shortname": "EagleBrdRenderer",
             "classitems": [],
             "plugins": [],
             "extensions": [],
             "plugin_for": [],
             "extension_for": [],
             "module": "EagleBrdRenderer",
-            "namespace": "",
+            "namespace": "EagleBrdRenderer",
             "file": "src/eagle-brd-renderer.js",
-            "line": 44,
+            "line": 28,
             "description": "Creator of board renders. Reads XML and composites the appropriate\ntextures and geometry.",
             "is_constructor": 1,
             "params": [
@@ -53,6 +59,43 @@
                     "name": "xml",
                     "description": "XML document to parse",
                     "type": "Document"
+                },
+                {
+                    "name": "params",
+                    "description": "Composite parameter object",
+                    "type": "Object",
+                    "optional": true,
+                    "props": [
+                        {
+                            "name": "pixelMicrons",
+                            "description": "Resolution of texture maps.\n\t\tBy default, this is 35 microns, equal to the thickness\n\t\tof a default copper layer.",
+                            "type": "Number",
+                            "optional": true,
+                            "optdefault": "35"
+                        }
+                    ]
+                }
+            ]
+        },
+        "EagleBrdRenderer.ChordData": {
+            "name": "EagleBrdRenderer.ChordData",
+            "shortname": "EagleBrdRenderer.ChordData",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "EagleBrdRenderer",
+            "namespace": "EagleBrdRenderer",
+            "file": "src/eagle-brd-renderer.js",
+            "line": 435,
+            "description": "Analysis of the chord and circular segment described\nby a curving wire element.",
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "wire",
+                    "description": "EAGLE BRD `wire` XML element",
+                    "type": "Element"
                 }
             ]
         }
@@ -61,83 +104,98 @@
     "classitems": [
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 31,
-            "description": "Return a rendered board.",
-            "params": [
-                {
-                    "name": "xml",
-                    "description": "XML document to parse",
-                    "type": "Document"
-                }
-            ],
-            "return": {
-                "description": "EagleBrdRenderer.Board"
-            },
-            "class": "Board",
+            "line": 41,
+            "description": "Optional parameters used to configure render.",
+            "itemtype": "property",
+            "name": "params",
+            "type": "Object",
+            "class": "EagleBrdRenderer",
             "module": "EagleBrdRenderer"
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 53,
+            "line": 48,
             "description": "XML document that contains the board data",
             "itemtype": "property",
             "name": "xml",
             "type": "Document",
-            "class": "Board",
+            "class": "EagleBrdRenderer",
             "module": "EagleBrdRenderer"
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 60,
+            "line": 55,
+            "description": "Named textures. Includes layer textures and other data.",
+            "itemtype": "property",
+            "name": "buffers",
+            "type": "Object",
+            "default": "{}",
+            "class": "EagleBrdRenderer",
+            "module": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 63,
             "description": "PCB layers to be combined into the final board",
             "itemtype": "property",
             "name": "layers",
             "type": "Array",
             "default": "[]",
-            "class": "Board",
+            "class": "EagleBrdRenderer",
             "module": "EagleBrdRenderer"
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 83,
+            "line": 73,
+            "description": "Scale factor for converting from millimeters to pixels.\nCoords in the XML should be multiplied by this before drawing.",
+            "itemtype": "property",
+            "name": "coordScale",
+            "type": "Number",
+            "default": "28.57",
+            "class": "EagleBrdRenderer",
+            "module": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 97,
             "description": "Set `designRules` to contain important circuit rules from XML.",
             "itemtype": "method",
             "name": "_parseDesignRules",
             "access": "private",
             "tagname": "",
-            "class": "Board",
+            "class": "EagleBrdRenderer",
             "module": "EagleBrdRenderer"
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 94,
+            "line": 108,
             "description": "Design rules for this PCB layout. These are used in determining\nvarious important layout characteristics.",
             "itemtype": "property",
             "name": "designRules",
             "type": "Object",
             "default": "{}",
-            "class": "Board",
+            "class": "EagleBrdRenderer",
             "module": "EagleBrdRenderer"
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 112,
+            "line": 126,
             "description": "Determine and record the boundaries of the board surface.\nThis is derived from `eagle.drawing.board.plain` wires.",
             "itemtype": "method",
             "name": "_parseBoardBounds",
             "access": "private",
             "tagname": "",
-            "class": "Board",
+            "class": "EagleBrdRenderer",
             "module": "EagleBrdRenderer"
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 165,
+            "line": 186,
             "description": "Information on physical bounds of board, in mm.",
             "itemtype": "property",
             "name": "bounds",
             "type": "Object",
-            "class": "Board",
+            "class": "EagleBrdRenderer",
             "module": "EagleBrdRenderer",
             "subprops": [
                 {
@@ -174,23 +232,265 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 191,
+            "line": 206,
+            "description": "Horizontal resolution of this board's texture maps.",
+            "itemtype": "property",
+            "name": "width",
+            "type": "Number",
+            "class": "EagleBrdRenderer",
+            "module": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 213,
+            "description": "Vertical resolution of this board's texture maps.",
+            "itemtype": "property",
+            "name": "height",
+            "type": "Number",
+            "class": "EagleBrdRenderer",
+            "module": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 220,
+            "description": "Horizontal offset for drawing pixels",
+            "itemtype": "property",
+            "name": "offsetX",
+            "type": "Number",
+            "class": "EagleBrdRenderer",
+            "module": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 227,
+            "description": "Vertical offset for drawing pixels",
+            "itemtype": "property",
+            "name": "offsetY",
+            "type": "Number",
+            "class": "EagleBrdRenderer",
+            "module": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 308,
+            "description": "Ensure that required params are set.",
+            "itemtype": "method",
+            "name": "_setDefaultParams",
+            "access": "private",
+            "tagname": "",
+            "class": "EagleBrdRenderer",
+            "module": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 325,
             "description": "Return a list of `[ x, y ]` coordinate pairs\nrepresenting the cardinal points of a circle described by the\ncurvature of the wire parameter. This list may be length 0.",
             "itemtype": "method",
-            "name": "_getChordPoints",
+            "name": "getChordPoints",
             "return": {
                 "description": "array"
             },
-            "access": "private",
-            "tagname": "",
-            "class": "Board",
+            "class": "EagleBrdRenderer",
             "module": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 393,
+            "description": "Return a list of all specified tags on a specified layer.",
+            "itemtype": "method",
+            "name": "getElementsByTagNameAndLayer",
+            "params": [
+                {
+                    "name": "tag",
+                    "description": "Tag name",
+                    "type": "String"
+                },
+                {
+                    "name": "layer",
+                    "description": "Layer number (note: still a string)",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "array"
+            },
+            "class": "EagleBrdRenderer",
+            "module": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 418,
+            "description": "Convert a string coord into a pixel number.",
+            "itemtype": "method",
+            "name": "parseCoord",
+            "params": [
+                {
+                    "name": "coord",
+                    "description": "String that represents a number in mm",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "Coord in pixels",
+                "type": "Number"
+            },
+            "class": "EagleBrdRenderer",
+            "module": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 447,
+            "description": "Curvature of wire segment",
+            "itemtype": "property",
+            "name": "curve",
+            "type": "Number",
+            "class": "EagleBrdRenderer.ChordData",
+            "module": "EagleBrdRenderer",
+            "namespace": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 454,
+            "description": "Horizontal coodinate of wire start",
+            "itemtype": "property",
+            "name": "x1",
+            "type": "Number",
+            "class": "EagleBrdRenderer.ChordData",
+            "module": "EagleBrdRenderer",
+            "namespace": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 461,
+            "description": "Vertical coodinate of wire start",
+            "itemtype": "property",
+            "name": "y1",
+            "type": "Number",
+            "class": "EagleBrdRenderer.ChordData",
+            "module": "EagleBrdRenderer",
+            "namespace": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 468,
+            "description": "Horizontal coodinate of wire end",
+            "itemtype": "property",
+            "name": "x2",
+            "type": "Number",
+            "class": "EagleBrdRenderer.ChordData",
+            "module": "EagleBrdRenderer",
+            "namespace": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 475,
+            "description": "Vertical coodinate of wire end",
+            "itemtype": "property",
+            "name": "y2",
+            "type": "Number",
+            "class": "EagleBrdRenderer.ChordData",
+            "module": "EagleBrdRenderer",
+            "namespace": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 482,
+            "description": "Horizontal wire displacement",
+            "itemtype": "property",
+            "name": "dx",
+            "type": "Number",
+            "class": "EagleBrdRenderer.ChordData",
+            "module": "EagleBrdRenderer",
+            "namespace": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 489,
+            "description": "Vertical wire displacement",
+            "itemtype": "property",
+            "name": "dy",
+            "type": "Number",
+            "class": "EagleBrdRenderer.ChordData",
+            "module": "EagleBrdRenderer",
+            "namespace": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 496,
+            "description": "Distance between start and end points of wire.",
+            "itemtype": "property",
+            "name": "chord",
+            "type": "Number",
+            "class": "EagleBrdRenderer.ChordData",
+            "module": "EagleBrdRenderer",
+            "namespace": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 503,
+            "description": "Angle from start to end points of wire.",
+            "itemtype": "property",
+            "name": "bearing",
+            "type": "Number",
+            "class": "EagleBrdRenderer.ChordData",
+            "module": "EagleBrdRenderer",
+            "namespace": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 510,
+            "description": "Radius of chord arc. Per chord identity,\nchord = 2 * radius * sin( angle / 2 ), rearranged to acquire radius.",
+            "itemtype": "property",
+            "name": "radius",
+            "type": "Number",
+            "class": "EagleBrdRenderer.ChordData",
+            "module": "EagleBrdRenderer",
+            "namespace": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 523,
+            "description": "Horizontal position of arc origin",
+            "itemtype": "property",
+            "name": "x",
+            "type": "Number",
+            "class": "EagleBrdRenderer.ChordData",
+            "module": "EagleBrdRenderer",
+            "namespace": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 530,
+            "description": "Vertical position of arc origin",
+            "itemtype": "property",
+            "name": "y",
+            "type": "Number",
+            "class": "EagleBrdRenderer.ChordData",
+            "module": "EagleBrdRenderer",
+            "namespace": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 537,
+            "description": "Angle from origin to wire start",
+            "itemtype": "property",
+            "name": "bearing1",
+            "type": "Number",
+            "class": "EagleBrdRenderer.ChordData",
+            "module": "EagleBrdRenderer",
+            "namespace": "EagleBrdRenderer"
+        },
+        {
+            "file": "src/eagle-brd-renderer.js",
+            "line": 544,
+            "description": "Angle from origin to wire end",
+            "itemtype": "property",
+            "name": "bearing2",
+            "type": "Number",
+            "class": "EagleBrdRenderer.ChordData",
+            "module": "EagleBrdRenderer",
+            "namespace": "EagleBrdRenderer"
         }
     ],
-    "warnings": [
-        {
-            "message": "Missing item type\nReturn a rendered board.",
-            "line": " src/eagle-brd-renderer.js:31"
-        }
-    ]
+    "warnings": []
 }
