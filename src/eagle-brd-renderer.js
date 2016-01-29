@@ -53,6 +53,14 @@ var EagleBrdRenderer = function( xml, params ) {
 	this.xml = xml;
 
 	/**
+	Named textures. Includes layer textures and other data.
+
+	@property buffers {object}
+	@default {}
+	**/
+	this.buffers = {};
+
+	/**
 	PCB layers to be combined into the final board
 
 	@property layers {array}
@@ -75,16 +83,15 @@ var EagleBrdRenderer = function( xml, params ) {
 };
 
 
-EagleBrdRenderer.prototype._getChordPoints = function( wire ) {
+EagleBrdRenderer.prototype.getChordPoints = function( wire ) {
 
 	/**
 	Return a list of `[ x, y ]` coordinate pairs
 	representing the cardinal points of a circle described by the
 	curvature of the wire parameter. This list may be length 0.
 
-	@method _getChordPoints
+	@method getChordPoints
 	@return array
-	@private
 	**/
 
 	var ang, bearing, centroidX, centroidY, dx, dy, len, radius,
@@ -201,7 +208,7 @@ EagleBrdRenderer.prototype._parseBoardBounds = function() {
 	@private
 	**/
 
-	var curve, chordPoints, i, j, k, x, y,
+	var buffer, ctx, curve, chordPoints, i, j, k, x, y,
 		testMinMax = function( x, y ) {
 			minX = Math.min( x, minX );
 			minY = Math.min( y, minY );
@@ -214,6 +221,8 @@ EagleBrdRenderer.prototype._parseBoardBounds = function() {
 		minY = 0,
 		wires = this.xml.getElementsByTagName( "plain" )[ 0 ]
 			.getElementsByTagName( "wire" );
+
+	// TODO Get wires by layer, rather than by element `plain`
 
 	/*
 	Some wires may be curved. Under rare circumstances,
@@ -240,7 +249,7 @@ EagleBrdRenderer.prototype._parseBoardBounds = function() {
 		// Cord checks
 		curve = wires[ i ].getAttribute( "curve" );
 		if ( curve ) {
-			chordPoints = this._getChordPoints( wires[ i ] );
+			chordPoints = this.getChordPoints( wires[ i ] );
 			for ( k = 0; k < chordPoints.length; k++ ) {
 				testMinMax( chordPoints[ k ][ 0 ], chordPoints[ k ][ 1 ] );
 			}
@@ -283,7 +292,23 @@ EagleBrdRenderer.prototype._parseBoardBounds = function() {
 
 	// TODO slots
 
-	// TODO draw outline mask
+	if ( !( this.width > 1 && this.height > 1 ) ) {
+		console.error( "Error: Texture dimensions too small.",
+			"BRD boundaries not found, or too many microns per pixel." );
+		return;
+	}
+
+	// Draw outline mask
+	buffer = document.createElement( "canvas" );
+	buffer.width = this.width;
+	buffer.height = this.height;
+	this.buffers.bounds = buffer;
+
+	ctx = buffer.getContext( "2d" );
+
+	ctx.fillStyle = "rgba( 0.1, 0.8, 0.1, 0.5 )";
+	ctx.beginPath();
+	ctx.fill();
 };
 
 
