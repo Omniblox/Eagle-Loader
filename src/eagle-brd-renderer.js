@@ -427,6 +427,52 @@ EagleBrdRenderer.prototype.parseCoord = function( coord ) {
 };
 
 
+EagleBrdRenderer.prototype.parseDistanceMm = function( dist ) {
+
+	/**
+	Return the distance measured by a BRD string, e.g. "0.035mm".
+	This distance is measured in mm.
+
+	@method parseDistanceMm
+	@param dist {string} Distance string from BRD XML
+	@return {number} Distance in mm
+	**/
+
+	var tokens = dist.match( /([0-9.]+)(\D+)/ ),
+		num = tokens[ 1 ],
+		unit = tokens[ 2 ];
+
+	switch( unit ) {
+
+		// Millimeters are the base unit
+		case "mm":
+			return num;
+
+		// Milliinch or "mil"
+		case "mil":
+			return num * 0.0254;
+
+		// Microns
+		case "mic":
+			return num * 0.001;
+
+		// Inch
+		case "inch":
+			return num * 25.4;
+	}
+
+	return 0;
+};
+
+
+
+
+
+/**
+@namespace EagleBrdRenderer
+**/
+
+
 
 
 
@@ -436,7 +482,6 @@ EagleBrdRenderer.ChordData = function( wire ) {
 	Analysis of the chord and circular segment described
 	by a curving wire element.
 
-	@namespace EagleBrdRenderer
 	@class ChordData
 	@constructor
 	@param wire {Element} EAGLE BRD `wire` XML element
