@@ -593,3 +593,173 @@ EagleBrdRenderer.ChordData = function( wire ) {
 	**/
 	this.bearing2 = Math.atan2( this.y2 - this.y, this.x2 - this.x );
 };
+
+
+
+
+
+EagleBrdRenderer.Layer = function( params ) {
+
+	/**
+	Define a layer of a PCB board. This contains a list of elements,
+	and the render of these elements.
+
+	Layer objects do not correspond directly to BRD layers.
+	They may combine many BRD layers into one target,
+	such as for rendering silkscreen;
+	share an element across multiple targets,
+	such as with vias and holes;
+	or ignore a BRD layer entirely,
+	such as with Symbol layers.
+
+	@class Layer
+	@constructor
+	@param params {object} Composite parameter object
+		@param params.layers {array} List of BRD layer numbers to follow
+		@param params.name {string} Unique layer identifier
+		@param [params.tags] {array} List of tag strings
+		@param params.thickness {string} Thickness of layer from XML
+	**/
+
+	/**
+	Unordered list of elements to be drawn to this layer
+
+	@property elements {array}
+	**/
+	this.elements = [];
+
+	/**
+	List of BRD layer numbers to follow
+
+	@property layers {array}
+	**/
+	this.layers = params.layers;
+
+	/**
+	Unique layer identifier
+
+	@property name {string}
+	**/
+	this.name = params.name;
+
+	/**
+	Tags on this layer. List of strings.
+
+	@property tags {array}
+	**/
+	this.tags = params.tags || [];
+
+	/**
+	Thickness of this layer. Measured in pixels, but they may be fractional.
+
+	@property thickness {number}
+	**/
+	this.thickness =
+		EagleBrdRenderer.prototype.parseDistanceMm( params.thickness );
+};
+
+
+EagleBrdRenderer.Layer.prototype.add = function ( el ) {
+
+	/**
+	Add an element to this layer. The element will not be checked
+	for layer information.
+
+	@method add
+	@param el {Element} XML element describing a BRD element
+	@return {EagleBrdRenderer.Layer} This Layer
+	**/
+
+	this.elements.push( el );
+
+	return this;
+};
+
+
+EagleBrdRenderer.Layer.prototype.assessElementCandidate = function( el ) {
+
+	/**
+	Assess an element for inclusion in this layer.
+	If the element contains or spans this layer, it is included.
+
+	@method assessElementCandidate
+	@param el {Element} XML element describing a BRD primitive
+	@return {EagleBrdRenderer.Layer} This Layer
+	**/
+
+	var extent1, extent2, i,
+		layer = parseInt( el.getAttribute( "layer" ), 10 ),
+		extent = el.getAttribute( "extent" );
+
+	if ( layer ) {
+
+		// See whether this is a matching layer.
+		if ( this.layers.indexOf( layer ) !== -1 ) {
+			this.add( el );
+		}
+	} else if ( extent ) {
+
+		// See whether this layer is within the specified extent.
+		extent = extent.match( /(\d+)-(\d+)/ );
+		extent1 = parseInt( extent[ 1 ], 10 );
+		extent2 = parseInt( extent[ 2 ], 10 );
+		for ( i = 0; i < this.layers.length; i++ ) {
+			if ( extent1 <= this.layers[ i ] && extent2 >= this.layers[ i ] ) {
+				this.add( el );
+				break;
+			}
+		}
+	} else {
+
+		// If no layer information is provided,
+		// this must be a hole through everything,
+		// or a pad that contains a hole through everything.
+		this.add( el );
+	}
+
+	return this;
+};
+
+
+EagleBrdRenderer.Layer.prototype.hasTag = function( tag ) {
+
+	/**
+	Return whether this layer has the specified tag.
+
+	@method hasTag
+	@param tag {string} Tag to assess
+	@return boolean
+	**/
+
+	if ( this.tags.indexOf( tag ) === -1 ) {
+		return false;
+	}
+	return true;
+};
+
+
+EagleBrdRenderer.Layer.prototype.initBuffer = function() {
+
+	/**
+	Initialise the buffer for this layer.
+	This must be called after the bounds are identified.
+
+	@method initBuffer
+	**/
+
+	/**
+	Texture buffer to which layer elements are rendered
+
+	@property buffer {HTMLCanvasElement}
+	**/
+	this.buffer = document.createElement( "canvas" );
+	this.buffer.width = this.width;
+	this.buffer.height = this.height;
+
+	/**
+	Texture drawing context for this layer
+
+	@property ctx {CanvasRenderingContext2D}
+	**/
+	this.ctx = this.buffer.getContext( "2d" );
+};
