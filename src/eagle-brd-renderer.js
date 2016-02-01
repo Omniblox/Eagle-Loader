@@ -38,6 +38,8 @@ var EagleBrdRenderer = function( xml, params ) {
 			of a default copper layer.
 	**/
 
+	console.log( "Beginning BRD parse" );
+
 	/**
 	Optional parameters used to configure render.
 
@@ -51,6 +53,10 @@ var EagleBrdRenderer = function( xml, params ) {
 	@property xml {Document}
 	**/
 	this.xml = xml;
+
+	console.log( "EAGLE version",
+		this.xml.getElementsByTagName( "eagle" )[ 0 ]
+		.getAttribute( "version" ) );
 
 	/**
 	Named textures. Includes layer textures and other data.
@@ -91,72 +97,6 @@ var EagleBrdRenderer = function( xml, params ) {
 	// layer list.  On the first hand again, most of them are unused.
 
 	// TODO Parse BRD into layers
-};
-
-
-EagleBrdRenderer.prototype._parseCollection = function( collection ) {
-
-	/**
-	Parse an element from the BRD which contains primitives.
-	If if encounters a package, it will recurse and parse that element.
-	Primitives are deployed to any number of layers, from 0 to all,
-	depending on which layers want it.
-
-	@method _parseCollection
-	@param el {Element} XML element from BRD to parse
-	@private
-	**/
-
-	var el, i, j, name, type,
-		nodeTypes = [ "circle", "element", "hole", "pad", "polygon",
-			"rectangle", "smd", "text", "via", "wire" ];
-
-	for ( i = 0; i < collection.childNodes.length; i++ ) {
-		el = collection.childNodes[ i ];
-		type = el.nodeType;
-
-		if ( type === el.ELEMENT_NODE ) {
-			name = el.nodeName;
-
-			// Recurse element packages
-			if ( name === "element" ) {
-				// TODO parse element
-			} else if ( nodeTypes.indexOf( name ) !== -1 ) {
-				for ( j = 0; j < this.layers.length; j++ ) {
-					this.layers[ j ].assessElementCandidate( el );
-				}
-			}
-		}
-	}
-};
-
-
-EagleBrdRenderer.prototype._parseDesignRules = function() {
-
-	/**
-	Set `designRules` to contain important circuit rules from XML.
-
-	@method _parseDesignRules
-	@private
-	**/
-
-	var i,
-		rules = this.xml.getElementsByTagName( "designrules" )[ 0 ]
-			.getElementsByTagName( "param" );
-
-	/**
-	Design rules for this PCB layout. These are used in determining
-	various important layout characteristics.
-
-	@property designRules {object}
-	@default {}
-	**/
-	this.designRules = {};
-
-	for ( i = 0; i < rules.length; i++ ) {
-		this.designRules[ rules[ i ].getAttribute( "name" ) ] =
-			rules[ i ].getAttribute( "value" );
-	}
 };
 
 
@@ -342,6 +282,124 @@ EagleBrdRenderer.prototype._parseBoardBounds = function() {
 };
 
 
+EagleBrdRenderer.prototype._parseCollection = function( collection ) {
+
+	/**
+	Parse an element from the BRD which contains primitives.
+	If if encounters a package, it will recurse and parse that element.
+	Primitives are deployed to any number of layers, from 0 to all,
+	depending on which layers want it.
+
+	@method _parseCollection
+	@param el {Element} XML element from BRD to parse
+	@private
+	**/
+
+	var el, i, j, name, type,
+		nodeTypes = [ "circle", "element", "hole", "pad", "polygon",
+			"rectangle", "smd", "text", "via", "wire" ];
+
+	for ( i = 0; i < collection.childNodes.length; i++ ) {
+		el = collection.childNodes[ i ];
+		type = el.nodeType;
+
+		if ( type === el.ELEMENT_NODE ) {
+			name = el.tagName;
+
+			// Recurse element packages
+			if ( name === "element" ) {
+				this._parseElement( el );
+			} else if ( nodeTypes.indexOf( name ) !== -1 ) {
+				for ( j = 0; j < this.layers.length; j++ ) {
+					this.layers[ j ].assessElementCandidate( el );
+				}
+			}
+		}
+	}
+};
+
+
+EagleBrdRenderer.prototype._parseDesignRules = function() {
+
+	/**
+	Set `designRules` to contain important circuit rules from XML.
+
+	@method _parseDesignRules
+	@private
+	**/
+
+	var i,
+		rules = this.xml.getElementsByTagName( "designrules" )[ 0 ]
+			.getElementsByTagName( "param" );
+
+	console.log( "Parsing design rules..." );
+
+	/**
+	Design rules for this PCB layout. These are used in determining
+	various important layout characteristics.
+
+	@property designRules {object}
+	@default {}
+	**/
+	this.designRules = {};
+
+	for ( i = 0; i < rules.length; i++ ) {
+		this.designRules[ rules[ i ].getAttribute( "name" ) ] =
+			rules[ i ].getAttribute( "value" );
+	}
+};
+
+
+EagleBrdRenderer.prototype._parseElement = function( el ) {
+
+	/**
+	Parse an `<element>` element from the XML library.
+
+	@method _parseElement
+	@param el {Element} `<element>` element to parse
+	**/
+
+	var i, lib, libs, pack, packs,
+		libName = el.getAttribute( "library" ),
+		packName = el.getAttribute( "package" );
+
+	console.log( "Preparing element: Library", libName, "Package", packName );
+
+	// Get a named library from the XML
+	libs = this.xml.getElementsByTagName( "libraries" )[ 0 ]
+		.getElementsByTagName( "library" );
+	for ( i = 0; i < libs.length; i++ ) {
+		lib = libs[ i ];
+		if ( lib.getAttribute( "name" ) === libName ) {
+			break;
+		}
+		lib = null;
+	}
+
+	if ( !lib ) {
+		return;
+	}
+
+	// Get the named package from the library
+	packs = lib.getElementsByTagName( "packages" )[ 0 ]
+		.getElementsByTagName( "package" );
+	for ( i = 0; i < packs.length; i++ ) {
+		pack = packs[ i ];
+		if ( pack.getAttribute( "name" ) === packName ) {
+			break;
+		}
+		pack = null;
+	}
+
+	if ( !pack ) {
+		return;
+	}
+
+	// Parse the package into the layers
+	this._parseCollection( pack );
+};
+
+
 EagleBrdRenderer.prototype._populateLayers = function() {
 
 	/**
@@ -374,7 +432,7 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 	@method _populateLayers
 	**/
 
-	var config, elements, extract, i, isNum, iso, layer,
+	var config, extract, i, isNum, iso, layer,
 		mtCopper, mtIsolate, signals, thickness,
 		layers = [],
 		thickMask = 0.015 * this.coordScale,
@@ -382,6 +440,8 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 		offset = 0,
 		regexNum = /^\d+/,
 		regexIso = /^\D/;
+
+	console.log( "Parsing board layers..." );
 
 	// Create bottom cream mask
 	this.layers.push( new EagleBrdRenderer.Layer( {
@@ -485,7 +545,7 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 		height: offset,
 		layers: [ 20 ],
 		name: "Bounds",
-		tags: "Bounds",
+		tags: [ "Bounds" ],
 		thickness: 1
 	} ) );
 
@@ -497,16 +557,23 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 	**/
 	this.thickness = offset;
 
+	for ( i = 0; i < this.layers.length; i++ ) {
+		console.log( "Layer generated:", this.layers[ i ].tags[ 0 ],
+			"thickness", this.layers[ i ].thickness );
+	}
+
 	// Populate layers
+	console.log( "Populating plain..." );
 	this._parseCollection( this.xml.getElementsByTagName( "plain" )[ 0 ] );
+
+	console.log( "Populating signals..." );
 	signals = this.xml.getElementsByTagName( "signal" );
 	for ( i = 0; i < signals.length; i++ ) {
 		this._parseCollection( signals[ i ] );
 	}
-	elements = this.xml.getElementsByTagName( "element" );
-	for ( i = 0; i < elements.length; i++ ) {
-		// TODO: Parse elements
-	}
+
+	console.log( "Populating elements..." );
+	this._parseCollection( this.xml.getElementsByTagName( "elements" )[ 0 ] );
 };
 
 
