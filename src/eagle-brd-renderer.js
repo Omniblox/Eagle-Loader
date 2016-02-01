@@ -997,6 +997,36 @@ EagleBrdRenderer.Layer.prototype.assessElementCandidate = function( el ) {
 };
 
 
+EagleBrdRenderer.Layer.prototype.getElements = function() {
+
+	/**
+	Return a list of elements. If no tags are passed as parameters,
+	all elements will be returned. Otherwise, only elements that match
+	one of the specified tags are returned.
+
+	@method getElements
+	@param [...tags] {string} Tags to return
+	**/
+
+	var i,
+		out = [],
+		tags = Array.apply( null, arguments );
+
+		// ( arguments.length === 1 ?
+		// 	[ arguments[ 0 ] ] :
+		// 	Array.apply( null, arguments ) );
+
+	for ( i = 0; i < this.elements.length; i++ ) {
+		if ( tags.length === 0 ||
+				tags.indexOf( this.elements[ i ].tagName ) !== -1 ) {
+			out.push( this.elements[ i ] );
+		}
+	}
+
+	return out;
+};
+
+
 EagleBrdRenderer.Layer.prototype.hasTag = function( tag ) {
 
 	/**
