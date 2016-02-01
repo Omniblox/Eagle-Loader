@@ -81,6 +81,8 @@ var EagleBrdRenderer = function( xml, params ) {
 
 	this._parseDesignRules();
 
+	this._populateLayers();
+
 	this._parseBoardBounds();
 
 	// TODO Init layers
@@ -89,6 +91,43 @@ var EagleBrdRenderer = function( xml, params ) {
 	// layer list.  On the first hand again, most of them are unused.
 
 	// TODO Parse BRD into layers
+};
+
+
+EagleBrdRenderer.prototype._parseCollection = function( collection ) {
+
+	/**
+	Parse an element from the BRD which contains primitives.
+	If if encounters a package, it will recurse and parse that element.
+	Primitives are deployed to any number of layers, from 0 to all,
+	depending on which layers want it.
+
+	@method _parseCollection
+	@param el {Element} XML element from BRD to parse
+	@private
+	**/
+
+	var el, i, j, name, type,
+		nodeTypes = [ "circle", "element", "hole", "pad", "polygon",
+			"rectangle", "smd", "text", "via", "wire" ];
+
+	for ( i = 0; i < collection.childNodes.length; i++ ) {
+		el = collection.childNodes[ i ];
+		type = el.nodeType;
+
+		if ( type === el.ELEMENT_NODE ) {
+			name = el.nodeName;
+
+			// Recurse element packages
+			if ( name === "element" ) {
+				// TODO parse element
+			} else if ( nodeTypes.indexOf( name ) !== -1 ) {
+				for ( j = 0; j < this.layers.length; j++ ) {
+					this.layers[ j ].assessElementCandidate( el );
+				}
+			}
+		}
+	}
 };
 
 
@@ -303,6 +342,174 @@ EagleBrdRenderer.prototype._parseBoardBounds = function() {
 };
 
 
+EagleBrdRenderer.prototype._populateLayers = function() {
+
+	/**
+	Initialize layers and populate them with the BRD elements.
+
+	Derives layer identities from designrules.
+	These are described as layers and combinations.
+
+	Layers are identified by numbers.
+	Combinations are either "+" or "*".
+
+	* "*" combinations are core-fused.
+	* "+" combinations are prepreg-fused.
+	* ":" combinations are discardable information about blind vias.
+	* "(" and "[" are also discardable via information.
+
+	The combination method doesn't really matter, except for texturing.
+	What matters is that we discard blind vias,
+	and correctly identify copper and isolate layers in sequence.
+	Thickness is defined in designrules as mtCopper and mtIsolate,
+	in order of encountered types.
+
+	For example, `(1*16)` can be simplified to `1*16`, and means
+	"copper layer 1, then a core isolate layer, then copper layer 2".
+	The copper layer thicknesses are found in `mtCopper` [ 0 ] and [ 1 ].
+	The isolate layer is found in `mtIsolate` [ 0 ].
+
+	This method will also create cream, mask, and board layers.
+
+	@method _populateLayers
+	**/
+
+	var config, elements, extract, i, isNum, iso, layer,
+		mtCopper, mtIsolate, signals, thickness,
+		layers = [],
+		thickMask = 0.015 * this.coordScale,
+		thickSolder = 0.05 * this.coordScale,
+		offset = 0,
+		regexNum = /^\d+/,
+		regexIso = /^\D/;
+
+	// Create bottom cream mask
+	this.layers.push( new EagleBrdRenderer.Layer( {
+		height: offset,
+		layers: [ 32 ],
+		name: "Bottom Solderpaste",
+		tags: [ "Solderpaste" ],
+		thickness: thickSolder
+	} ) );
+
+	offset += thickSolder;
+
+	// Create bottom mask
+	this.layers.push( new EagleBrdRenderer.Layer( {
+		height: offset,
+		layers: [ 22, 26 ],
+		name: "Bottom Mask",
+		tags: [ "Mask" ],
+		thickness: thickMask
+	} ) );
+
+	offset += thickMask;
+
+	// Parse layer setup
+	config = this.designRules.layerSetup;
+
+	config = config.replace( /\[\d+:/g, "" );
+	config = config.replace( /:\d+\]/g, "" );
+	config = config.replace( /[()]/g, "" );
+
+	while ( config !== "" ) {
+		extract = config.match( regexNum );
+		if ( extract ) {
+			layers.push( parseInt( extract, 10 ) );
+			config = config.replace( regexNum, "" );
+		} else {
+			extract = config.match( regexIso );
+			layers.push( extract[ 0 ] );
+			config = config.replace( regexIso, "" );
+		}
+	}
+
+	// `layers` should now be an alternating sequence
+	// of numbers representing coppers and symbols representing isolates.
+
+	// Build copper and isolate arrays from designrules strings
+	mtCopper = this.designRules.mtCopper.split( " " );
+	mtIsolate = this.designRules.mtIsolate.split( " " );
+
+	for ( i = 0; i < layers.length; i++ ) {
+		isNum = typeof layers[ i ] === "number";
+		if ( !isNum ) {
+			iso = layers[ i ] === "*" ? "Core" : "Prepreg";
+		} else {
+			iso = "";
+		}
+		thickness = isNum ?
+				mtCopper[ Math.floor( i / 2 ) ] :
+				mtIsolate[ Math.floor( i / 2 ) ];
+		thickness =
+			this.parseDistanceMm( thickness ) * this.coordScale;
+
+		layer = new EagleBrdRenderer.Layer( {
+			height: offset,
+			layers: [ isNum ? layers[ i ] : layers[ i - 1 ] ],
+			name: isNum ?
+				"Layer" + layers [ i ] :
+				"Layer" + layers[ i - 1 ] + iso,
+			tags: [ iso || "Copper" ],
+			thickness: thickness
+		} );
+		this.layers.push( layer );
+
+		offset += thickness;
+	}
+
+	// Create top mask
+	this.layers.push( new EagleBrdRenderer.Layer( {
+		height: offset,
+		layers: [ 21, 25 ],
+		name: "Top Mask",
+		tags: [ "Mask" ],
+		thickness: thickMask
+	} ) );
+
+	offset += thickMask;
+
+	// Create top cream mask
+	this.layers.push( new EagleBrdRenderer.Layer( {
+		height: offset,
+		layers: [ 31 ],
+		name: "Top Solderpaste",
+		tags: [ "Solderpaste" ],
+		thickness: thickSolder
+	} ) );
+
+	offset += thickSolder;
+
+	// Create board dimensions
+	this.layers.push( new EagleBrdRenderer.Layer( {
+		height: offset,
+		layers: [ 20 ],
+		name: "Bounds",
+		tags: "Bounds",
+		thickness: 1
+	} ) );
+
+	/**
+	Total thickness, including solderpaste and mask layers.
+	Does not actually check for presence of solderpaste or mask.
+
+	@property thickness {number}
+	**/
+	this.thickness = offset;
+
+	// Populate layers
+	this._parseCollection( this.xml.getElementsByTagName( "plain" )[ 0 ] );
+	signals = this.xml.getElementsByTagName( "signal" );
+	for ( i = 0; i < signals.length; i++ ) {
+		this._parseCollection( signals[ i ] );
+	}
+	elements = this.xml.getElementsByTagName( "element" );
+	for ( i = 0; i < elements.length; i++ ) {
+		// TODO: Parse elements
+	}
+};
+
+
 EagleBrdRenderer.prototype._setDefaultParams = function() {
 
 	/**
@@ -439,7 +646,7 @@ EagleBrdRenderer.prototype.parseDistanceMm = function( dist ) {
 	**/
 
 	var tokens = dist.match( /([0-9.]+)(\D+)/ ),
-		num = tokens[ 1 ],
+		num = parseFloat( tokens[ 1 ] ),
 		unit = tokens[ 2 ];
 
 	switch( unit ) {
@@ -615,10 +822,11 @@ EagleBrdRenderer.Layer = function( params ) {
 	@class Layer
 	@constructor
 	@param params {object} Composite parameter object
+		@param [params.height=0] {number} Offset of layer from base in pixels
 		@param params.layers {array} List of BRD layer numbers to follow
 		@param params.name {string} Unique layer identifier
 		@param [params.tags] {array} List of tag strings
-		@param params.thickness {string} Thickness of layer from XML
+		@param params.thickness {number} Thickness of layer in pixels
 	**/
 
 	/**
@@ -627,6 +835,8 @@ EagleBrdRenderer.Layer = function( params ) {
 	@property elements {array}
 	**/
 	this.elements = [];
+
+	this.height = params.height;
 
 	/**
 	List of BRD layer numbers to follow
@@ -654,8 +864,7 @@ EagleBrdRenderer.Layer = function( params ) {
 
 	@property thickness {number}
 	**/
-	this.thickness =
-		EagleBrdRenderer.prototype.parseDistanceMm( params.thickness );
+	this.thickness = params.thickness;
 };
 
 
