@@ -852,7 +852,7 @@ EagleBrdRenderer.ChordData = function( wire ) {
 
 	@property radius {number}
 	**/
-	this.radius = this.chord / ( 2 * Math.sin( this.curve / 2 ) );
+	this.radius = Math.abs( this.chord / ( 2 * Math.sin( this.curve / 2 ) ) );
 
 	// Determine sidedness
 	ang = this.curve > 0 ?
