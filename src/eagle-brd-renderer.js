@@ -687,6 +687,26 @@ function( tag, layer ) {
 };
 
 
+EagleBrdRenderer.prototype.getLayer = function( name ) {
+
+	/**
+	Return a layer of the specified name.
+
+	@method getLayer
+	@param name {string} Identifier of the layer
+	@return EagleBrdRenderer.Layer
+	**/
+
+	var i;
+
+	for ( i = 0; i < this.layers.length; i++ ) {
+		if ( this.layers[ i ].name === name ) {
+			return this.layers[ i ];
+		}
+	}
+};
+
+
 EagleBrdRenderer.prototype.parseCoord = function( coord ) {
 
 	/**
