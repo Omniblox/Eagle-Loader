@@ -110,7 +110,7 @@ EagleBrdRenderer.prototype._parseBoardBounds = function() {
 	@private
 	**/
 
-	var buffer, ctx, curve, chordData, chordPoints, i, j, k, wires,
+	var buffer, ctx, curve, chordData, chordPoints, i, j, k, layer, wires,
 		x, y, lastX, lastY,
 		testMinMax = function( x, y ) {
 			minX = Math.min( x, minX );
@@ -123,12 +123,8 @@ EagleBrdRenderer.prototype._parseBoardBounds = function() {
 		minX = 0,
 		minY = 0;
 
-		wires = this.xml.getElementsByTagName( "plain" )[ 0 ]
-			.getElementsByTagName( "wire" );
-
-	// Get wires that draw to layer 20
-	// wires = this.getElementsByTagNameAndLayer( "wire", "20" );
-	// TODO: Collect wires as drawn, omitting library definitions
+	layer = this.getLayer( "Bounds" );
+	wires = layer.getElements( "wire" );
 
 	/*
 	Some wires may be curved. Under rare circumstances,
@@ -1031,10 +1027,6 @@ EagleBrdRenderer.Layer.prototype.getElements = function() {
 	var i,
 		out = [],
 		tags = Array.apply( null, arguments );
-
-		// ( arguments.length === 1 ?
-		// 	[ arguments[ 0 ] ] :
-		// 	Array.apply( null, arguments ) );
 
 	for ( i = 0; i < this.elements.length; i++ ) {
 		if ( tags.length === 0 ||
