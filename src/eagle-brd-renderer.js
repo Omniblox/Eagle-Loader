@@ -306,6 +306,13 @@ EagleBrdRenderer.prototype._parseCollection = function( collection ) {
 			if ( name === "element" ) {
 				this._parseElement( el );
 			} else if ( nodeTypes.indexOf( name ) !== -1 ) {
+
+				// Add element data to package components
+				if ( this._elementCurrent ) {
+					el.elementParent = this._elementCurrent;
+				}
+
+				// Allow layers to register elements they desire
 				for ( j = 0; j < this.layers.length; j++ ) {
 					this.layers[ j ].assessElementCandidate( el );
 				}
@@ -391,8 +398,17 @@ EagleBrdRenderer.prototype._parseElement = function( el ) {
 		return;
 	}
 
+	/**
+	Element currently being parsed. Used to append data to package elements.
+
+	@property _elementCurrent {Element} undefined
+	**/
+	this._elementCurrent = el;
+
 	// Parse the package into the layers
 	this._parseCollection( pack );
+
+	this._elementCurrent = null;
 };
 
 
