@@ -777,10 +777,8 @@ EagleBrdRenderer.prototype.renderBounds = function() {
 			firstY = y;
 		}
 
-		lastX = this.parseCoord(
-			wires[ i ].getAttribute( "x2" ) );
-		lastY = this.parseCoord(
-			wires[ i ].getAttribute( "y2" ) );
+		lastX = this.parseCoord( wires[ i ].getAttribute( "x2" ) );
+		lastY = this.parseCoord( wires[ i ].getAttribute( "y2" ) );
 
 		// Connect segment
 		if ( wires[ i ].hasAttribute( "curve" ) ) {
@@ -789,7 +787,8 @@ EagleBrdRenderer.prototype.renderBounds = function() {
 				chordData.x * this.coordScale,
 				chordData.y * this.coordScale,
 				chordData.radius * this.coordScale,
-				chordData.bearing1, chordData.bearing2 );
+				chordData.bearing1, chordData.bearing2,
+				chordData.curve < 0 );
 		} else {
 			layer.ctx.lineTo( lastX, lastY );
 		}
@@ -802,6 +801,7 @@ EagleBrdRenderer.prototype.renderBounds = function() {
 
 	layer.ctx.closePath();
 	layer.ctx.fill( "evenodd" );
+	// layer.ctx.stroke();
 
 
 
