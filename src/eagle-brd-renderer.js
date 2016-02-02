@@ -75,36 +75,31 @@ var EagleBrdRenderer = function( xml, params ) {
 	@property coordScale {number}
 	@default 28.57
 	**/
-	this.coordScale = 1 / ( this.params.pixelMicrons * 0.001 );
+	this.coordScale = 1000 / this.params.pixelMicrons;
 
 	this._parseDesignRules();
 
 	this._populateLayers();
 
-	this._parseBoardBounds();
+	// Determine dimensions of board and derived textures.
+	this._parseBounds();
 
-	// TODO Init layers
-	// We probably want a proper layer manager here, rather than
-	// a naïve array. On the other hand, the BRD does specify the complete
-	// layer list.  On the first hand again, most of them are unused.
-
-	// TODO Parse BRD into layers
+	this.renderBounds();
 };
 
 
-EagleBrdRenderer.prototype._parseBoardBounds = function() {
+EagleBrdRenderer.prototype._parseBounds = function() {
 
 	/**
 	Determine and record the boundaries of the board surface.
 	This is derived from `eagle.drawing.board.plain` wires.
 
-	@method _parseBoardBounds
+	@method _parseBounds
 	@private
 	**/
 
-	var curve, chordData, chordPoints, holes, layer, pads, wires,
-		i, j, k,
-		x, y, firstX, firstY, lastX, lastY,
+	var curve, chordPoints, layer, wires,
+		i, j, k, x, y,
 		testMinMax = function( x, y ) {
 			minX = Math.min( x, minX );
 			minY = Math.min( y, minY );
@@ -204,123 +199,6 @@ EagleBrdRenderer.prototype._parseBoardBounds = function() {
 			"BRD boundaries not found, or too many microns per pixel." );
 		return;
 	}
-
-
-
-	// We may now begin to initialise drawing surfaces.
-	layer.initBuffer( this.width, this.height );
-
-	// Setup draw style
-	layer.ctx.save();
-	layer.ctx.fillStyle = "rgb( 32, 192, 32 )";
-
-	// EAGLE coordinates are bottom-left, not top-left.
-	// This coord system should be persistent.
-	layer.ctx.scale( 1, -1 );
-	layer.ctx.translate( this.offsetX, this.offsetY - this.height );
-	layer.ctx.save();
-
-
-
-	// Draw wire outlines
-	layer.ctx.beginPath();
-
-	// First point
-	if ( wires.length ) {
-		lastX = this.parseCoord(
-			wires[ 0 ].getAttribute( "x1" ) );
-		lastY = this.parseCoord(
-			wires[ 0 ].getAttribute( "y1" ) );
-		layer.ctx.moveTo( lastX, lastY );
-		firstX = lastX;
-		firstY = lastY;
-	}
-
-	for ( i = 0; i < wires.length; i++ ) {
-
-		// Account for objects created by elements
-		if ( wires[ i ].elementParent ) {
-			layer.ctx.save();
-			layer.orientContext( wires[ i ].elementParent, this.coordScale );
-		}
-
-		x = this.parseCoord( wires[ i ].getAttribute( "x1" ) );
-		y = this.parseCoord( wires[ i ].getAttribute( "y1" ) );
-
-		// Check for line breaks
-		if ( x !== lastX || y !== lastY ) {
-			layer.ctx.closePath();
-			layer.ctx.moveTo( x, y );
-			firstX = x;
-			firstY = y;
-		}
-
-		lastX = this.parseCoord(
-			wires[ i ].getAttribute( "x2" ) );
-		lastY = this.parseCoord(
-			wires[ i ].getAttribute( "y2" ) );
-
-		// Connect segment
-		if ( wires[ i ].hasAttribute( "curve" ) ) {
-			chordData = new EagleBrdRenderer.ChordData( wires[ i ] );
-			layer.ctx.arc(
-				chordData.x * this.coordScale,
-				chordData.y * this.coordScale,
-				chordData.radius * this.coordScale,
-				chordData.bearing1, chordData.bearing2 );
-		} else {
-			layer.ctx.lineTo( lastX, lastY );
-		}
-
-		// Revert element positioning
-		if ( wires[ i ].elementParent ) {
-			layer.ctx.restore();
-		}
-	}
-
-	layer.ctx.closePath();
-	layer.ctx.fill( "evenodd" );
-
-
-
-	// Draw apertures
-	holes = layer.getElements( "hole" );
-	pads = layer.getElements( "pad" );
-	holes = holes.concat( pads );
-
-	// Subtractive draw
-	layer.ctx.save();
-	layer.ctx.globalCompositeOperation = "destination-out";
-
-	for ( i = 0; i < holes.length; i++ ) {
-
-		// Account for objects created by elements
-		if ( holes[ i ].elementParent ) {
-			layer.ctx.save();
-			layer.orientContext( holes[ i ].elementParent, this.coordScale );
-		}
-
-		x = this.parseCoord( holes[ i ].getAttribute( "x" ) );
-		y = this.parseCoord( holes[ i ].getAttribute( "y" ) );
-		layer.ctx.beginPath();
-		layer.ctx.arc( x, y,
-			holes[ i ].getAttribute( "drill" ) * this.coordScale / 2,
-			0, Math.PI * 2
-		);
-		layer.ctx.fill();
-
-		// Revert element positioning
-		if ( holes[ i ].elementParent ) {
-			layer.ctx.restore();
-		}
-	}
-
-	layer.ctx.restore();
-
-
-
-	// Diagnostic
-	document.body.appendChild( layer.buffer );
 };
 
 
@@ -798,6 +676,135 @@ EagleBrdRenderer.prototype.parseDistanceMm = function( dist ) {
 	}
 
 	return 0;
+};
+
+
+EagleBrdRenderer.prototype.renderBounds = function() {
+
+	/**
+	Render the bounds to a buffer.
+
+	@method renderBounds
+	**/
+
+	var chordData, holes, pads,
+		i, x, y, firstX, firstY, lastX, lastY,
+		layer = this.getLayer( "Bounds" ),
+		wires = layer.getElements( "wire" );
+
+	layer.initBuffer( this.width, this.height );
+
+	// Setup draw style
+	layer.ctx.save();
+	layer.ctx.fillStyle = "rgb( 32, 192, 32 )";
+
+	// EAGLE coordinates are bottom-left, not top-left.
+	// This coord system should be persistent.
+	layer.ctx.scale( 1, -1 );
+	layer.ctx.translate( this.offsetX, this.offsetY - this.height );
+	layer.ctx.save();
+
+
+
+	// Draw wire outlines
+	layer.ctx.beginPath();
+
+	// First point
+	if ( wires.length ) {
+		lastX = this.parseCoord(
+			wires[ 0 ].getAttribute( "x1" ) );
+		lastY = this.parseCoord(
+			wires[ 0 ].getAttribute( "y1" ) );
+		layer.ctx.moveTo( lastX, lastY );
+		firstX = lastX;
+		firstY = lastY;
+	}
+
+	for ( i = 0; i < wires.length; i++ ) {
+
+		// Account for objects created by elements
+		if ( wires[ i ].elementParent ) {
+			layer.ctx.save();
+			layer.orientContext( wires[ i ].elementParent, this.coordScale );
+		}
+
+		x = this.parseCoord( wires[ i ].getAttribute( "x1" ) );
+		y = this.parseCoord( wires[ i ].getAttribute( "y1" ) );
+
+		// Check for line breaks
+		if ( x !== lastX || y !== lastY ) {
+			layer.ctx.closePath();
+			layer.ctx.moveTo( x, y );
+			firstX = x;
+			firstY = y;
+		}
+
+		lastX = this.parseCoord(
+			wires[ i ].getAttribute( "x2" ) );
+		lastY = this.parseCoord(
+			wires[ i ].getAttribute( "y2" ) );
+
+		// Connect segment
+		if ( wires[ i ].hasAttribute( "curve" ) ) {
+			chordData = new EagleBrdRenderer.ChordData( wires[ i ] );
+			layer.ctx.arc(
+				chordData.x * this.coordScale,
+				chordData.y * this.coordScale,
+				chordData.radius * this.coordScale,
+				chordData.bearing1, chordData.bearing2 );
+		} else {
+			layer.ctx.lineTo( lastX, lastY );
+		}
+
+		// Revert element positioning
+		if ( wires[ i ].elementParent ) {
+			layer.ctx.restore();
+		}
+	}
+
+	layer.ctx.closePath();
+	layer.ctx.fill( "evenodd" );
+
+
+
+	// Draw apertures
+	holes = layer.getElements( "hole" );
+	pads = layer.getElements( "pad" );
+	holes = holes.concat( pads );
+
+	// Subtractive draw
+	layer.ctx.save();
+	layer.ctx.globalCompositeOperation = "destination-out";
+
+	for ( i = 0; i < holes.length; i++ ) {
+
+		// Account for objects created by elements
+		if ( holes[ i ].elementParent ) {
+			layer.ctx.save();
+			layer.orientContext( holes[ i ].elementParent, this.coordScale );
+		}
+
+		x = this.parseCoord( holes[ i ].getAttribute( "x" ) );
+		y = this.parseCoord( holes[ i ].getAttribute( "y" ) );
+		layer.ctx.beginPath();
+		layer.ctx.arc( x, y,
+			holes[ i ].getAttribute( "drill" ) * this.coordScale / 2,
+			0, Math.PI * 2
+		);
+		layer.ctx.fill();
+
+		// Revert element positioning
+		if ( holes[ i ].elementParent ) {
+			layer.ctx.restore();
+		}
+	}
+
+	layer.ctx.restore();
+
+
+
+	// Diagnostic
+	document.body.appendChild( layer.buffer );
 };
 
 
