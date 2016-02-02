@@ -688,7 +688,8 @@ EagleBrdRenderer.prototype.renderBounds = function() {
 	**/
 
 	var chordData, holes, pads,
-		i, x, y, firstX, firstY, lastX, lastY,
+		i, j, k, x, y, firstX, firstY, lastX, lastY,
+		wireGrps, wireGrp, wire,
 		layer = this.getLayer( "Bounds" ),
 		wires = layer.getElements( "wire" );
 
@@ -697,6 +698,49 @@ EagleBrdRenderer.prototype.renderBounds = function() {
 	// Setup draw style
 	layer.ctx.fillStyle = "rgb( 32, 192, 32 )";
 	layer.ctx.save();
+
+
+
+	// Order wires
+	// Wire entities may be out of order in the BRD.
+	// This will cause fills to operate badly.
+	wireGrps = [];
+	wireGrp = [];
+	wireGrps.push( wireGrp );
+
+	// Sort wires into groups of single origin.
+	for ( i = 0; i < wires.length; i++ ) {
+		if ( wire && wire.elementParent !== wires[ i ].elementParent ) {
+			wireGrp = [];
+			wireGrps.push( wireGrp );
+		}
+		wire = wires[ i ];
+		wireGrp.push( wire );
+	}
+
+	// Sort wire groups by link.
+	for ( i = 0; i < wireGrps.length; i++ ) {
+		wireGrp = wireGrps[ i ];
+
+		for ( j = 0; j < wireGrp.length; j++ ) {
+			wire = wireGrp[ j ];
+			x = wire.getAttribute( "x2" );
+			y = wire.getAttribute( "y2" );
+			for ( k = j; k >= 0; k-- ) {
+				if ( x === wireGrp[ k ].getAttribute( "x1" ) &&
+						y === wireGrp[ k ].getAttribute( "y1" ) ) {
+					wireGrp.splice( j, 1 );
+					wireGrp.splice( k, 0, wire );
+					break;
+				}
+			}
+		}
+	}
+
+	wires = [];
+	for ( i = 0; i < wireGrps.length; i++ ) {
+		wires = wires.concat( wireGrps[ i ] );
+	}
 
 
 
