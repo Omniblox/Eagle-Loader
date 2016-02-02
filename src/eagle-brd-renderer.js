@@ -59,14 +59,6 @@ var EagleBrdRenderer = function( xml, params ) {
 		.getAttribute( "version" ) );
 
 	/**
-	Named textures. Includes layer textures and other data.
-
-	@property buffers {object}
-	@default {}
-	**/
-	this.buffers = {};
-
-	/**
 	PCB layers to be combined into the final board
 
 	@property layers {array}
@@ -110,8 +102,8 @@ EagleBrdRenderer.prototype._parseBoardBounds = function() {
 	@private
 	**/
 
-	var buffer, ctx, curve, chordData, chordPoints, i, j, k, layer, wires,
-		x, y, lastX, lastY,
+	var curve, chordData, chordPoints, holes, i, j, k, layer, pads, wires,
+		x, y, firstX, firstY, lastX, lastY,
 		testMinMax = function( x, y ) {
 			minX = Math.min( x, minX );
 			minY = Math.min( y, minY );
@@ -212,69 +204,123 @@ EagleBrdRenderer.prototype._parseBoardBounds = function() {
 		return;
 	}
 
-	// Draw outline mask
-	buffer = document.createElement( "canvas" );
-	buffer.width = this.width;
-	buffer.height = this.height;
-	this.buffers.bounds = buffer;
 
-	ctx = buffer.getContext( "2d" );
+
+	// We may now begin to initialise drawing surfaces.
+	layer.initBuffer( this.width, this.height );
 
 	// Setup draw style
-	ctx.fillStyle = "rgb( 32, 192, 32 )";
+	layer.ctx.save();
+	layer.ctx.fillStyle = "rgb( 32, 192, 32 )";
 
-	// EAGLE coordinates are bottom-left, not top-left
-	ctx.scale( 1, -1 );
-	ctx.translate( 0, -this.height );
+	// EAGLE coordinates are bottom-left, not top-left.
+	// This coord system should be persistent.
+	layer.ctx.scale( 1, -1 );
+	layer.ctx.translate( this.offsetX, this.offsetY - this.height );
+	layer.ctx.save();
 
-	ctx.beginPath();
 
+
+	// Draw wire outlines
+	layer.ctx.beginPath();
+
+	// First point
 	if ( wires.length ) {
 		lastX = this.parseCoord(
-			wires[ 0 ].getAttribute( "x1" ) ) + this.offsetX;
+			wires[ 0 ].getAttribute( "x1" ) );
 		lastY = this.parseCoord(
-			wires[ 0 ].getAttribute( "y1" ) ) + this.offsetY;
-		ctx.moveTo( lastX, lastY );
+			wires[ 0 ].getAttribute( "y1" ) );
+		layer.ctx.moveTo( lastX, lastY );
+		firstX = lastX;
+		firstY = lastY;
 	}
 
 	for ( i = 0; i < wires.length; i++ ) {
 
-		x = this.parseCoord( wires[ i ].getAttribute( "x1" ) ) + this.offsetX;
-		y = this.parseCoord( wires[ i ].getAttribute( "y1" ) ) + this.offsetY;
+		// Account for objects created by elements
+		if ( wires[ i ].elementParent ) {
+			layer.ctx.save();
+			layer.orientContext( wires[ i ].elementParent, this.coordScale );
+		}
+
+		x = this.parseCoord( wires[ i ].getAttribute( "x1" ) );
+		y = this.parseCoord( wires[ i ].getAttribute( "y1" ) );
 
 		// Check for line breaks
 		if ( x !== lastX || y !== lastY ) {
-			ctx.moveTo(
-				this.parseCoord(
-					wires[ i ].getAttribute( "x1" ) ) + this.offsetX,
-				this.parseCoord(
-					wires[ i ].getAttribute( "y1" ) ) + this.offsetY );
+			layer.ctx.closePath();
+			layer.ctx.moveTo( x, y );
+			firstX = x;
+			firstY = y;
 		}
 
 		lastX = this.parseCoord(
-			wires[ i ].getAttribute( "x2" ) ) + this.offsetX;
+			wires[ i ].getAttribute( "x2" ) );
 		lastY = this.parseCoord(
-			wires[ i ].getAttribute( "y2" ) ) + this.offsetY;
+			wires[ i ].getAttribute( "y2" ) );
 
 		// Connect segment
 		if ( wires[ i ].hasAttribute( "curve" ) ) {
 			chordData = new EagleBrdRenderer.ChordData( wires[ i ] );
-			ctx.arc(
-				chordData.x * this.coordScale + this.offsetX,
-				chordData.y * this.coordScale + this.offsetY,
+			layer.ctx.arc(
+				chordData.x * this.coordScale,
+				chordData.y * this.coordScale,
 				chordData.radius * this.coordScale,
 				chordData.bearing1, chordData.bearing2 );
 		} else {
-			ctx.lineTo( lastX, lastY );
+			layer.ctx.lineTo( lastX, lastY );
+		}
+
+		// Revert element positioning
+		if ( wires[ i ].elementParent ) {
+			layer.ctx.restore();
 		}
 	}
 
-	ctx.closePath();
-	ctx.fill( "evenodd" );
-	ctx.stroke();
+	layer.ctx.closePath();
+	layer.ctx.fill( "evenodd" );
+
+
+
+	// Draw apertures
+	holes = layer.getElements( "hole" );
+	pads = layer.getElements( "pad" );
+	holes = holes.concat( pads );
+
+	// Subtractive draw
+	layer.ctx.save();
+	layer.ctx.globalCompositeOperation = "destination-out";
+
+	for ( i = 0; i < holes.length; i++ ) {
+
+		// Account for objects created by elements
+		if ( holes[ i ].elementParent ) {
+			layer.ctx.save();
+			layer.orientContext( holes[ i ].elementParent, this.coordScale );
+		}
+
+		x = this.parseCoord( holes[ i ].getAttribute( "x" ) );
+		y = this.parseCoord( holes[ i ].getAttribute( "y" ) );
+		console.log( "pos", x, y, "drill", holes[i].getAttribute("drill") );
+		layer.ctx.beginPath();
+		layer.ctx.arc( x, y,
+			holes[ i ].getAttribute( "drill" ) * this.coordScale / 2,
+			0, Math.PI * 2
+		);
+		layer.ctx.fill();
+
+		// Revert element positioning
+		if ( holes[ i ].elementParent ) {
+			layer.ctx.restore();
+		}
+	}
+
+	layer.ctx.restore();
+
+
 
 	// Diagnostic
-	document.body.appendChild( buffer );
+	document.body.appendChild( layer.buffer );
 };
 
 
@@ -366,7 +412,8 @@ EagleBrdRenderer.prototype._parseElement = function( el ) {
 		libName = el.getAttribute( "library" ),
 		packName = el.getAttribute( "package" );
 
-	console.log( "Preparing element: Library", libName, "Package", packName );
+	console.log( "Preparing element:", el.getAttribute( "name" ),
+		"-- Library", libName, "-- Package", packName );
 
 	// Get a named library from the XML
 	libs = this.xml.getElementsByTagName( "libraries" )[ 0 ]
@@ -756,6 +803,41 @@ EagleBrdRenderer.prototype.parseDistanceMm = function( dist ) {
 
 
 
+EagleBrdRenderer.AngleData = function( ang ) {
+
+	/**
+	Holds data about a BRD angle.
+
+	@class AngleData
+	@constructor
+	@param ang {string} BRD angle description
+	**/
+
+	if ( !ang || typeof ang !== "string" ) {
+		ang = "R0";
+	}
+
+	this.angle = parseFloat( ang.match( /[0-9.]+/ ) ) * Math.PI / 180;
+
+	/**
+	Whether the angle includes a horizontal mirror
+
+	@property mirror {boolean} false
+	**/
+	this.mirror = ang.indexOf( "M" ) === -1 ? false : true;
+
+	/**
+	Whether the angle includes a vertical spin
+
+	@property spin {boolean} false
+	**/
+	this.spin = ang.indexOf( "S" ) === -1 ? false : true;
+};
+
+
+
+
+
 EagleBrdRenderer.ChordData = function( wire ) {
 
 	/**
@@ -1046,13 +1128,14 @@ EagleBrdRenderer.Layer.prototype.hasTag = function( tag ) {
 };
 
 
-EagleBrdRenderer.Layer.prototype.initBuffer = function() {
+EagleBrdRenderer.Layer.prototype.initBuffer = function( width, height ) {
 
 	/**
 	Initialise the buffer for this layer.
-	This must be called after the bounds are identified.
 
 	@method initBuffer
+	@param width {number} Horizontal integer
+	@param height {number} Vertical integer
 	**/
 
 	/**
@@ -1061,8 +1144,8 @@ EagleBrdRenderer.Layer.prototype.initBuffer = function() {
 	@property buffer {HTMLCanvasElement}
 	**/
 	this.buffer = document.createElement( "canvas" );
-	this.buffer.width = this.width;
-	this.buffer.height = this.height;
+	this.buffer.width = width;
+	this.buffer.height = height;
 
 	/**
 	Texture drawing context for this layer
@@ -1070,4 +1153,44 @@ EagleBrdRenderer.Layer.prototype.initBuffer = function() {
 	@property ctx {CanvasRenderingContext2D}
 	**/
 	this.ctx = this.buffer.getContext( "2d" );
+};
+
+
+EagleBrdRenderer.Layer.prototype.orientContext = function( el, scale ) {
+
+	/**
+	Transform the drawing context according to properties on BRD elements.
+
+	Note: this method does not save or restore context transform.
+
+	@method orientContext
+	@param el {Element} BRD element to serve as transformation basis
+	@param [scale=1] {number} `coordScale` factor
+	**/
+
+	var x, y,
+		ang = new EagleBrdRenderer.AngleData( el.getAttribute( "rot" ) );
+
+	// Cannot draw if the buffer has not been initialized
+	if ( !this.ctx ) {
+		return;
+	}
+
+	scale = isNaN( scale ) ? 1 : scale;
+
+	x = parseFloat( el.getAttribute( "x" ) ) * scale;
+	y = parseFloat( el.getAttribute( "y" ) ) * scale;
+
+	this.ctx.translate( x, y );
+
+	this.ctx.rotate( ang.angle );
+
+	if ( ang.mirror ) {
+		this.ctx.scale( -1, 1 );
+	}
+	if ( ang.spin ) {
+		this.ctx.scale( 1, -1 );
+	}
+
+	console.log( "Orienting", "pos", x, y, "angle", ang.angle, "mirror", ang.mirror, "spin", ang.spin );
 };
