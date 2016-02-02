@@ -98,8 +98,7 @@ EagleBrdRenderer.prototype._parseBounds = function() {
 	@private
 	**/
 
-	var curve, chordPoints, layer, wires,
-		i, j, k, x, y,
+	var chordPoints, layer, wires, i, j, x, y,
 		testMinMax = function( x, y ) {
 			minX = Math.min( x, minX );
 			minY = Math.min( y, minY );
@@ -136,12 +135,11 @@ EagleBrdRenderer.prototype._parseBounds = function() {
 			testMinMax( x, y );
 		}
 
-		// Cord checks
-		curve = wires[ i ].getAttribute( "curve" );
-		if ( curve ) {
+		// Chord checks
+		if ( wires[ i ].hasAttribute( "curve" ) ) {
 			chordPoints = this.getChordPoints( wires[ i ] );
-			for ( k = 0; k < chordPoints.length; k++ ) {
-				testMinMax( chordPoints[ k ][ 0 ], chordPoints[ k ][ 1 ] );
+			for ( j = 0; j < chordPoints.length; j++ ) {
+				testMinMax( chordPoints[ j ][ 0 ], chordPoints[ j ][ 1 ] );
 			}
 		}
 	}
@@ -171,28 +169,28 @@ EagleBrdRenderer.prototype._parseBounds = function() {
 
 	@property width {number}
 	**/
-	this.width = Math.ceil( this.bounds.width * this.params.pixelMicrons );
+	this.width = Math.ceil( this.bounds.width * this.coordScale );
 
 	/**
 	Vertical resolution of this board's texture maps.
 
 	@property height {number}
 	**/
-	this.height = Math.ceil( this.bounds.height * this.params.pixelMicrons );
+	this.height = Math.ceil( this.bounds.height * this.coordScale );
 
 	/**
 	Horizontal offset for drawing pixels
 
 	@property offsetX {number}
 	**/
-	this.offsetX = -Math.ceil( this.bounds.minX * this.params.pixelMicrons );
+	this.offsetX = -Math.ceil( this.bounds.minX * this.coordScale );
 
 	/**
 	Vertical offset for drawing pixels
 
 	@property offsetY {number}
 	**/
-	this.offsetY = -Math.ceil( this.bounds.minY * this.params.pixelMicrons );
+	this.offsetY = -Math.ceil( this.bounds.minY * this.coordScale );
 
 	if ( !( this.width > 1 && this.height > 1 ) ) {
 		console.error( "Error: Texture dimensions too small.",
@@ -551,31 +549,26 @@ EagleBrdRenderer.prototype.getChordPoints = function( wire ) {
 	@return array
 	**/
 
-	var centroidX, centroidY, curve, radius, sweepMin, sweepMax,
-		x1, x2, y1, y2,
+	var centroidX, centroidY, radius, sweepMin, sweepMax,
 		chordData = new EagleBrdRenderer.ChordData( wire ),
 		points = [];
 
 	// Pull data from chord analytics
-	curve = chordData.curve;
-	centroidX = chordData.centroidX;
-	centroidY = chordData.centroidY;
+	centroidX = chordData.x;
+	centroidY = chordData.y;
 	radius = chordData.radius;
-	x1 = chordData.x1;
-	y1 = chordData.y1;
-	x2 = chordData.x2;
-	y2 = chordData.y2;
+	sweepMin = chordData.bearing1;
+	sweepMax = chordData.bearing2;
 
-	// Determine angular sweep from point 1 to point 2.
-	// The sweep may be greater than PI.
-	sweepMin = Math.atan2( centroidY - y1, centroidX - x1 );
-	sweepMax = Math.atan2( centroidY - y2, centroidX - x2 );
-	if ( sweepMin > sweepMax ) {
-		sweepMax += Math.PI * 2;
+	if ( chordData.curve < 0 ) {
+		sweepMin = chordData.bearing2;
+		sweepMax = chordData.bearing1;
+	}
+	if ( sweepMax > Math.PI ) {
+		sweepMax -= Math.PI * 2;
 	}
 
 	// Determine points that fall within sweep.
-	// Must check extra points, as `sweepMax` may be as high as PI * 3.
 	// Note that perfect matches are discarded,
 	// as this indicates the wire point is on that cardinal point.
 	if ( sweepMin < -Math.PI / 2 && sweepMax > -Math.PI / 2 ) {
@@ -588,18 +581,6 @@ EagleBrdRenderer.prototype.getChordPoints = function( wire ) {
 		points.push( [ centroidX, centroidY - radius ] );
 	}
 	if ( sweepMin < Math.PI && sweepMax > Math.PI ) {
-		points.push( [ centroidX + radius, centroidY ] );
-	}
-	if ( sweepMax > Math.PI * 1.5 ) {
-		points.push( [ centroidX, centroidY + radius ] );
-	}
-	if ( sweepMax > Math.PI * 2 ) {
-		points.push( [ centroidX - radius, centroidY ] );
-	}
-	if ( sweepMax > Math.PI * 2.5 ) {
-		points.push( [ centroidX, centroidY - radius ] );
-	}
-	if ( sweepMax > Math.PI * 3 ) {
 		points.push( [ centroidX + radius, centroidY ] );
 	}
 
