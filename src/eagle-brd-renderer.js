@@ -692,16 +692,10 @@ EagleBrdRenderer.prototype.renderBounds = function() {
 		layer = this.getLayer( "Bounds" ),
 		wires = layer.getElements( "wire" );
 
-	layer.initBuffer( this.width, this.height );
+	layer.initBuffer();
 
 	// Setup draw style
-	layer.ctx.save();
 	layer.ctx.fillStyle = "rgb( 32, 192, 32 )";
-
-	// EAGLE coordinates are bottom-left, not top-left.
-	// This coord system should be persistent.
-	layer.ctx.scale( 1, -1 );
-	layer.ctx.translate( this.offsetX, this.offsetY - this.height );
 	layer.ctx.save();
 
 
@@ -1162,14 +1156,12 @@ EagleBrdRenderer.Layer.prototype.hasTag = function( tag ) {
 };
 
 
-EagleBrdRenderer.Layer.prototype.initBuffer = function( width, height ) {
+EagleBrdRenderer.Layer.prototype.initBuffer = function() {
 
 	/**
 	Initialise the buffer for this layer.
 
 	@method initBuffer
-	@param width {number} Horizontal integer
-	@param height {number} Vertical integer
 	**/
 
 	/**
@@ -1178,8 +1170,8 @@ EagleBrdRenderer.Layer.prototype.initBuffer = function( width, height ) {
 	@property buffer {HTMLCanvasElement}
 	**/
 	this.buffer = document.createElement( "canvas" );
-	this.buffer.width = width;
-	this.buffer.height = height;
+	this.buffer.width = this.board.width;
+	this.buffer.height = this.board.height;
 
 	/**
 	Texture drawing context for this layer
@@ -1187,6 +1179,13 @@ EagleBrdRenderer.Layer.prototype.initBuffer = function( width, height ) {
 	@property ctx {CanvasRenderingContext2D}
 	**/
 	this.ctx = this.buffer.getContext( "2d" );
+
+	// EAGLE coordinates are bottom-left, not top-left.
+	// This coord system should be persistent.
+	this.ctx.save();
+	this.ctx.scale( 1, -1 );
+	this.ctx.translate(
+		this.board.offsetX, this.board.offsetY - this.board.height );
 };
 
 
