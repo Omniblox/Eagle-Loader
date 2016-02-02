@@ -930,12 +930,9 @@ EagleBrdRenderer.ChordData = function( wire ) {
 
 	@property radius {number}
 	**/
-	this.radius = Math.abs( this.chord / ( 2 * Math.sin( this.curve / 2 ) ) );
+	this.radius = this.chord / ( 2 * Math.sin( this.curve / 2 ) );
 
-	// Determine sidedness
-	ang = this.curve > 0 ?
-		this.bearing + Math.PI / 2 - this.curve / 2 :
-		this.bearing - Math.PI / 2 + this.curve / 2;
+	ang = this.bearing + Math.PI / 2 - this.curve / 2;
 
 	/**
 	Horizontal position of arc origin
@@ -964,6 +961,9 @@ EagleBrdRenderer.ChordData = function( wire ) {
 	@property bearing2 {number}
 	**/
 	this.bearing2 = Math.atan2( this.y2 - this.y, this.x2 - this.x );
+
+	// Correct radius after calculations
+	this.radius = Math.abs( this.radius );
 };
 
 
