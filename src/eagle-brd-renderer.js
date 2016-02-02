@@ -102,7 +102,8 @@ EagleBrdRenderer.prototype._parseBoardBounds = function() {
 	@private
 	**/
 
-	var curve, chordData, chordPoints, holes, i, j, k, layer, pads, wires,
+	var curve, chordData, chordPoints, holes, layer, pads, wires,
+		i, j, k,
 		x, y, firstX, firstY, lastX, lastY,
 		testMinMax = function( x, y ) {
 			minX = Math.min( x, minX );
@@ -301,7 +302,6 @@ EagleBrdRenderer.prototype._parseBoardBounds = function() {
 
 		x = this.parseCoord( holes[ i ].getAttribute( "x" ) );
 		y = this.parseCoord( holes[ i ].getAttribute( "y" ) );
-		console.log( "pos", x, y, "drill", holes[i].getAttribute("drill") );
 		layer.ctx.beginPath();
 		layer.ctx.arc( x, y,
 			holes[ i ].getAttribute( "drill" ) * this.coordScale / 2,
@@ -503,7 +503,11 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 	console.log( "Parsing board layers..." );
 
 	// Create bottom cream mask
+	// Note: Thickness of solder is a guess, based on a little research.
+	// The current 50-micron value should be reasonably accurate,
+	// but as of 2016-02-02 I haven't found a BRD specification.
 	this.layers.push( new EagleBrdRenderer.Layer( {
+		board: this,
 		height: offset,
 		layers: [ 32 ],
 		name: "Bottom Solderpaste",
@@ -515,6 +519,7 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 
 	// Create bottom mask
 	this.layers.push( new EagleBrdRenderer.Layer( {
+		board: this,
 		height: offset,
 		layers: [ 22, 26 ],
 		name: "Bottom Mask",
@@ -564,6 +569,7 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 			this.parseDistanceMm( thickness ) * this.coordScale;
 
 		layer = new EagleBrdRenderer.Layer( {
+			board: this,
 			height: offset,
 			layers: [ isNum ? layers[ i ] : layers[ i - 1 ] ],
 			name: isNum ?
@@ -579,6 +585,7 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 
 	// Create top mask
 	this.layers.push( new EagleBrdRenderer.Layer( {
+		board: this,
 		height: offset,
 		layers: [ 21, 25 ],
 		name: "Top Mask",
@@ -590,6 +597,7 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 
 	// Create top cream mask
 	this.layers.push( new EagleBrdRenderer.Layer( {
+		board: this,
 		height: offset,
 		layers: [ 31 ],
 		name: "Top Solderpaste",
@@ -601,6 +609,7 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 
 	// Create board dimensions
 	this.layers.push( new EagleBrdRenderer.Layer( {
+		board: this,
 		height: offset,
 		layers: [ 20 ],
 		name: "Bounds",
@@ -977,12 +986,20 @@ EagleBrdRenderer.Layer = function( params ) {
 	@class Layer
 	@constructor
 	@param params {object} Composite parameter object
+		@param params.board {EagleBrdRenderer} Master board
 		@param [params.height=0] {number} Offset of layer from base in pixels
 		@param params.layers {array} List of BRD layer numbers to follow
 		@param params.name {string} Unique layer identifier
 		@param [params.tags] {array} List of tag strings
 		@param params.thickness {number} Thickness of layer in pixels
 	**/
+
+	/**
+	Master board to which this layer belongs
+
+	@property board {EagleBrdRenderer}
+	**/
+	this.board = params.board;
 
 	/**
 	Unordered list of elements to be drawn to this layer
@@ -1026,13 +1043,23 @@ EagleBrdRenderer.Layer = function( params ) {
 EagleBrdRenderer.Layer.prototype.add = function ( el ) {
 
 	/**
-	Add an element to this layer. The element will not be checked
-	for layer information.
+	Add an element (cloned) to this layer.
+	The element will not be checked for layer information.
 
 	@method add
 	@param el {Element} XML element describing a BRD element
 	@return {EagleBrdRenderer.Layer} This Layer
 	**/
+
+	var parent = el.elementParent;
+
+	// Clone the node, so package components become unique.
+	el = el.cloneNode();
+
+	// Append any current `<element>` parent to the clone
+	if ( parent ) {
+		el.elementParent = parent;
+	}
 
 	this.elements.push( el );
 
@@ -1191,6 +1218,4 @@ EagleBrdRenderer.Layer.prototype.orientContext = function( el, scale ) {
 	if ( ang.spin ) {
 		this.ctx.scale( 1, -1 );
 	}
-
-	console.log( "Orienting", "pos", x, y, "angle", ang.angle, "mirror", ang.mirror, "spin", ang.spin );
 };
