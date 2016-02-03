@@ -540,6 +540,81 @@ EagleBrdRenderer.prototype._setDefaultParams = function() {
 };
 
 
+EagleBrdRenderer.prototype.drawPads = function( params ) {
+
+	/**
+	Draw a series of pads, using current drawing styles.
+
+	@method drawPads
+	@param params {object} Composite parameter object
+		@param params.layer {EagleBrdRenderer.Layer} Layer being drawn
+		@param [params.offset=0] {number} Extra radius
+		@param pads {array} List of pad elements to draw
+	**/
+
+	var drill, i, pad, radius, rest, restMin, restMax, restPc, shape, x, y,
+		ctx = params.layer.ctx,
+		layer = params.layer,
+		pads = params.pads,
+		offset = params.offset || 0;
+
+	for ( i = 0; i < pads.length; i++ ) {
+		pad = pads[ i ];
+
+		// Account for objects created by elements
+		if ( pads[ i ].elementParent ) {
+			ctx.save();
+			layer.orientContext(
+				pads[ i ].elementParent, this.coordScale );
+		}
+
+		// Derive properties
+		shape = pad.getAttribute( "shape" ) || "round";
+		x = this.parseCoord( pad.getAttribute( "x" ) );
+		y = this.parseCoord( pad.getAttribute( "y" ) );
+		drill = this.parseCoord( pad.getAttribute( "drill" ) || 0 ) / 2;
+		radius = this.parseCoord( pad.getAttribute( "diameter" ) || 0 ) / 2;
+
+		// Compute rest ring
+		restMin = layer.hasTag( "Top" ) ?
+			this.parseDistanceMm( this.designRules.rlMinPadTop ) :
+			layer.hasTag( "Bottom" ) ?
+			this.parseDistanceMm( this.designRules.rlMinPadBottom ) :
+			this.parseDistanceMm( this.designRules.rlMinPadInner );
+		restMax = layer.hasTag( "Top" ) ?
+			this.parseDistanceMm( this.designRules.rlMaxPadTop ) :
+			layer.hasTag( "Bottom" ) ?
+			this.parseDistanceMm( this.designRules.rlMaxPadBottom ) :
+			this.parseDistanceMm( this.designRules.rlMaxPadInner );
+		restPc = layer.hasTag( "Top" ) ?
+			parseFloat( this.designRules.rvPadTop ) :
+			layer.hasTag( "Bottom" ) ?
+			parseFloat( this.designRules.rvPadBottom ) :
+			parseFloat( this.designRules.rvPadInner );
+		rest = Math.min( Math.max( drill * restPc, restMin ), restMax );
+		if ( radius < rest + drill ) {
+			radius = rest + drill;
+		}
+
+		switch ( shape ) {
+			case "round":
+				ctx.beginPath();
+				ctx.arc( x, y, radius + offset, 0, Math.PI * 2 );
+				ctx.fill();
+				break;
+			case "square":
+				ctx.fillRect( x - radius, y - radius, x + radius, y + radius );
+				break;
+		}
+
+		// Revert element positioning
+		if ( pads[ i ].elementParent ) {
+			ctx.restore();
+		}
+	}
+};
+
+
 EagleBrdRenderer.prototype.drawWirePaths = function( params ) {
 
 	/**
@@ -557,18 +632,17 @@ EagleBrdRenderer.prototype.drawWirePaths = function( params ) {
 
 	var i, wire,
 		ctx = params.ctx,
-		wires = params.wires;
-
-	params.widthOffset = params.widthOffset || 0;
+		wires = params.wires,
+		widthOffset = params.widthOffset || 0;
 
 	ctx.save();
 
-	for ( i = 0; i < params.wires.length; i++ ) {
+	for ( i = 0; i < wires.length; i++ ) {
 		wire = wires[ i ];
 
 		ctx.beginPath();
 		ctx.lineWidth = this.parseCoord( wire.getAttribute( "width" ) ) +
-			params.widthOffset;
+			widthOffset;
 		ctx.moveTo(
 			this.parseCoord( wire.getAttribute( "x1" ) ),
 			this.parseCoord( wire.getAttribute( "y1" ) ) );
@@ -943,24 +1017,40 @@ EagleBrdRenderer.prototype.renderCopperLayer = function( layer ) {
 
 
 	// Erase clearances
-
-	// Erase wire clearance
 	ctx.save();
 	ctx.globalCompositeOperation = "destination-out";
+
+	// Erase wire clearance
 	this.drawWirePaths( {
 		ctx: ctx,
 		widthOffset: margin,
 		wires: wires
 	} );
+
+	// Erase pad clearance
+	this.drawPads( {
+		layer: layer,
+		offset: margin,
+		pads: pads
+	} );
+
 	ctx.restore();
 
 
+
+	// Draw traces
 
 	// Draw wires
 	this.drawWirePaths( {
 		ctx: ctx,
 		wires: wires
 	} );
+
+	// Draw pads
+	this.drawPads( {
+		layer: layer,
+		pads: pads
+	})
 
 
 	// Apply bounds mask
