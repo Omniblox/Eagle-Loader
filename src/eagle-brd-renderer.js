@@ -630,7 +630,7 @@ EagleBrdRenderer.prototype.drawWirePaths = function( params ) {
 		@param wires {array} List of wire elements to draw
 	**/
 
-	var i, wire,
+	var chordData, i, wire,
 		ctx = params.ctx,
 		wires = params.wires,
 		widthOffset = params.widthOffset || 0;
@@ -643,12 +643,24 @@ EagleBrdRenderer.prototype.drawWirePaths = function( params ) {
 		ctx.beginPath();
 		ctx.lineWidth = this.parseCoord( wire.getAttribute( "width" ) ) +
 			widthOffset;
-		ctx.moveTo(
-			this.parseCoord( wire.getAttribute( "x1" ) ),
-			this.parseCoord( wire.getAttribute( "y1" ) ) );
-		ctx.lineTo(
-			this.parseCoord( wire.getAttribute( "x2" ) ),
-			this.parseCoord( wire.getAttribute( "y2" ) ) );
+
+		if ( wire.hasAttribute( "curve" ) ) {
+			chordData = new EagleBrdRenderer.ChordData( wire );
+			ctx.arc(
+				chordData.x * this.coordScale,
+				chordData.y * this.coordScale,
+				chordData.radius * this.coordScale,
+				chordData.bearing1, chordData.bearing2,
+				chordData.curve < 0 );
+		} else {
+			ctx.moveTo(
+				this.parseCoord( wire.getAttribute( "x1" ) ),
+				this.parseCoord( wire.getAttribute( "y1" ) ) );
+			ctx.lineTo(
+				this.parseCoord( wire.getAttribute( "x2" ) ),
+				this.parseCoord( wire.getAttribute( "y2" ) ) );
+		}
+
 		ctx.stroke();
 	}
 
@@ -1004,10 +1016,27 @@ EagleBrdRenderer.prototype.renderCopperLayer = function( layer ) {
 		y = this.parseCoord( verts[ 0 ].getAttribute( "y" ) );
 		ctx.moveTo( x, y );
 
-		for ( j = 1; j < verts.length; j++ ) {
-			x = this.parseCoord( verts[ j ].getAttribute( "x" ) );
-			y = this.parseCoord( verts[ j ].getAttribute( "y" ) );
-			ctx.lineTo( x, y );
+		for ( j = 0; j < verts.length; j++ ) {
+			if ( verts[ j ].hasAttribute( "curve" ) ) {
+				chordData = new EagleBrdRenderer.ChordData( {
+					curve: parseFloat( verts[ j ].getAttribute( "curve" ) ),
+					x1: parseFloat( verts[ j ].getAttribute( "x" ) ),
+					y1: parseFloat( verts[ j ].getAttribute( "y" ) ),
+					x2: parseFloat( verts[ j < verts.length - 1 ? j + 1 : 0 ]
+						.getAttribute( "x" ) ),
+					y2: parseFloat( verts[ j < verts.length - 1 ? j + 1 : 0 ]
+						.getAttribute( "y" ) )
+				} );
+				ctx.arc(
+					chordData.x * this.coordScale,
+					chordData.y * this.coordScale,
+					chordData.radius * this.coordScale,
+					chordData.bearing1, chordData.bearing2 );
+			} else {
+				x = this.parseCoord( verts[ j ].getAttribute( "x" ) );
+				y = this.parseCoord( verts[ j ].getAttribute( "y" ) );
+				ctx.lineTo( x, y );
+			}
 		}
 
 		ctx.closePath();
