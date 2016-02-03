@@ -540,6 +540,48 @@ EagleBrdRenderer.prototype._setDefaultParams = function() {
 };
 
 
+EagleBrdRenderer.prototype.drawWirePaths = function( params ) {
+
+	/**
+	Draw a series of paths from an array of wires.
+	These paths are not continuous. Each has its own stroke width.
+
+	Stroke style, other than width, does not change.
+
+	@method drawWirePaths
+	@param params {object} Composite parameter object
+		@param params.ctx {CanvasRenderingContext2D} Draw context
+		@param [params.widthOffset=0] {number} Extra width
+		@param wires {array} List of wire elements to draw
+	**/
+
+	var i, wire,
+		ctx = params.ctx,
+		wires = params.wires;
+
+	params.widthOffset = params.widthOffset || 0;
+
+	ctx.save();
+
+	for ( i = 0; i < params.wires.length; i++ ) {
+		wire = wires[ i ];
+
+		ctx.beginPath();
+		ctx.lineWidth = this.parseCoord( wire.getAttribute( "width" ) ) +
+			params.widthOffset;
+		ctx.moveTo(
+			this.parseCoord( wire.getAttribute( "x1" ) ),
+			this.parseCoord( wire.getAttribute( "y1" ) ) );
+		ctx.lineTo(
+			this.parseCoord( wire.getAttribute( "x2" ) ),
+			this.parseCoord( wire.getAttribute( "y2" ) ) );
+		ctx.stroke();
+	}
+
+	ctx.restore();
+};
+
+
 EagleBrdRenderer.prototype.getChordPoints = function( wire ) {
 
 	/**
@@ -902,123 +944,23 @@ EagleBrdRenderer.prototype.renderCopperLayer = function( layer ) {
 
 	// Erase clearances
 
-	// Erase wires
+	// Erase wire clearance
 	ctx.save();
 	ctx.globalCompositeOperation = "destination-out";
-	ctx.beginPath();
-	if ( wires.length ) {
-		lastX = this.parseCoord(
-			wires[ 0 ].getAttribute( "x1" ) );
-		lastY = this.parseCoord(
-			wires[ 0 ].getAttribute( "y1" ) );
-		layer.ctx.moveTo( lastX, lastY );
-		firstX = lastX;
-		firstY = lastY;
-	}
-	for ( i = 0; i < wires.length; i++ ) {
-
-		// Set wire thickness
-		ctx.lineWidth =
-			this.parseCoord( wires[ i ].getAttribute( "width" ) ) + margin;
-
-		// Account for objects created by elements
-		if ( wires[ i ].elementParent ) {
-			ctx.save();
-			layer.orientContext( wires[ i ].elementParent, this.coordScale );
-		}
-
-		x = this.parseCoord( wires[ i ].getAttribute( "x1" ) );
-		y = this.parseCoord( wires[ i ].getAttribute( "y1" ) );
-
-		// Check for line breaks
-		if ( x !== lastX || y !== lastY ) {
-			ctx.moveTo( x, y );
-			firstX = x;
-			firstY = y;
-		}
-
-		lastX = this.parseCoord( wires[ i ].getAttribute( "x2" ) );
-		lastY = this.parseCoord( wires[ i ].getAttribute( "y2" ) );
-
-		// Connect segment
-		if ( wires[ i ].hasAttribute( "curve" ) ) {
-			chordData = new EagleBrdRenderer.ChordData( wires[ i ] );
-			ctx.arc(
-				chordData.x * this.coordScale,
-				chordData.y * this.coordScale,
-				chordData.radius * this.coordScale,
-				chordData.bearing1, chordData.bearing2,
-				chordData.curve < 0 );
-		} else {
-			ctx.lineTo( lastX, lastY );
-		}
-
-		// Revert element positioning
-		if ( wires[ i ].elementParent ) {
-			ctx.restore();
-		}
-	}
-	ctx.stroke();
+	this.drawWirePaths( {
+		ctx: ctx,
+		widthOffset: margin,
+		wires: wires
+	} );
 	ctx.restore();
+
 
 
 	// Draw wires
-	ctx.save();
-	ctx.beginPath();
-	if ( wires.length ) {
-		lastX = this.parseCoord(
-			wires[ 0 ].getAttribute( "x1" ) );
-		lastY = this.parseCoord(
-			wires[ 0 ].getAttribute( "y1" ) );
-		layer.ctx.moveTo( lastX, lastY );
-		firstX = lastX;
-		firstY = lastY;
-	}
-	for ( i = 0; i < wires.length; i++ ) {
-
-		// Set wire thickness
-		ctx.lineWidth = this.parseCoord( wires[ i ].getAttribute( "width" ) );
-
-		// Account for objects created by elements
-		if ( wires[ i ].elementParent ) {
-			ctx.save();
-			layer.orientContext( wires[ i ].elementParent, this.coordScale );
-		}
-
-		x = this.parseCoord( wires[ i ].getAttribute( "x1" ) );
-		y = this.parseCoord( wires[ i ].getAttribute( "y1" ) );
-
-		// Check for line breaks
-		if ( x !== lastX || y !== lastY ) {
-			ctx.moveTo( x, y );
-			firstX = x;
-			firstY = y;
-		}
-
-		lastX = this.parseCoord( wires[ i ].getAttribute( "x2" ) );
-		lastY = this.parseCoord( wires[ i ].getAttribute( "y2" ) );
-
-		// Connect segment
-		if ( wires[ i ].hasAttribute( "curve" ) ) {
-			chordData = new EagleBrdRenderer.ChordData( wires[ i ] );
-			ctx.arc(
-				chordData.x * this.coordScale,
-				chordData.y * this.coordScale,
-				chordData.radius * this.coordScale,
-				chordData.bearing1, chordData.bearing2,
-				chordData.curve < 0 );
-		} else {
-			ctx.lineTo( lastX, lastY );
-		}
-
-		// Revert element positioning
-		if ( wires[ i ].elementParent ) {
-			ctx.restore();
-		}
-	}
-	ctx.stroke();
-	ctx.restore();
-
+	this.drawWirePaths( {
+		ctx: ctx,
+		wires: wires
+	} );
 
 
 	// Apply bounds mask
