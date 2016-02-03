@@ -552,7 +552,8 @@ EagleBrdRenderer.prototype.drawPads = function( params ) {
 		@param pads {array} List of pad elements to draw
 	**/
 
-	var drill, i, pad, radius, rest, restMin, restMax, restPc, shape, x, y,
+	var angData, drill, i, pad, radius, step,
+		rest, restMin, restMax, restPc, shape, x, y,
 		ctx = params.layer.ctx,
 		layer = params.layer,
 		pads = params.pads,
@@ -560,12 +561,13 @@ EagleBrdRenderer.prototype.drawPads = function( params ) {
 
 	for ( i = 0; i < pads.length; i++ ) {
 		pad = pads[ i ];
+		
+		ctx.save();
 
 		// Account for objects created by elements
-		if ( pads[ i ].elementParent ) {
-			ctx.save();
+		if ( pad.elementParent ) {
 			layer.orientContext(
-				pads[ i ].elementParent, this.coordScale );
+				pad.elementParent, this.coordScale );
 		}
 
 		// Derive properties
@@ -574,6 +576,17 @@ EagleBrdRenderer.prototype.drawPads = function( params ) {
 		y = this.parseCoord( pad.getAttribute( "y" ) );
 		drill = this.parseCoord( pad.getAttribute( "drill" ) || 0 ) / 2;
 		radius = this.parseCoord( pad.getAttribute( "diameter" ) || 0 ) / 2;
+		angData = new EagleBrdRenderer.AngleData( pad.getAttribute( "rot" ) );
+
+		// Orient pad
+		ctx.translate( x, y );
+		ctx.rotate( angData.angle );
+		if ( angData.mirror ) {
+			ctx.scale( -1, 1 );
+		}
+		if ( angData.spin ) {
+			ctx.scale( 1, -1 );
+		}
 
 		// Compute rest ring
 		restMin = layer.hasTag( "Top" ) ?
@@ -591,26 +604,64 @@ EagleBrdRenderer.prototype.drawPads = function( params ) {
 			layer.hasTag( "Bottom" ) ?
 			parseFloat( this.designRules.rvPadBottom ) :
 			parseFloat( this.designRules.rvPadInner );
-		rest = Math.min( Math.max( drill * restPc, restMin ), restMax );
+		rest = Math.min( Math.max( drill * restPc, restMin ), restMax ) *
+			this.coordScale;
 		if ( radius < rest + drill ) {
 			radius = rest + drill;
 		}
 
+		radius += offset;
+
 		switch ( shape ) {
 			case "round":
 				ctx.beginPath();
-				ctx.arc( x, y, radius + offset, 0, Math.PI * 2 );
+				ctx.arc( 0, 0, radius, 0, Math.PI * 2 );
 				ctx.fill();
 				break;
 			case "square":
-				ctx.fillRect( x - radius, y - radius, x + radius, y + radius );
+				ctx.fillRect( -radius, -radius, radius * 2, radius * 2 );
+				break;
+			case "octagon":
+				step = radius * Math.sin( Math.PI / 8 );
+				ctx.beginPath();
+				ctx.moveTo( radius, step );
+				ctx.lineTo( step, radius );
+				ctx.lineTo( -step, radius );
+				ctx.lineTo( -radius, step );
+				ctx.lineTo( -radius, -step );
+				ctx.lineTo( -step, -radius );
+				ctx.lineTo( step, -radius );
+				ctx.lineTo( radius, -step );
+				ctx.closePath();
+				ctx.fill();
+				break;
+			case "long":
+				step = ( radius - offset ) * 0.01 *
+					parseFloat( this.designRules.psElongationLong );
+				ctx.beginPath();
+				ctx.lineCap = "round";
+				ctx.lineWidth = radius * 2;
+				ctx.moveTo( -step, 0 );
+				ctx.lineTo( step, 0 );
+				ctx.stroke();
+				break;
+			case "offset":
+
+				// NOTE: Offset and Long pads might not be perfectly accurate.
+				// As near as I can tell, they are getting the right radius
+				// from designrules...
+				step = ( radius - offset ) * 0.01 *
+					parseFloat( this.designRules.psElongationLong );
+				ctx.beginPath();
+				ctx.lineCap = "round";
+				ctx.lineWidth = radius * 2;
+				ctx.moveTo( 0, 0 );
+				ctx.lineTo( step * 2, 0 );
+				ctx.stroke();
 				break;
 		}
 
-		// Revert element positioning
-		if ( pads[ i ].elementParent ) {
-			ctx.restore();
-		}
+		ctx.restore();
 	}
 };
 
@@ -1052,7 +1103,7 @@ EagleBrdRenderer.prototype.renderCopperLayer = function( layer ) {
 	// Erase wire clearance
 	this.drawWirePaths( {
 		ctx: ctx,
-		widthOffset: margin,
+		widthOffset: margin * 2,
 		wires: wires
 	} );
 
