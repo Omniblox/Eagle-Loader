@@ -1109,7 +1109,7 @@ EagleBrdRenderer.AngleData = function( ang ) {
 
 
 
-EagleBrdRenderer.ChordData = function( wire ) {
+EagleBrdRenderer.ChordData = function( chord ) {
 
 	/**
 	Analysis of the chord and circular segment described
@@ -1117,45 +1117,62 @@ EagleBrdRenderer.ChordData = function( wire ) {
 
 	@class ChordData
 	@constructor
-	@param wire {Element} EAGLE BRD `wire` XML element
+	@param chord {Element} EAGLE BRD `wire` XML element.
+		May also be a JS object definition.
 	**/
 
-	var ang;
+	var ang,
+		curve, x1, x2, y1, y2;
+
+	// Parse feed
+	if ( chord.getAttribute ) {
+		curve = parseFloat( chord.getAttribute( "curve" ) );
+		x1 = parseFloat( chord.getAttribute( "x1" ) );
+		x2 = parseFloat( chord.getAttribute( "x2" ) );
+		y1 = parseFloat( chord.getAttribute( "y1" ) );
+		y2 = parseFloat( chord.getAttribute( "y2" ) );
+	} else {
+		curve = chord.curve;
+		x1 = chord.x1;
+		x2 = chord.x2;
+		y1 = chord.y1;
+		y2 = chord.y2;
+	}
 
 	/**
 	Curvature of wire segment
 
 	@property curve {number}
 	**/
-	this.curve = parseFloat( wire.getAttribute( "curve" ) ) * Math.PI / 180;
+	this.curve = curve * Math.PI / 180;
 
 	/**
 	Horizontal coodinate of wire start
 
 	@property x1 {number}
 	**/
-	this.x1 = parseFloat( wire.getAttribute( "x1" ) );
+	this.x1 = x1;
 
 	/**
 	Vertical coodinate of wire start
 
 	@property y1 {number}
 	**/
-	this.y1 = parseFloat( wire.getAttribute( "y1" ) );
+	this.y1 = y1;
 
 	/**
 	Horizontal coodinate of wire end
 
 	@property x2 {number}
 	**/
-	this.x2 = parseFloat( wire.getAttribute( "x2" ) );
+	this.x2 = x2;
 
 	/**
 	Vertical coodinate of wire end
 
 	@property y2 {number}
 	**/
-	this.y2 = parseFloat( wire.getAttribute( "y2" ) );
+	this.y2 = y2;
 
 	/**
 	Horizontal wire displacement
