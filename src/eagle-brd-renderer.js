@@ -85,6 +85,8 @@ var EagleBrdRenderer = function( xml, params ) {
 	this._parseBounds();
 
 	this.renderBounds();
+
+	this.renderCopper();
 };
 
 
@@ -819,11 +821,213 @@ EagleBrdRenderer.prototype.renderBounds = function() {
 	}
 
 	layer.ctx.restore();
+};
+
+
+EagleBrdRenderer.prototype.renderCopper = function() {
+
+	/**
+	Render all copper textures.
+
+	@method renderCopper
+	**/
+
+	var i;
+
+	for ( i = 0; i < this.layers.length; i++ ) {
+		if ( this.layers[ i ].hasTag( "Copper" ) ) {
+			this.renderCopperLayer( this.layers[ i ] );
+		}
+	}
+};
+
+
+EagleBrdRenderer.prototype.renderCopperLayer = function( layer ) {
+
+	/**
+	Render a copper layer.
+
+	@method renderCopperLayer
+	@param layer {EagleBrdRenderer.Layer} Layer to initialize and parse
+	**/
+
+	var chordData, ctx, firstX, firstY, i, j, lastX, lastY, verts, x, y,
+		margin = this.parseDistanceMm( this.designRules.slThermalIsolate ) *
+			this.coordScale,
+		pads = layer.getElements( "pad" ),
+		polys = layer.getElements( "polygon" ),
+		smds = layer.getElements( "smd" ),
+		vias = layer.getElements( "via" ),
+		wires = layer.getElements( "wire" );
+
+	layer.initBuffer();
+	ctx = layer.ctx;
+
+
+	// Copper styles
+	ctx.fillStyle = "rgb( 255, 192, 128 )";
+	ctx.strokeStyle = "rgb( 255, 192, 128 )";
+	ctx.lineCap = "round";
+
+
+	// Fill with copper
+	// ctx.fillRect( -this.offsetX, -this.offsetY, this.width , this.height );
+
+
+	// Draw polys
+	for ( i = 0; i < polys.length; i++ ) {
+		verts = polys[ i ].getElementsByTagName( "vertex" );
+
+		// Skip polys with no possible area.
+		if ( verts.length < 3 ) {
+			continue;
+		}
+
+		ctx.beginPath();
+		x = this.parseCoord( verts[ 0 ].getAttribute( "x" ) );
+		y = this.parseCoord( verts[ 0 ].getAttribute( "y" ) );
+		ctx.moveTo( x, y );
+
+		for ( j = 1; j < verts.length; j++ ) {
+			x = this.parseCoord( verts[ j ].getAttribute( "x" ) );
+			y = this.parseCoord( verts[ j ].getAttribute( "y" ) );
+			ctx.lineTo( x, y );
+		}
+
+		ctx.closePath();
+		ctx.fill();
+		ctx.stroke();
+	}
+
+
+	// Erase clearances
+
+	// Erase wires
+	ctx.save();
+	ctx.globalCompositeOperation = "destination-out";
+	ctx.beginPath();
+	if ( wires.length ) {
+		lastX = this.parseCoord(
+			wires[ 0 ].getAttribute( "x1" ) );
+		lastY = this.parseCoord(
+			wires[ 0 ].getAttribute( "y1" ) );
+		layer.ctx.moveTo( lastX, lastY );
+		firstX = lastX;
+		firstY = lastY;
+	}
+	for ( i = 0; i < wires.length; i++ ) {
+
+		// Set wire thickness
+		ctx.lineWidth =
+			this.parseCoord( wires[ i ].getAttribute( "width" ) ) + margin;
+
+		// Account for objects created by elements
+		if ( wires[ i ].elementParent ) {
+			ctx.save();
+			layer.orientContext( wires[ i ].elementParent, this.coordScale );
+		}
+
+		x = this.parseCoord( wires[ i ].getAttribute( "x1" ) );
+		y = this.parseCoord( wires[ i ].getAttribute( "y1" ) );
+
+		// Check for line breaks
+		if ( x !== lastX || y !== lastY ) {
+			ctx.moveTo( x, y );
+			firstX = x;
+			firstY = y;
+		}
+
+		lastX = this.parseCoord( wires[ i ].getAttribute( "x2" ) );
+		lastY = this.parseCoord( wires[ i ].getAttribute( "y2" ) );
+
+		// Connect segment
+		if ( wires[ i ].hasAttribute( "curve" ) ) {
+			chordData = new EagleBrdRenderer.ChordData( wires[ i ] );
+			ctx.arc(
+				chordData.x * this.coordScale,
+				chordData.y * this.coordScale,
+				chordData.radius * this.coordScale,
+				chordData.bearing1, chordData.bearing2,
+				chordData.curve < 0 );
+		} else {
+			ctx.lineTo( lastX, lastY );
+		}
+
+		// Revert element positioning
+		if ( wires[ i ].elementParent ) {
+			ctx.restore();
+		}
+	}
+	ctx.stroke();
+	ctx.restore();
+
+
+	// Draw wires
+	ctx.save();
+	ctx.beginPath();
+	if ( wires.length ) {
+		lastX = this.parseCoord(
+			wires[ 0 ].getAttribute( "x1" ) );
+		lastY = this.parseCoord(
+			wires[ 0 ].getAttribute( "y1" ) );
+		layer.ctx.moveTo( lastX, lastY );
+		firstX = lastX;
+		firstY = lastY;
+	}
+	for ( i = 0; i < wires.length; i++ ) {
+
+		// Set wire thickness
+		ctx.lineWidth = this.parseCoord( wires[ i ].getAttribute( "width" ) );
+
+		// Account for objects created by elements
+		if ( wires[ i ].elementParent ) {
+			ctx.save();
+			layer.orientContext( wires[ i ].elementParent, this.coordScale );
+		}
+
+		x = this.parseCoord( wires[ i ].getAttribute( "x1" ) );
+		y = this.parseCoord( wires[ i ].getAttribute( "y1" ) );
+
+		// Check for line breaks
+		if ( x !== lastX || y !== lastY ) {
+			ctx.moveTo( x, y );
+			firstX = x;
+			firstY = y;
+		}
+
+		lastX = this.parseCoord( wires[ i ].getAttribute( "x2" ) );
+		lastY = this.parseCoord( wires[ i ].getAttribute( "y2" ) );
+
+		// Connect segment
+		if ( wires[ i ].hasAttribute( "curve" ) ) {
+			chordData = new EagleBrdRenderer.ChordData( wires[ i ] );
+			ctx.arc(
+				chordData.x * this.coordScale,
+				chordData.y * this.coordScale,
+				chordData.radius * this.coordScale,
+				chordData.bearing1, chordData.bearing2,
+				chordData.curve < 0 );
+		} else {
+			ctx.lineTo( lastX, lastY );
+		}
+
+		// Revert element positioning
+		if ( wires[ i ].elementParent ) {
+			ctx.restore();
+		}
+	}
+	ctx.stroke();
+	ctx.restore();
 
 
 
-	// Diagnostic
-	document.body.appendChild( layer.buffer );
+	// Apply bounds mask
+	ctx.save();
+	ctx.globalCompositeOperation = "destination-in";
+	ctx.translate( -this.offsetX, this.height - this.offsetY );
+	ctx.scale( 1, -1 );
+	ctx.drawImage( this.getLayer( "Bounds" ).buffer, 0, 0 );
+	ctx.restore();
 };
 
 
@@ -1077,7 +1281,13 @@ EagleBrdRenderer.Layer.prototype.add = function ( el ) {
 	@return {EagleBrdRenderer.Layer} This Layer
 	**/
 
-	var parent = el.elementParent;
+	var i, verts,
+		parent = el.elementParent;
+
+	// Get polygon vertices
+	if ( el.tagName === "polygon" ) {
+		verts = el.innerHTML;
+	}
 
 	// Clone the node, so package components become unique.
 	el = el.cloneNode();
@@ -1085,6 +1295,11 @@ EagleBrdRenderer.Layer.prototype.add = function ( el ) {
 	// Append any current `<element>` parent to the clone
 	if ( parent ) {
 		el.elementParent = parent;
+	}
+
+	// Append vertex clones to polygons
+	if ( verts ) {
+		el.innerHTML = verts;
 	}
 
 	this.elements.push( el );

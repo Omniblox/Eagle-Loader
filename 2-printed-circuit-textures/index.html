@@ -20,6 +20,9 @@
 	xhttp.onreadystatechange = function() {
 		if ( xhttp.readyState === 4 && xhttp.status === 200 ) {
 			brd = new EagleBrdRenderer( xhttp.responseXML );
+
+			// Diagnose output
+			document.body.appendChild( brd.getLayer( "Layer16" ).buffer );
 		}
 	};
 	xhttp.open( "GET", src, true );
