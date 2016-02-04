@@ -727,6 +727,10 @@ EagleBrdRenderer.prototype.drawPolygons = function( params ) {
 	/**
 	Draw a series of polygons, using current draw styles.
 
+	NOTE: Some polygons can become part of pads.
+	This is not implemented in this version. A thin isolation gap
+	will appear around the core pad. Signal merging would be optimal.
+
 	@method drawPolygons
 	@param params {object} Composite parameter object
 		@param params.layer {EagleBrdRenderer.Layer} Layer being drawn
@@ -734,10 +738,11 @@ EagleBrdRenderer.prototype.drawPolygons = function( params ) {
 		@param [params.offset=0] {number} Extra margins
 	**/
 
-	var chordData, i, verts, x, y,
+	var chordData, i, j, verts, x, y,
 		ctx = params.layer.ctx,
 		layer = params.layer,
-		polys = params.polys;
+		polys = params.polys,
+		offset = params.offset || 0;
 
 	for ( i = 0; i < polys.length; i++ ) {
 		verts = polys[ i ].getElementsByTagName( "vertex" );
@@ -746,7 +751,7 @@ EagleBrdRenderer.prototype.drawPolygons = function( params ) {
 		if ( verts.length < 3 ) {
 			continue;
 		}
-		
+
 		ctx.save();
 
 		// Account for objects created by elements
@@ -766,9 +771,11 @@ EagleBrdRenderer.prototype.drawPolygons = function( params ) {
 					curve: parseFloat( verts[ j ].getAttribute( "curve" ) ),
 					x1: parseFloat( verts[ j ].getAttribute( "x" ) ),
 					y1: parseFloat( verts[ j ].getAttribute( "y" ) ),
-					x2: parseFloat( verts[ j < verts.length - 1 ? j + 1 : 0 ]
+					x2: parseFloat(
+						verts[ ( j < verts.length - 1 ) ? j + 1 : 0 ]
 						.getAttribute( "x" ) ),
-					y2: parseFloat( verts[ j < verts.length - 1 ? j + 1 : 0 ]
+					y2: parseFloat(
+						verts[ ( j < verts.length - 1 ) ? j + 1 : 0 ]
 						.getAttribute( "y" ) )
 				} );
 				ctx.arc(
@@ -785,7 +792,12 @@ EagleBrdRenderer.prototype.drawPolygons = function( params ) {
 
 		ctx.closePath();
 		ctx.fill();
-		ctx.stroke();
+
+		if ( offset ) {
+			ctx.lineWidth = offset;
+			ctx.stroke();
+		}
+
 		ctx.restore();
 	}
 };
@@ -1419,7 +1431,7 @@ EagleBrdRenderer.prototype.renderSolderMask = function() {
 		if ( this.layers[ i ].hasTag( "Mask" ) ) {
 			this.renderSolderMaskLayer( this.layers[ i ] );
 		}
-	};
+	}
 };
 
 
@@ -1435,7 +1447,8 @@ EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 	var ctx, i, probeLayer, smds, vias,
 		margin = this.parseDistanceMm( this.designRules.mlMinStopFrame ) *
 			this.coordScale,
-		pads = layer.getElements( "pad" );
+		pads = layer.getElements( "pad" ),
+		polys = layer.getElements( "polygon" );
 
 	// NOTE: This uses an inaccurate margin.
 	// Offset should be derived from smd dimensions per designrules.
@@ -1463,6 +1476,12 @@ EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 	ctx.save();
 	ctx.globalCompositeOperation = "destination-out";
 
+	// Cut polygons
+	this.drawPolygons( {
+		layer: layer,
+		polys: polys
+	} );
+
 	// Cut pad rings
 	this.drawPads( {
 		layer: layer,
@@ -1470,7 +1489,7 @@ EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 		offset: margin
 	} );
 
-	// TODO: Rectangles, wires, polys, circles
+	// TODO: Rectangles, wires, circles
 
 	// Derive associated copper layer
 	for ( i = 0; i < this.layers.length; i++ ) {
