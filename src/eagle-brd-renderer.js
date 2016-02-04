@@ -380,28 +380,28 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 
 	console.log( "Parsing board layers..." );
 
-	// Create bottom cream mask
+	// Create top cream mask
 	// Note: Thickness of solder is a guess, based on a little research.
 	// The current 50-micron value should be reasonably accurate,
 	// but as of 2016-02-02 I haven't found a BRD specification.
 	this.layers.push( new EagleBrdRenderer.Layer( {
 		board: this,
 		height: offset,
-		layers: [ 32 ],
-		name: "Bottom Solderpaste",
-		tags: [ "Solderpaste" ],
+		layers: [ 31 ],
+		name: "Top Solderpaste",
+		tags: [ "Solderpaste", "Top" ],
 		thickness: thickSolder
 	} ) );
 
 	offset += thickSolder;
 
-	// Create bottom mask
+	// Create top mask
 	this.layers.push( new EagleBrdRenderer.Layer( {
 		board: this,
 		height: offset,
-		layers: [ 22, 26 ],
-		name: "Bottom Mask",
-		tags: [ "Mask" ],
+		layers: [ 21, 25 ],
+		name: "Top Mask",
+		tags: [ "Mask", "Top" ],
 		thickness: thickMask
 	} ) );
 
@@ -461,25 +461,25 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 		offset += thickness;
 	}
 
-	// Create top mask
+	// Create bottom mask
 	this.layers.push( new EagleBrdRenderer.Layer( {
 		board: this,
 		height: offset,
-		layers: [ 21, 25 ],
-		name: "Top Mask",
-		tags: [ "Mask" ],
+		layers: [ 22, 26 ],
+		name: "Bottom Mask",
+		tags: [ "Mask", "Bottom" ],
 		thickness: thickMask
 	} ) );
 
 	offset += thickMask;
 
-	// Create top cream mask
+	// Create bottom cream mask
 	this.layers.push( new EagleBrdRenderer.Layer( {
 		board: this,
 		height: offset,
-		layers: [ 31 ],
-		name: "Top Solderpaste",
-		tags: [ "Solderpaste" ],
+		layers: [ 32 ],
+		name: "Bottom Solderpaste",
+		tags: [ "Solderpaste", "Bottom" ],
 		thickness: thickSolder
 	} ) );
 
