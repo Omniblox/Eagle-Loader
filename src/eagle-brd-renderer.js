@@ -87,6 +87,8 @@ var EagleBrdRenderer = function( xml, params ) {
 	this.renderBounds();
 
 	this.renderCopper();
+
+	this.renderSolderMask();
 };
 
 
@@ -1368,6 +1370,114 @@ EagleBrdRenderer.prototype.renderCopperLayer = function( layer ) {
 		layer: layer,
 		holes: vias
 	} );
+
+
+	// Apply bounds mask
+	ctx.save();
+	ctx.globalCompositeOperation = "destination-in";
+	ctx.translate( -this.offsetX, this.height - this.offsetY );
+	ctx.scale( 1, -1 );
+	ctx.drawImage( this.getLayer( "Bounds" ).buffer, 0, 0 );
+	ctx.restore();
+};
+
+
+EagleBrdRenderer.prototype.renderSolderMask = function() {
+
+	/**
+	Render all solder mask textures.
+
+	@method renderSolderMask
+	**/
+
+	var i;
+
+	for ( i = 0; i < this.layers.length; i++ ) {
+		if ( this.layers[ i ].hasTag( "Mask" ) ) {
+			this.renderSolderMaskLayer( this.layers[ i ] );
+		}
+	};
+};
+
+
+EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
+
+	/**
+	Render a solder mask layer.
+
+	@method renderSolderMaskLayer
+	@param layer {EagleBrdRenderer.Layer} Layer to initialize and parse
+	**/
+
+	var ctx, i, probeLayer, smds, vias,
+		margin = this.parseDistanceMm( this.designRules.mlMinStopFrame ) *
+			this.coordScale,
+		pads = layer.getElements( "pad" );
+
+	// NOTE: This uses an inaccurate margin.
+	// Offset should be derived from smd dimensions per designrules.
+	// As I'm just reusing draw methods, I can't do that,
+	// so I'm using the min mask values.
+
+	layer.initBuffer();
+	ctx = layer.ctx;
+
+
+	// Mask styles
+	ctx.fillStyle = "rgb( 32, 64, 192 )";
+	ctx.strokeStyle = "rgb( 32, 64, 192 )";
+	ctx.lineCap = "round";
+
+
+	// Fill with mask
+	ctx.save();
+	ctx.globalAlpha = 0.8;
+	ctx.fillRect( -this.offsetX, -this.offsetY, this.width , this.height );
+	ctx.restore();
+
+
+	// Erase mask holes
+	ctx.save();
+	ctx.globalCompositeOperation = "destination-out";
+
+	// Cut pad rings
+	this.drawPads( {
+		layer: layer,
+		pads: pads,
+		offset: margin
+	} );
+
+	// TODO: Rectangles, wires, polys, circles
+
+	// Derive associated copper layer
+	for ( i = 0; i < this.layers.length; i++ ) {
+		probeLayer = this.layers [ i ];
+		if ( ( layer.hasTag( "Bottom" ) && probeLayer.hasTag( "Bottom" ) ) ||
+				( layer.hasTag( "Top" ) && probeLayer.hasTag( "Top" ) ) &&
+				probeLayer.hasTag( "Copper" ) ) {
+			break;
+		}
+	}
+
+	if ( probeLayer ) {
+
+		// Cut vias
+		vias = probeLayer.getElements( "via" );
+		this.drawHoles( {
+			layer: layer,
+			holes: vias
+		} );
+
+		// Cut smds
+		smds = probeLayer.getElements( "smd" );
+		this.drawSmds( {
+			layer: layer,
+			offset: margin,
+			smds: smds
+		} );
+	}
+
+	ctx.restore();
 
 
 	// Apply bounds mask
