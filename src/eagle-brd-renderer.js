@@ -459,6 +459,13 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 		this.layers.push( layer );
 
 		offset += thickness;
+
+		if ( i === 0 ) {
+			layer.tags.push( "Top" );
+		}
+		if ( i === layers.length - 1 ) {
+			layer.tags.push( "Bottom" );
+		}
 	}
 
 	// Create bottom mask
