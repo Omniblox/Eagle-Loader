@@ -558,7 +558,7 @@ EagleBrdRenderer.prototype.drawHoles = function( params ) {
 	@param params {object} Composite parameter object
 		@param params.layer {EagleBrdRenderer.Layer} Layer being drawn
 		@param [params.offset=0] {number} Extra radius
-		@param holes {array} List of hole or via elements to draw
+		@param params.holes {array} List of hole or via elements to draw
 	**/
 
 	var drill, hole, i, x, y,
@@ -609,7 +609,7 @@ EagleBrdRenderer.prototype.drawPads = function( params ) {
 	@param params {object} Composite parameter object
 		@param params.layer {EagleBrdRenderer.Layer} Layer being drawn
 		@param [params.offset=0] {number} Extra radius
-		@param pads {array} List of pad elements to draw
+		@param params.pads {array} List of pad elements to draw
 	**/
 
 	var angData, drill, i, pad, radius, step,
@@ -734,6 +734,8 @@ EagleBrdRenderer.prototype.drawPolygons = function( params ) {
 	@method drawPolygons
 	@param params {object} Composite parameter object
 		@param params.layer {EagleBrdRenderer.Layer} Layer being drawn
+		@param [params.layerMatch] {number} If defined,
+			only elements with a matching `layer` attribute will draw
 		@param params.polys {array} List of polygon elements to render
 		@param [params.offset=0] {number} Extra margins
 	**/
@@ -745,6 +747,13 @@ EagleBrdRenderer.prototype.drawPolygons = function( params ) {
 		offset = params.offset || 0;
 
 	for ( i = 0; i < polys.length; i++ ) {
+
+		if ( params.layerMatch &&
+				parseInt( polys[ i ].getAttribute( "layer" ), 10 ) !==
+				params.layerMatch ) {
+			continue;
+		}
+
 		verts = polys[ i ].getElementsByTagName( "vertex" );
 
 		// Skip polys with no possible area.
@@ -803,6 +812,61 @@ EagleBrdRenderer.prototype.drawPolygons = function( params ) {
 };
 
 
+EagleBrdRenderer.prototype.drawRectangles = function( params ) {
+
+	/**
+	Draw a series of rectangles, using current drawing styles.
+
+	@method drawRectangles
+	@param params {object} Composite parameter object
+		@param params.layer {EagleBrdRenderer.Layer} Layer being drawn
+		@param [params.offset=0] Extra size
+		@param params.rects {array} List of rectangle elements to draw
+		@param [params.layerMatch] {number} If defined,
+			only elements with a matching `layer` attribute will draw
+	**/
+
+	var dx, dy, i, rect, x, y,
+		ctx = params.layer.ctx,
+		layer = params.layer,
+		rects = params.rects,
+		offset = params.offset || 0;
+
+	for ( i = 0; i < rects.length; i++ ) {
+		rect = rects[ i ];
+
+		if ( params.layerMatch &&
+				parseInt( rects[ i ].getAttribute( "layer" ), 10 ) !==
+				params.layerMatch ) {
+			continue;
+		}
+
+		x = rect.getAttribute( "x1" );
+		y = rect.getAttribute( "y1" );
+		dx = this.parseCoord( rect.getAttribute( "x2" ) - x );
+		dy = this.parseCoord( rect.getAttribute( "y2" ) - y );
+
+		ctx.save();
+
+		// Account for objects created by elements
+		if ( rect.elementParent ) {
+			layer.orientContext( rect.elementParent, this.coordScale );
+		}
+
+		ctx.translate( this.parseCoord( x ), this.parseCoord( y ) );
+
+		ctx.fillRect( 0, 0, dx, dy );
+
+		if ( offset ) {
+			ctx.lineWidth = offset;
+			ctx.strokeRect( 0, 0, dx, dy );
+		}
+
+		ctx.restore();
+	}
+};
+
+
 EagleBrdRenderer.prototype.drawSmds = function( params ) {
 
 	/**
@@ -812,7 +876,7 @@ EagleBrdRenderer.prototype.drawSmds = function( params ) {
 	@param params {object} Composite parameter object
 		@param params.layer {EagleBrdRenderer.Layer} Layer being drawn
 		@param [params.offset=0] Extra size
-		@param smds {array} List of SMD elements to draw
+		@param params.smds {array} List of SMD elements to draw
 	**/
 
 	var i, smd, x, y,
@@ -828,8 +892,7 @@ EagleBrdRenderer.prototype.drawSmds = function( params ) {
 
 		// Account for objects created by elements
 		if ( smd.elementParent ) {
-			layer.orientContext(
-				smd.elementParent, this.coordScale );
+			layer.orientContext( smd.elementParent, this.coordScale );
 		}
 
 		// Derive properties
@@ -866,7 +929,7 @@ EagleBrdRenderer.prototype.drawViaRings = function( params ) {
 	@param params {object} Composite parameter object
 		@param params.layer {EagleBrdRenderer.Layer} Layer being drawn
 		@param [params.offset=0] {number} Extra radius
-		@param vias {array} List of via elements to draw
+		@param params.vias {array} List of via elements to draw
 	**/
 
 	var drill, i, radius, rest, restMin, restMax, restPc, shape, x, y,
@@ -940,7 +1003,7 @@ EagleBrdRenderer.prototype.drawWirePaths = function( params ) {
 	@param params {object} Composite parameter object
 		@param params.ctx {CanvasRenderingContext2D} Draw context
 		@param [params.widthOffset=0] {number} Extra width
-		@param wires {array} List of wire elements to draw
+		@param params.wires {array} List of wire elements to draw
 	**/
 
 	var chordData, i, wire,
@@ -1448,7 +1511,8 @@ EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 		margin = this.parseDistanceMm( this.designRules.mlMinStopFrame ) *
 			this.coordScale,
 		pads = layer.getElements( "pad" ),
-		polys = layer.getElements( "polygon" );
+		polys = layer.getElements( "polygon" ),
+		rects = layer.getElements( "rectangle" );
 
 	// NOTE: This uses an inaccurate margin.
 	// Offset should be derived from smd dimensions per designrules.
@@ -1479,7 +1543,15 @@ EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 	// Cut polygons
 	this.drawPolygons( {
 		layer: layer,
-		polys: polys
+		polys: polys,
+		layerMatch: layer.hasTag( "Top" ) ? 29 : 30
+	} );
+
+	// Cut polygons
+	this.drawRectangles( {
+		layer: layer,
+		rects: rects,
+		layerMatch: layer.hasTag( "Top" ) ? 29 : 30
 	} );
 
 	// Cut pad rings
