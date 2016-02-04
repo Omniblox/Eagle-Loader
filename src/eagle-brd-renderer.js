@@ -766,7 +766,6 @@ EagleBrdRenderer.prototype.drawViaRings = function( params ) {
 			parseFloat( this.designRules.rvViaOuter ) :
 			parseFloat( this.designRules.rvViaInner );
 		rest = Math.min( Math.max( drill * restPc, restMin ), restMax );
-		console.log( "Via ring:", restMin, restMax, restPc, rest, "r", radius );
 		if ( radius < rest + drill ) {
 			radius = rest + drill;
 		}
@@ -799,7 +798,7 @@ EagleBrdRenderer.prototype.drawViaHoles = function( params ) {
 		@param vias {array} List of via elements to draw
 	**/
 
-	var drill, i, shape, x, y,
+	var drill, i, x, y,
 		ctx = params.layer.ctx,
 		layer = params.layer,
 		vias = params.vias;
@@ -816,7 +815,6 @@ EagleBrdRenderer.prototype.drawViaHoles = function( params ) {
 		}
 
 		// Derive properties
-		shape = via.getAttribute( "shape" ) || "round";
 		x = this.parseCoord( via.getAttribute( "x" ) );
 		y = this.parseCoord( via.getAttribute( "y" ) );
 		drill = this.parseCoord( via.getAttribute( "drill" ) || 0 ) / 2;
@@ -824,13 +822,9 @@ EagleBrdRenderer.prototype.drawViaHoles = function( params ) {
 		// Orient pad
 		ctx.translate( x, y );
 
-		switch ( shape ) {
-			case "round":
-				ctx.beginPath();
-				ctx.arc( 0, 0, drill, 0, Math.PI * 2 );
-				ctx.fill();
-				break;
-		}
+		ctx.beginPath();
+		ctx.arc( 0, 0, drill, 0, Math.PI * 2 );
+		ctx.fill();
 
 		ctx.restore();
 	}
@@ -1297,6 +1291,15 @@ EagleBrdRenderer.prototype.renderCopperLayer = function( layer ) {
 		layer: layer,
 		offset: margin,
 		vias: vias
+	} );
+
+	// Erase board boundaries
+	this.drawWirePaths( {
+		ctx: ctx,
+		widthOffset:
+			this.parseDistanceMm( this.designRules.mdCopperDimension ) *
+			this.coordScale,
+		wires: this.getLayer( "Bounds" ).getElements( "wire" )
 	} );
 
 	ctx.restore();
