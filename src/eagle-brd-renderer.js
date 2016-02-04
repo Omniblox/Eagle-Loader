@@ -574,8 +574,8 @@ EagleBrdRenderer.prototype.drawPads = function( params ) {
 		shape = pad.getAttribute( "shape" ) || "round";
 		x = this.parseCoord( pad.getAttribute( "x" ) );
 		y = this.parseCoord( pad.getAttribute( "y" ) );
-		drill = this.parseCoord( pad.getAttribute( "drill" ) || 0 ) / 2;
-		radius = this.parseCoord( pad.getAttribute( "diameter" ) || 0 ) / 2;
+		drill = parseFloat( pad.getAttribute( "drill" ) || 0 ) / 2;
+		radius = parseFloat( pad.getAttribute( "diameter" ) || 0 ) / 2;
 		angData = new EagleBrdRenderer.AngleData( pad.getAttribute( "rot" ) );
 
 		// Orient pad
@@ -604,12 +604,12 @@ EagleBrdRenderer.prototype.drawPads = function( params ) {
 			layer.hasTag( "Bottom" ) ?
 			parseFloat( this.designRules.rvPadBottom ) :
 			parseFloat( this.designRules.rvPadInner );
-		rest = Math.min( Math.max( drill * restPc, restMin ), restMax ) *
-			this.coordScale;
+		rest = Math.min( Math.max( drill * restPc, restMin ), restMax );
 		if ( radius < rest + drill ) {
 			radius = rest + drill;
 		}
 
+		radius *= this.coordScale;
 		radius += offset;
 
 		switch ( shape ) {
@@ -646,10 +646,6 @@ EagleBrdRenderer.prototype.drawPads = function( params ) {
 				ctx.stroke();
 				break;
 			case "offset":
-
-				// NOTE: Offset and Long pads might not be perfectly accurate.
-				// As near as I can tell, they are getting the right radius
-				// from designrules...
 				step = ( radius - offset ) * 0.01 *
 					parseFloat( this.designRules.psElongationLong );
 				ctx.beginPath();
@@ -714,6 +710,127 @@ EagleBrdRenderer.prototype.drawSmds = function( params ) {
 		}
 
 		ctx.fillRect( -dx / 2, -dy / 2, dx, dy );
+
+		ctx.restore();
+	}
+};
+
+
+EagleBrdRenderer.prototype.drawViaRings = function( params ) {
+
+	/**
+	Draw a series of via rings, using current drawing styles.
+
+	@method drawViaRings
+	@param params {object} Composite parameter object
+		@param params.layer {EagleBrdRenderer.Layer} Layer being drawn
+		@param [params.offset=0] {number} Extra radius
+		@param vias {array} List of via elements to draw
+	**/
+
+	var drill, i, radius, rest, restMin, restMax, restPc, shape, x, y,
+		ctx = params.layer.ctx,
+		layer = params.layer,
+		offset = params.offset || 0,
+		vias = params.vias;
+
+	for ( i = 0; i < vias.length; i++ ) {
+		via = vias[ i ];
+
+		ctx.save();
+
+		// Account for objects created by elements
+		if ( via.elementParent ) {
+			layer.orientContext(
+				via.elementParent, this.coordScale );
+		}
+
+		// Derive properties
+		shape = via.getAttribute( "shape" ) || "round";
+		x = this.parseCoord( via.getAttribute( "x" ) );
+		y = this.parseCoord( via.getAttribute( "y" ) );
+		drill = parseFloat( via.getAttribute( "drill" ) || 0 ) / 2;
+		radius = parseFloat( via.getAttribute( "diameter" ) || 0 ) / 2;
+
+		// Orient pad
+		ctx.translate( x, y );
+
+		// Compute rest ring
+		restMin = layer.hasTag( "Top" ) || layer.hasTag( "Bottom" ) ?
+			this.parseDistanceMm( this.designRules.rlMinViaOuter ) :
+			this.parseDistanceMm( this.designRules.rlMinViaInner );
+		restMax = layer.hasTag( "Top" ) || layer.hasTag( "Bottom" ) ?
+			this.parseDistanceMm( this.designRules.rlMaxViaOuter ) :
+			this.parseDistanceMm( this.designRules.rlMaxViaInner );
+		restPc = layer.hasTag( "Top" ) || layer.hasTag( "Bottom" ) ?
+			parseFloat( this.designRules.rvViaOuter ) :
+			parseFloat( this.designRules.rvViaInner );
+		rest = Math.min( Math.max( drill * restPc, restMin ), restMax );
+		console.log( "Via ring:", restMin, restMax, restPc, rest, "r", radius );
+		if ( radius < rest + drill ) {
+			radius = rest + drill;
+		}
+
+		// Scale radius to pixel coords
+		radius *= this.coordScale;
+
+		switch ( shape ) {
+			case "round":
+				ctx.beginPath();
+				ctx.arc( 0, 0, radius + offset, 0, Math.PI * 2 );
+				ctx.fill();
+				break;
+			// TODO: other shapes
+		}
+
+		ctx.restore();
+	}
+};
+
+
+EagleBrdRenderer.prototype.drawViaHoles = function( params ) {
+
+	/**
+	Draw a series of via holes, using current drawing styles.
+
+	@method drawViaHoles
+	@param params {object} Composite parameter object
+		@param params.layer {EagleBrdRenderer.Layer} Layer being drawn
+		@param vias {array} List of via elements to draw
+	**/
+
+	var drill, i, shape, x, y,
+		ctx = params.layer.ctx,
+		layer = params.layer,
+		vias = params.vias;
+
+	for ( i = 0; i < vias.length; i++ ) {
+		via = vias[ i ];
+
+		ctx.save();
+
+		// Account for objects created by elements
+		if ( via.elementParent ) {
+			layer.orientContext(
+				via.elementParent, this.coordScale );
+		}
+
+		// Derive properties
+		shape = via.getAttribute( "shape" ) || "round";
+		x = this.parseCoord( via.getAttribute( "x" ) );
+		y = this.parseCoord( via.getAttribute( "y" ) );
+		drill = this.parseCoord( via.getAttribute( "drill" ) || 0 ) / 2;
+
+		// Orient pad
+		ctx.translate( x, y );
+
+		switch ( shape ) {
+			case "round":
+				ctx.beginPath();
+				ctx.arc( 0, 0, drill, 0, Math.PI * 2 );
+				ctx.fill();
+				break;
+		}
 
 		ctx.restore();
 	}
@@ -1175,6 +1292,13 @@ EagleBrdRenderer.prototype.renderCopperLayer = function( layer ) {
 		smds: smds
 	} );
 
+	// Erase via ring clearance
+	this.drawViaRings( {
+		layer: layer,
+		offset: margin,
+		vias: vias
+	} );
+
 	ctx.restore();
 
 
@@ -1191,13 +1315,28 @@ EagleBrdRenderer.prototype.renderCopperLayer = function( layer ) {
 	this.drawPads( {
 		layer: layer,
 		pads: pads
-	})
+	} );
 
 	// Draw SMDs
 	this.drawSmds( {
 		layer: layer,
 		smds: smds
-	})
+	} );
+
+	// Draw via rings
+	this.drawViaRings( {
+		layer: layer,
+		vias: vias
+	} );
+
+	// Cut vias
+	ctx.save();
+	ctx.globalCompositeOperation = "destination-out";
+	this.drawViaHoles( {
+		layer: layer,
+		vias: vias
+	} );
+	ctx.restore();
 
 
 	// Apply bounds mask
