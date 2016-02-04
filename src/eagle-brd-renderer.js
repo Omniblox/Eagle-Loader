@@ -540,6 +540,57 @@ EagleBrdRenderer.prototype._setDefaultParams = function() {
 };
 
 
+EagleBrdRenderer.prototype.drawHoles = function( params ) {
+
+	/**
+	Draw a series of drill holes, using current drawing styles.
+
+	@method drawHoles
+	@param params {object} Composite parameter object
+		@param params.layer {EagleBrdRenderer.Layer} Layer being drawn
+		@param [params.offset=0] {number} Extra radius
+		@param holes {array} List of hole or via elements to draw
+	**/
+
+	var drill, hole, i, x, y,
+		ctx = params.layer.ctx,
+		holes = params.holes,
+		layer = params.layer,
+		offset = params.offset || 0;
+
+	ctx.save();
+	ctx.globalCompositeOperation = "destination-out";
+
+	for ( i = 0; i < holes.length; i++ ) {
+		hole = holes[ i ];
+
+		ctx.save();
+
+		// Account for objects created by elements
+		if ( hole.elementParent ) {
+			layer.orientContext(
+				hole.elementParent, this.coordScale );
+		}
+
+		// Derive properties
+		x = this.parseCoord( hole.getAttribute( "x" ) );
+		y = this.parseCoord( hole.getAttribute( "y" ) );
+		drill = this.parseCoord( hole.getAttribute( "drill" ) || 0 ) / 2;
+
+		// Orient pad
+		ctx.translate( x, y );
+
+		ctx.beginPath();
+		ctx.arc( 0, 0, drill + offset, 0, Math.PI * 2 );
+		ctx.fill();
+
+		ctx.restore();
+	}
+
+	ctx.restore();
+};
+
+
 EagleBrdRenderer.prototype.drawPads = function( params ) {
 
 	/**
@@ -784,57 +835,6 @@ EagleBrdRenderer.prototype.drawViaRings = function( params ) {
 
 		ctx.restore();
 	}
-};
-
-
-EagleBrdRenderer.prototype.drawHoles = function( params ) {
-
-	/**
-	Draw a series of drill holes, using current drawing styles.
-
-	@method drawHoles
-	@param params {object} Composite parameter object
-		@param params.layer {EagleBrdRenderer.Layer} Layer being drawn
-		@param [params.offset=0] {number} Extra radius
-		@param holes {array} List of hole or via elements to draw
-	**/
-
-	var drill, hole, i, x, y,
-		ctx = params.layer.ctx,
-		holes = params.holes,
-		layer = params.layer,
-		offset = params.offset || 0;
-
-	ctx.save();
-	ctx.globalCompositeOperation = "destination-out";
-
-	for ( i = 0; i < holes.length; i++ ) {
-		hole = holes[ i ];
-
-		ctx.save();
-
-		// Account for objects created by elements
-		if ( hole.elementParent ) {
-			layer.orientContext(
-				hole.elementParent, this.coordScale );
-		}
-
-		// Derive properties
-		x = this.parseCoord( hole.getAttribute( "x" ) );
-		y = this.parseCoord( hole.getAttribute( "y" ) );
-		drill = this.parseCoord( hole.getAttribute( "drill" ) || 0 ) / 2;
-
-		// Orient pad
-		ctx.translate( x, y );
-
-		ctx.beginPath();
-		ctx.arc( 0, 0, drill + offset, 0, Math.PI * 2 );
-		ctx.fill();
-
-		ctx.restore();
-	}
-
-	ctx.restore();
 };
 
 
