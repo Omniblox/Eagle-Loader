@@ -787,47 +787,54 @@ EagleBrdRenderer.prototype.drawViaRings = function( params ) {
 };
 
 
-EagleBrdRenderer.prototype.drawViaHoles = function( params ) {
+EagleBrdRenderer.prototype.drawHoles = function( params ) {
 
 	/**
-	Draw a series of via holes, using current drawing styles.
+	Draw a series of drill holes, using current drawing styles.
 
-	@method drawViaHoles
+	@method drawHoles
 	@param params {object} Composite parameter object
 		@param params.layer {EagleBrdRenderer.Layer} Layer being drawn
-		@param vias {array} List of via elements to draw
+		@param [params.offset=0] {number} Extra radius
+		@param holes {array} List of hole or via elements to draw
 	**/
 
-	var drill, i, x, y,
+	var drill, hole, i, x, y,
 		ctx = params.layer.ctx,
+		holes = params.holes,
 		layer = params.layer,
-		vias = params.vias;
+		offset = params.offset;
 
-	for ( i = 0; i < vias.length; i++ ) {
-		via = vias[ i ];
+	ctx.save();
+	ctx.globalCompositeOperation = "destination-out";
+
+	for ( i = 0; i < holes.length; i++ ) {
+		hole = holes[ i ];
 
 		ctx.save();
 
 		// Account for objects created by elements
-		if ( via.elementParent ) {
+		if ( hole.elementParent ) {
 			layer.orientContext(
-				via.elementParent, this.coordScale );
+				hole.elementParent, this.coordScale );
 		}
 
 		// Derive properties
-		x = this.parseCoord( via.getAttribute( "x" ) );
-		y = this.parseCoord( via.getAttribute( "y" ) );
-		drill = this.parseCoord( via.getAttribute( "drill" ) || 0 ) / 2;
+		x = this.parseCoord( hole.getAttribute( "x" ) );
+		y = this.parseCoord( hole.getAttribute( "y" ) );
+		drill = this.parseCoord( hole.getAttribute( "drill" ) || 0 ) / 2;
 
 		// Orient pad
 		ctx.translate( x, y );
 
 		ctx.beginPath();
-		ctx.arc( 0, 0, drill, 0, Math.PI * 2 );
+		ctx.arc( 0, 0, drill + offset, 0, Math.PI * 2 );
 		ctx.fill();
 
 		ctx.restore();
 	}
+
+	ctx.restore();
 };
 
 
@@ -1301,6 +1308,12 @@ EagleBrdRenderer.prototype.renderCopperLayer = function( layer ) {
 			this.coordScale,
 		wires: this.getLayer( "Bounds" ).getElements( "wire" )
 	} );
+	this.drawHoles( {
+		layer: layer,
+		offset: this.parseDistanceMm( this.designRules.mdCopperDimension ) *
+			this.coordScale,
+		holes: this.getLayer( "Bounds" ).getElements( "hole" )
+	} );
 
 	ctx.restore();
 
@@ -1333,13 +1346,10 @@ EagleBrdRenderer.prototype.renderCopperLayer = function( layer ) {
 	} );
 
 	// Cut vias
-	ctx.save();
-	ctx.globalCompositeOperation = "destination-out";
-	this.drawViaHoles( {
+	this.drawHoles( {
 		layer: layer,
-		vias: vias
+		holes: vias
 	} );
-	ctx.restore();
 
 
 	// Apply bounds mask
