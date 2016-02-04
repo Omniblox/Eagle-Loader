@@ -890,7 +890,7 @@ EagleBrdRenderer.prototype.drawRectangles = function( params ) {
 		rect = rects[ i ];
 
 		if ( params.layerMatch &&
-				parseInt( rects[ i ].getAttribute( "layer" ), 10 ) !==
+				parseInt( rect.getAttribute( "layer" ), 10 ) !==
 				params.layerMatch ) {
 			continue;
 		}
@@ -1055,20 +1055,34 @@ EagleBrdRenderer.prototype.drawWirePaths = function( params ) {
 
 	@method drawWirePaths
 	@param params {object} Composite parameter object
-		@param params.ctx {CanvasRenderingContext2D} Draw context
+		@param params.layer {EagleBrdRenderer.Layer} Layer being drawn
 		@param [params.widthOffset=0] {number} Extra width
 		@param params.wires {array} List of wire elements to draw
+		@param [params.layerMatch] {number} If defined,
+			only elements with a matching `layer` attribute will draw
 	**/
 
 	var chordData, i, wire,
-		ctx = params.ctx,
+		ctx = params.layer.ctx,
+		layer = params.layer,
 		wires = params.wires,
 		widthOffset = params.widthOffset || 0;
 
-	ctx.save();
-
 	for ( i = 0; i < wires.length; i++ ) {
 		wire = wires[ i ];
+
+		if ( params.layerMatch &&
+				parseInt( wire.getAttribute( "layer" ), 10 ) !==
+				params.layerMatch ) {
+			continue;
+			}
+
+		ctx.save();
+
+		// Account for objects created by elements
+		if ( wire.elementParent ) {
+			layer.orientContext( wire.elementParent, this.coordScale );
+		}
 
 		ctx.beginPath();
 		ctx.lineWidth = this.parseCoord( wire.getAttribute( "width" ) ) +
@@ -1092,9 +1106,9 @@ EagleBrdRenderer.prototype.drawWirePaths = function( params ) {
 		}
 
 		ctx.stroke();
-	}
 
-	ctx.restore();
+		ctx.restore();
+	}
 };
 
 
@@ -1446,7 +1460,7 @@ EagleBrdRenderer.prototype.renderCopperLayer = function( layer ) {
 
 	// Erase wire clearance
 	this.drawWirePaths( {
-		ctx: ctx,
+		layer: layer,
 		widthOffset: margin * 2,
 		wires: wires
 	} );
@@ -1474,7 +1488,7 @@ EagleBrdRenderer.prototype.renderCopperLayer = function( layer ) {
 
 	// Erase board boundaries
 	this.drawWirePaths( {
-		ctx: ctx,
+		layer: layer,
 		widthOffset:
 			this.parseDistanceMm( this.designRules.mdCopperDimension ) *
 			this.coordScale,
@@ -1495,7 +1509,7 @@ EagleBrdRenderer.prototype.renderCopperLayer = function( layer ) {
 
 	// Draw wires
 	this.drawWirePaths( {
-		ctx: ctx,
+		layer: layer,
 		wires: wires
 	} );
 
@@ -1562,11 +1576,9 @@ EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 	**/
 
 	var ctx, i, probeLayer, smds, vias,
+		layerMatch = layer.hasTag( "Top" ) ? 29 : 30,
 		margin = this.parseDistanceMm( this.designRules.mlMinStopFrame ) *
-			this.coordScale,
-		pads = layer.getElements( "pad" ),
-		polys = layer.getElements( "polygon" ),
-		rects = layer.getElements( "rectangle" );
+			this.coordScale;
 
 	// NOTE: This uses an inaccurate margin.
 	// Offset should be derived from smd dimensions per designrules.
@@ -1597,25 +1609,37 @@ EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 	// Cut polygons
 	this.drawPolygons( {
 		layer: layer,
-		polys: polys,
-		layerMatch: layer.hasTag( "Top" ) ? 29 : 30
+		polys: layer.getElements( "polygon" ),
+		layerMatch: layerMatch
 	} );
 
-	// Cut polygons
+	// Cut rects
 	this.drawRectangles( {
 		layer: layer,
-		rects: rects,
-		layerMatch: layer.hasTag( "Top" ) ? 29 : 30
+		rects: layer.getElements( "rectangle" ),
+		layerMatch: layerMatch
+	} );
+
+	// Cut circles
+	this.drawCircles( {
+		layer: layer,
+		circles: layer.getElements( "circle" ),
+		layerMatch: layerMatch
 	} );
 
 	// Cut pad rings
 	this.drawPads( {
 		layer: layer,
-		pads: pads,
+		pads: layer.getElements( "pad" ),
 		offset: margin
 	} );
 
-	// TODO: Rectangles, wires, circles
+	// Cut wires
+	this.drawWirePaths( {
+		layer: layer,
+		wires: layer.getElements( "wire" ),
+		layerMatch: layerMatch
+	} );
 
 	// Derive associated copper layer
 	for ( i = 0; i < this.layers.length; i++ ) {
