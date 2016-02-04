@@ -666,6 +666,60 @@ EagleBrdRenderer.prototype.drawPads = function( params ) {
 };
 
 
+EagleBrdRenderer.prototype.drawSmds = function( params ) {
+
+	/**
+	Draw a series of smds, using current drawing styles.
+
+	@method drawSmds
+	@param params {object} Composite parameter object
+		@param params.layer {EagleBrdRenderer.Layer} Layer being drawn
+		@param [params.offset=0] Extra size
+		@param smds {array} List of SMD elements to draw
+	**/
+
+	var i, smd, x, y,
+		ctx = params.layer.ctx,
+		layer = params.layer,
+		smds = params.smds,
+		offset = params.offset || 0;
+
+	for ( i = 0; i < smds.length; i++ ) {
+		smd = smds[ i ];
+
+		ctx.save();
+
+		// Account for objects created by elements
+		if ( smd.elementParent ) {
+			layer.orientContext(
+				smd.elementParent, this.coordScale );
+		}
+
+		// Derive properties
+		x = this.parseCoord( smd.getAttribute( "x" ) );
+		y = this.parseCoord( smd.getAttribute( "y" ) );
+		dx = this.parseCoord( smd.getAttribute( "dx" ) ) + offset * 2;
+		dy = this.parseCoord( smd.getAttribute( "dy" ) ) + offset * 2;
+		angData = new EagleBrdRenderer.AngleData( smd.getAttribute( "rot" ) );
+		// TODO: Roundness?
+
+		// Orient object
+		ctx.translate( x, y );
+		ctx.rotate( angData.angle );
+		if ( angData.mirror ) {
+			ctx.scale( -1, 1 );
+		}
+		if ( angData.spin ) {
+			ctx.scale( 1, -1 );
+		}
+
+		ctx.fillRect( -dx / 2, -dy / 2, dx, dy );
+
+		ctx.restore();
+	}
+};
+
+
 EagleBrdRenderer.prototype.drawWirePaths = function( params ) {
 
 	/**
@@ -1114,6 +1168,13 @@ EagleBrdRenderer.prototype.renderCopperLayer = function( layer ) {
 		pads: pads
 	} );
 
+	// Erase SMD clearance
+	this.drawSmds( {
+		layer: layer,
+		offset: margin,
+		smds: smds
+	} );
+
 	ctx.restore();
 
 
@@ -1130,6 +1191,12 @@ EagleBrdRenderer.prototype.renderCopperLayer = function( layer ) {
 	this.drawPads( {
 		layer: layer,
 		pads: pads
+	})
+
+	// Draw SMDs
+	this.drawSmds( {
+		layer: layer,
+		smds: smds
 	})
 
 
