@@ -549,6 +549,60 @@ EagleBrdRenderer.prototype._setDefaultParams = function() {
 };
 
 
+EagleBrdRenderer.prototype.drawCircles = function( params ) {
+
+	/**
+	Draw a series of circles, using current drawing styles.
+
+	@method drawCircles
+	@param params {object} Composite parameter object
+		@param params.layer {EagleBrdRenderer.Layer} Layer being drawn
+		@param [params.offset=0] Extra size
+		@param params.circles {array} List of circle elements to draw
+		@param [params.layerMatch] {number} If defined,
+			only elements with a matching `layer` attribute will draw
+	**/
+
+	var circle, i, radius, x, y,
+		ctx = params.layer.ctx,
+		layer = params.layer,
+		circles = params.circles,
+		offset = params.offset || 0;
+
+	for ( i = 0; i < circles.length; i++ ) {
+		circle = circles[ i ];
+
+		if ( params.layerMatch &&
+				parseInt( circle.getAttribute( "layer" ), 10 ) !==
+				params.layerMatch ) {
+			continue;
+		}
+
+		x = this.parseCoord( circle.getAttribute( "x" ) );
+		y = this.parseCoord( circle.getAttribute( "y" ) );
+		radius = this.parseCoord( circle.getAttribute( "radius" ) );
+
+		ctx.save();
+
+		// Account for objects created by elements
+		if ( circle.elementParent ) {
+			layer.orientContext( circle.elementParent, this.coordScale );
+		}
+
+		ctx.beginPath();
+		ctx.arc( x, x, radius, 0, Math.PI * 2 );
+		ctx.fill();
+
+		if ( offset ) {
+			ctx.lineWidth = offset;
+			ctx.stroke();
+		}
+
+		ctx.restore();
+	}
+};
+
+
 EagleBrdRenderer.prototype.drawHoles = function( params ) {
 
 	/**
