@@ -803,7 +803,7 @@ EagleBrdRenderer.prototype.drawHoles = function( params ) {
 		ctx = params.layer.ctx,
 		holes = params.holes,
 		layer = params.layer,
-		offset = params.offset;
+		offset = params.offset || 0;
 
 	ctx.save();
 	ctx.globalCompositeOperation = "destination-out";
