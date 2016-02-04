@@ -722,6 +722,75 @@ EagleBrdRenderer.prototype.drawPads = function( params ) {
 };
 
 
+EagleBrdRenderer.prototype.drawPolygons = function( params ) {
+
+	/**
+	Draw a series of polygons, using current draw styles.
+
+	@method drawPolygons
+	@param params {object} Composite parameter object
+		@param params.layer {EagleBrdRenderer.Layer} Layer being drawn
+		@param params.polys {array} List of polygon elements to render
+		@param [params.offset=0] {number} Extra margins
+	**/
+
+	var chordData, i, verts, x, y,
+		ctx = params.layer.ctx,
+		layer = params.layer,
+		polys = params.polys;
+
+	for ( i = 0; i < polys.length; i++ ) {
+		verts = polys[ i ].getElementsByTagName( "vertex" );
+
+		// Skip polys with no possible area.
+		if ( verts.length < 3 ) {
+			continue;
+		}
+		
+		ctx.save();
+
+		// Account for objects created by elements
+		if ( polys[ i ].elementParent ) {
+			layer.orientContext(
+				polys[ i ].elementParent, this.coordScale );
+		}
+
+		ctx.beginPath();
+		x = this.parseCoord( verts[ 0 ].getAttribute( "x" ) );
+		y = this.parseCoord( verts[ 0 ].getAttribute( "y" ) );
+		ctx.moveTo( x, y );
+
+		for ( j = 0; j < verts.length; j++ ) {
+			if ( verts[ j ].hasAttribute( "curve" ) ) {
+				chordData = new EagleBrdRenderer.ChordData( {
+					curve: parseFloat( verts[ j ].getAttribute( "curve" ) ),
+					x1: parseFloat( verts[ j ].getAttribute( "x" ) ),
+					y1: parseFloat( verts[ j ].getAttribute( "y" ) ),
+					x2: parseFloat( verts[ j < verts.length - 1 ? j + 1 : 0 ]
+						.getAttribute( "x" ) ),
+					y2: parseFloat( verts[ j < verts.length - 1 ? j + 1 : 0 ]
+						.getAttribute( "y" ) )
+				} );
+				ctx.arc(
+					chordData.x * this.coordScale,
+					chordData.y * this.coordScale,
+					chordData.radius * this.coordScale,
+					chordData.bearing1, chordData.bearing2 );
+			} else {
+				x = this.parseCoord( verts[ j ].getAttribute( "x" ) );
+				y = this.parseCoord( verts[ j ].getAttribute( "y" ) );
+				ctx.lineTo( x, y );
+			}
+		}
+
+		ctx.closePath();
+		ctx.fill();
+		ctx.stroke();
+		ctx.restore();
+	}
+};
+
+
 EagleBrdRenderer.prototype.drawSmds = function( params ) {
 
 	/**
@@ -1235,57 +1304,11 @@ EagleBrdRenderer.prototype.renderCopperLayer = function( layer ) {
 
 
 	// Draw polys
-	for ( i = 0; i < polys.length; i++ ) {
-		verts = polys[ i ].getElementsByTagName( "vertex" );
-
-		console.log( "verts", verts );
-
-		// Skip polys with no possible area.
-		if ( verts.length < 3 ) {
-			continue;
-		}
-		
-		ctx.save();
-
-		// Account for objects created by elements
-		if ( polys[ i ].elementParent ) {
-			layer.orientContext(
-				polys[ i ].elementParent, this.coordScale );
-		}
-
-		ctx.beginPath();
-		x = this.parseCoord( verts[ 0 ].getAttribute( "x" ) );
-		y = this.parseCoord( verts[ 0 ].getAttribute( "y" ) );
-		ctx.moveTo( x, y );
-
-		for ( j = 0; j < verts.length; j++ ) {
-			if ( verts[ j ].hasAttribute( "curve" ) ) {
-				chordData = new EagleBrdRenderer.ChordData( {
-					curve: parseFloat( verts[ j ].getAttribute( "curve" ) ),
-					x1: parseFloat( verts[ j ].getAttribute( "x" ) ),
-					y1: parseFloat( verts[ j ].getAttribute( "y" ) ),
-					x2: parseFloat( verts[ j < verts.length - 1 ? j + 1 : 0 ]
-						.getAttribute( "x" ) ),
-					y2: parseFloat( verts[ j < verts.length - 1 ? j + 1 : 0 ]
-						.getAttribute( "y" ) )
-				} );
-				ctx.arc(
-					chordData.x * this.coordScale,
-					chordData.y * this.coordScale,
-					chordData.radius * this.coordScale,
-					chordData.bearing1, chordData.bearing2 );
-			} else {
-				x = this.parseCoord( verts[ j ].getAttribute( "x" ) );
-				y = this.parseCoord( verts[ j ].getAttribute( "y" ) );
-				ctx.lineTo( x, y );
-			}
-		}
-
-		ctx.closePath();
-		ctx.fill();
-		ctx.stroke();
-		ctx.restore();
-	}
+	// These are laid down first, because other objects will carve into them.
+	this.drawPolygons( {
+		layer: layer,
+		polys: polys
+	} );
 
 
 	// Erase clearances
