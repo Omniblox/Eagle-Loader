@@ -1202,7 +1202,7 @@ EagleBrdRenderer.prototype.renderCopperLayer = function( layer ) {
 	@param layer {EagleBrdRenderer.Layer} Layer to initialize and parse
 	**/
 
-	var chordData, ctx, firstX, firstY, i, j, lastX, lastY, verts, x, y,
+	var chordData, ctx, i, j, verts, x, y,
 		margin = this.parseDistanceMm( this.designRules.slThermalIsolate ) *
 			this.coordScale,
 		pads = layer.getElements( "pad" ),
@@ -1229,9 +1229,19 @@ EagleBrdRenderer.prototype.renderCopperLayer = function( layer ) {
 	for ( i = 0; i < polys.length; i++ ) {
 		verts = polys[ i ].getElementsByTagName( "vertex" );
 
+		console.log( "verts", verts );
+
 		// Skip polys with no possible area.
 		if ( verts.length < 3 ) {
 			continue;
+		}
+		
+		ctx.save();
+
+		// Account for objects created by elements
+		if ( polys[ i ].elementParent ) {
+			layer.orientContext(
+				polys[ i ].elementParent, this.coordScale );
 		}
 
 		ctx.beginPath();
@@ -1265,6 +1275,7 @@ EagleBrdRenderer.prototype.renderCopperLayer = function( layer ) {
 		ctx.closePath();
 		ctx.fill();
 		ctx.stroke();
+		ctx.restore();
 	}
 
 
