@@ -401,7 +401,7 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 	this.layers.push( new EagleBrdRenderer.Layer( {
 		board: this,
 		height: offset,
-		layers: [ 21, 25 ],
+		layers: [ 21, 25, 29 ],
 		name: "Top Mask",
 		tags: [ "Mask", "Top" ],
 		thickness: thickMask
@@ -474,7 +474,7 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 	this.layers.push( new EagleBrdRenderer.Layer( {
 		board: this,
 		height: offset,
-		layers: [ 22, 26 ],
+		layers: [ 22, 26, 30 ],
 		name: "Bottom Mask",
 		tags: [ "Mask", "Bottom" ],
 		thickness: thickMask
@@ -1799,7 +1799,7 @@ EagleBrdRenderer.Layer.prototype.add = function ( el ) {
 	@return {EagleBrdRenderer.Layer} This Layer
 	**/
 
-	var i, verts,
+	var verts,
 		parent = el.elementParent;
 
 	// Get polygon vertices
@@ -1854,7 +1854,8 @@ EagleBrdRenderer.Layer.prototype.assessElementCandidate = function( el ) {
 		extent1 = parseInt( extent[ 1 ], 10 );
 		extent2 = parseInt( extent[ 2 ], 10 );
 		for ( i = 0; i < this.layers.length; i++ ) {
-			if ( extent1 <= this.layers[ i ] && extent2 >= this.layers[ i ] ) {
+			if ( extent1 <= this.layers[ i ] &&
+					extent2 >= this.layers[ i ] ) {
 				this.add( el );
 				break;
 			}
