@@ -974,6 +974,74 @@ EagleBrdRenderer.prototype.drawSmds = function( params ) {
 };
 
 
+EagleBrdRenderer.prototype.drawTexts = function( params ) {
+
+	/**
+	Draw a series of text legends, using current drawing styles.
+
+	@method drawTexts
+	@param params {object} Composite parameter object
+		@param params.layer {EagleBrdRenderer.Layer} Layer being drawn
+		@param [params.offset=0] Extra size
+		@param params.texts {array} List of text elements to draw
+		@param [params.layerMatch] {number} If defined,
+			only elements with a matching `layer` attribute will draw
+	**/
+
+	var angData, i, text,
+		ctx = params.layer.ctx,
+		layer = params.layer,
+		texts = params.texts,
+		offset = params.offset || 0;
+
+	for ( i = 0; i < texts.length; i++ ) {
+		text = texts[ i ];
+
+		console.log( "Rendering text", text.innerHTML );
+
+		if ( params.layerMatch &&
+				parseInt( text.getAttribute( "layer" ), 10 ) !==
+				params.layerMatch ) {
+			continue;
+		}
+
+		x = this.parseCoord( text.getAttribute( "x" ) );
+		y = this.parseCoord( text.getAttribute( "x" ) );
+
+		ctx.save();
+
+		// Account for objects created by elements
+		if ( text.elementParent ) {
+			layer.orientContext( text.elementParent, this.coordScale );
+		}
+
+		ctx.translate( this.parseCoord( x ), this.parseCoord( y ) );
+
+		if ( text.hasAttribute( "rot" ) ) {
+			angData = new EagleBrdRenderer.AngleData(
+				text.getAttribute( "rot" ) );
+			ctx.rotate( angData.angle );
+			ctx.scale(
+				angData.mirror ? -1 : 1,
+				angData.spin ? -1 : 1 );
+		}
+
+
+		// Set font
+		// Note: Other fonts may be set.
+		// Default/vector is OCR A (available on OSX as OCR A Std).
+		// "Proportional" is said to be generally Helvetica.
+		// "Fixed" is said to be generally Courier.
+		ctx.font = Math.round( this.parseCoord(
+			text.getAttribute( "size" ) ) ) + "px " + "OCR A Std";
+
+		ctx.fillText( text.innerHTML, x, y );
+
+		ctx.restore();
+	}
+};
+
+
 EagleBrdRenderer.prototype.drawViaRings = function( params ) {
 
 	/**
@@ -1551,7 +1619,7 @@ EagleBrdRenderer.prototype.renderCopperLayer = function( layer ) {
 EagleBrdRenderer.prototype.renderSolderMask = function() {
 
 	/**
-	Render all solder mask textures.
+	Render all solder mask textures. These bear silkscreen.
 
 	@method renderSolderMask
 	**/
@@ -1569,7 +1637,7 @@ EagleBrdRenderer.prototype.renderSolderMask = function() {
 EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 
 	/**
-	Render a solder mask layer.
+	Render a solder mask layer. This bears silkscreen legends.
 
 	@method renderSolderMaskLayer
 	@param layer {EagleBrdRenderer.Layer} Layer to initialize and parse
@@ -1589,6 +1657,9 @@ EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 	ctx = layer.ctx;
 
 
+	ctx.save();
+
+
 	// Mask styles
 	ctx.fillStyle = "rgb( 32, 64, 192 )";
 	ctx.strokeStyle = "rgb( 32, 64, 192 )";
@@ -1602,8 +1673,61 @@ EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 	ctx.restore();
 
 
-	// Erase mask holes
+
+
+	// Silkscreen layer
 	ctx.save();
+
+	// Silkscreen styles
+	ctx.fillStyle = "rgb( 255, 255, 255 )";
+	ctx.strokeStyle = "rgb( 255, 255, 255 )";
+	ctx.lineCap = "round";
+
+	layerMatch = layer.hasTag( "Top" ) ? [ 21, 25 ] : [ 22, 26 ];
+	for ( i = 0; i < layerMatch.length; i++ ) {
+
+		// Draw polygons
+		this.drawPolygons( {
+			layer: layer,
+			polys: layer.getElements( "polygon" ),
+			layerMatch: layerMatch[ i ]
+		} );
+
+		// Draw rects
+		this.drawRectangles( {
+			layer: layer,
+			rects: layer.getElements( "rectangle" ),
+			layerMatch: layerMatch[ i ]
+		} );
+
+		// Draw circles
+		this.drawCircles( {
+			layer: layer,
+			circles: layer.getElements( "circle" ),
+			layerMatch: layerMatch[ i ]
+		} );
+
+		// Draw wires
+		this.drawWirePaths( {
+			layer: layer,
+			wires: layer.getElements( "wire" ),
+			layerMatch: layerMatch[ i ]
+		} );
+
+		// Draw text
+		this.drawTexts( {
+			layer: layer,
+			texts: layer.getElements( "text" ),
+			layerMatch: layerMatch[ i ]
+		} );
+	}
+
+	ctx.restore();
+
+
+
+
+	// Erase mask holes
 	ctx.globalCompositeOperation = "destination-out";
 
 	// Cut polygons
@@ -1670,6 +1794,8 @@ EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 	}
 
 	ctx.restore();
+
+
 
 
 	// Apply bounds mask
@@ -1949,13 +2075,11 @@ EagleBrdRenderer.Layer.prototype.add = function ( el ) {
 	@return {EagleBrdRenderer.Layer} This Layer
 	**/
 
-	var verts,
+	var inner,
 		parent = el.elementParent;
 
-	// Get polygon vertices
-	if ( el.tagName === "polygon" ) {
-		verts = el.innerHTML;
-	}
+	// Get subordinate data
+	inner = el.innerHTML || "";
 
 	// Clone the node, so package components become unique.
 	el = el.cloneNode();
@@ -1965,10 +2089,7 @@ EagleBrdRenderer.Layer.prototype.add = function ( el ) {
 		el.elementParent = parent;
 	}
 
-	// Append vertex clones to polygons
-	if ( verts ) {
-		el.innerHTML = verts;
-	}
+	el.innerHTML = inner;
 
 	this.elements.push( el );
 
@@ -1987,15 +2108,50 @@ EagleBrdRenderer.Layer.prototype.assessElementCandidate = function( el ) {
 	@return {EagleBrdRenderer.Layer} This Layer
 	**/
 
-	var extent1, extent2, i,
+	var extent1, extent2, i, mirror, oldLayer,
+		extent = el.getAttribute( "extent" ),
 		layer = parseInt( el.getAttribute( "layer" ), 10 ),
-		extent = el.getAttribute( "extent" );
+		swapLayers = function( layerOriginal ) {
+			switch( layerOriginal ) {
+				case 21:
+					el.setAttribute( "layer", "22" );
+					layer = 22;
+					break;
+				case 22:
+					el.setAttribute( "layer", "21" );
+					layer = 21;
+					break;
+				case 25:
+					el.setAttribute( "layer", "26" );
+					layer = 26;
+					break;
+				case 26:
+					el.setAttribute( "layer", "25" );
+					layer = 25;
+					break;
+			}
+		};
 
 	if ( layer ) {
+
+		// Flip layers on mirrored elements
+		// NOTE: This might not catch everything.
+		// I've only seen it used for silkscreen elements.
+		if ( el.elementParent && ( new EagleBrdRenderer.AngleData(
+				el.elementParent.getAttribute( "rot" ) ) ).mirror ) {
+			oldLayer = layer;
+			swapLayers( layer );
+		}
 
 		// See whether this is a matching layer.
 		if ( this.layers.indexOf( layer ) !== -1 ) {
 			this.add( el );
+		}
+
+		// Unflip layers
+		if ( oldLayer ) {
+			swapLayers( layer );
+			oldLayer = null;
 		}
 	} else if ( extent ) {
 
