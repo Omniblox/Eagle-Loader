@@ -26,6 +26,7 @@
 			// document.body.appendChild( brd.getLayer( "Layer1" ).buffer );
 			// document.body.appendChild( brd.getLayer( "Bottom Mask" ).buffer );
 			// document.body.appendChild( brd.getLayer( "Layer16" ).buffer );
+			// document.body.appendChild( brd.getLayer( "Layer1Core" ).buffer );
 
 			// Layer output
 			var c = document.createElement( "canvas" );
@@ -33,12 +34,20 @@
 			c.height = brd.height;
 			document.body.appendChild( c );
 			var ctx = c.getContext( "2d" );
-			ctx.drawImage( brd.getLayer( "Layer1" ).buffer, 0, 0 );
-			ctx.drawImage( brd.getLayer( "Top Mask" ).buffer, 0, 0 );
-			ctx.drawImage( brd.getLayer( "Top Solderpaste" ).buffer, 0, 0 );
+
+			// ctx.drawImage( brd.getLayer( "Layer1" ).buffer, 0, 0 );
+			// ctx.drawImage( brd.getLayer( "Top Mask" ).buffer, 0, 0 );
+			// ctx.drawImage( brd.getLayer( "Top Solderpaste" ).buffer, 0, 0 );
+
 			// ctx.drawImage( brd.getLayer( "Layer16" ).buffer, 0, 0 );
 			// ctx.drawImage( brd.getLayer( "Bottom Mask" ).buffer, 0, 0 );
 			// ctx.drawImage( brd.getLayer( "Bottom Solderpaste" ).buffer, 0, 0 );
+
+			for ( var i = brd.layers.length - 1; i >= 0; i-- ) {
+				if ( brd.layers[ i ].name !== "Bounds" ) {
+					ctx.drawImage( brd.layers[ i ].buffer, 0, 0 );
+				}
+			}
 		}
 	};
 	xhttp.open( "GET", src, true );

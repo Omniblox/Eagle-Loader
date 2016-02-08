@@ -1733,9 +1733,11 @@ EagleBrdRenderer.prototype.renderIsolateLayer = function( layer, viaSource ) {
 
 
 	// Fill with material
-	// Alpha makes thicker isolate transmit less light
+	// Alpha makes thicker isolate transmit less light in non-linear fashion;
+	// this is a crude approximation of subsurface scattering in
+	// resin-impregnated materials.
 	ctx.save();
-	ctx.globalAlpha = 1 - ( 1 / ( 1 + layer.thickness ) );
+	ctx.globalAlpha = 1 - ( 1 / ( 1 + Math.pow( layer.thickness, 0.5 ) ) );
 	ctx.fillRect( -this.offsetX, -this.offsetY, this.width , this.height );
 	ctx.restore();
 
@@ -1987,7 +1989,7 @@ EagleBrdRenderer.prototype.renderSolderpasteLayer = function( layer ) {
 	ctx.save();
 
 	// Stylize solder
-	ctx.fillStyle = "rgb( 192, 192, 164 )";
+	ctx.fillStyle = "rgb( 192, 192, 192 )";
 
 
 	// Draw rects
@@ -2010,8 +2012,6 @@ EagleBrdRenderer.prototype.renderSolderpasteLayer = function( layer ) {
 
 
 	ctx.restore();
-
-
 
 
 	// Apply bounds mask
