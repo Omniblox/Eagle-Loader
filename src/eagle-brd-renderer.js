@@ -91,6 +91,8 @@ var EagleBrdRenderer = function( xml, params ) {
 	this.renderSolderMask();
 
 	this.renderSolderpaste();
+
+	this.renderIsolate();
 };
 
 
@@ -460,6 +462,9 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 			tags: [ iso || "Copper" ],
 			thickness: thickness
 		} );
+		if ( iso ) {
+			layer.tags.push( "Isolate" );
+		}
 		this.layers.push( layer );
 
 		offset += thickness;
@@ -1689,6 +1694,72 @@ EagleBrdRenderer.prototype.renderCopperLayer = function( layer ) {
 };
 
 
+EagleBrdRenderer.prototype.renderIsolate = function() {
+
+	/**
+	Render all isolate textures, including prepreg and core.
+
+	@method renderIsolate
+	**/
+
+	var i;
+
+	for ( i = 0; i < this.layers.length; i++ ) {
+		if ( this.layers[ i ].hasTag( "Isolate" ) ) {
+			this.renderIsolateLayer( this.layers[ i ], this.layers[ i - 1 ] );
+		}
+	}
+};
+
+
+EagleBrdRenderer.prototype.renderIsolateLayer = function( layer, viaSource ) {
+
+	/**
+	Render an isolate layer, either prepreg or core.
+
+	@method renderIsolateLayer
+	@param layer {EagleBrdRenderer.Layer} Layer to initialize and parse
+	@param viaSource {EagleBrdRenderer.Layer} Layer with vias to use
+	**/
+
+	var ctx;
+
+	layer.initBuffer();
+	ctx = layer.ctx;
+	ctx.save();
+
+	// Stylize isolate
+	ctx.fillStyle = "rgb( 222, 222, 192 )";
+
+
+	// Fill with material
+	// Alpha makes thicker isolate transmit less light
+	ctx.save();
+	ctx.globalAlpha = 1 - ( 1 / ( 1 + layer.thickness ) );
+	ctx.fillRect( -this.offsetX, -this.offsetY, this.width , this.height );
+	ctx.restore();
+
+	// Cut vias
+	ctx.globalCompositeOperation = "destination-out";
+	this.drawHoles( {
+		layer: layer,
+		holes: viaSource.getElements( "via" )
+	} );
+
+
+	ctx.restore();
+
+
+	// Apply bounds mask
+	ctx.save();
+	ctx.globalCompositeOperation = "destination-in";
+	ctx.translate( -this.offsetX, this.height - this.offsetY );
+	ctx.scale( 1, -1 );
+	ctx.drawImage( this.getLayer( "Bounds" ).buffer, 0, 0 );
+	ctx.restore();
+};
+
+
 EagleBrdRenderer.prototype.renderSolderMask = function() {
 
 	/**
@@ -1872,8 +1943,6 @@ EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 	ctx.restore();
 
 
-
-
 	// Apply bounds mask
 	ctx.save();
 	ctx.globalCompositeOperation = "destination-in";
@@ -1915,11 +1984,10 @@ EagleBrdRenderer.prototype.renderSolderpasteLayer = function( layer ) {
 
 	layer.initBuffer();
 	ctx = layer.ctx;
+	ctx.save();
 
 	// Stylize solder
 	ctx.fillStyle = "rgb( 192, 192, 164 )";
-
-	ctx.save();
 
 
 	// Draw rects
