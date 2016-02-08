@@ -995,7 +995,7 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 			only elements with a matching `layer` attribute will draw
 	**/
 
-	var angData, flip, i, text, textAlign, textAlignX, textAlignY, textText,
+	var angData, flip, i, j, text, textAlign, textAlignX, textAlignY, textText,
 		ctx = params.layer.ctx,
 		layer = params.layer,
 		localRot = 0,
@@ -1100,7 +1100,13 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 		ctx.textAlign = textAlignX;
 		ctx.textBaseline = textAlignY;
 
-		ctx.fillText( textText, 0, 0 );
+
+		// Render text into multiple lines if necessary
+		textText = textText.split( "\n" );
+		for ( j = 0; j < textText.length; j++ ) {
+			ctx.fillText( textText[ j ], 0, 0 );
+			ctx.translate( 0, this.parseCoord( text.getAttribute( "size" ) ) );
+		}
 
 		ctx.restore();
 	}
@@ -1747,7 +1753,9 @@ EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 	ctx.strokeStyle = "rgb( 255, 255, 255 )";
 	ctx.lineCap = "round";
 
-	layerMatch = layer.hasTag( "Top" ) ? [ 21, 25, 51 ] : [ 22, 26, 52 ];
+	layerMatch = layer.hasTag( "Top" ) ?
+		[ 21, 25, 27, 51 ] :
+		[ 22, 26, 28, 52 ];
 	for ( i = 0; i < layerMatch.length; i++ ) {
 
 		// Draw polygons
@@ -2195,6 +2203,14 @@ EagleBrdRenderer.Layer.prototype.assessElementCandidate = function( el ) {
 					el.setAttribute( "layer", "25" );
 					layer = 25;
 					break;
+				case 27:
+					el.setAttribute( "layer", "28" );
+					layer = 28;
+					break;
+				case 28:
+					el.setAttribute( "layer", "27" );
+					layer = 27;
+					break;
 				case 51:
 					el.setAttribute( "layer", "52" );
 					layer = 52;
@@ -2207,6 +2223,8 @@ EagleBrdRenderer.Layer.prototype.assessElementCandidate = function( el ) {
 		};
 
 	if ( layer ) {
+
+		// NOTE: This doesn't respect layer visibility yet.
 
 		// Flip layers on mirrored elements
 		// NOTE: This might not catch everything.
