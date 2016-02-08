@@ -401,7 +401,7 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 	this.layers.push( new EagleBrdRenderer.Layer( {
 		board: this,
 		height: offset,
-		layers: [ 21, 25, 29 ],
+		layers: [ 21, 25, 29, 51 ],
 		name: "Top Mask",
 		tags: [ "Mask", "Top" ],
 		thickness: thickMask
@@ -474,7 +474,7 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 	this.layers.push( new EagleBrdRenderer.Layer( {
 		board: this,
 		height: offset,
-		layers: [ 22, 26, 30 ],
+		layers: [ 22, 26, 30, 52 ],
 		name: "Bottom Mask",
 		tags: [ "Mask", "Bottom" ],
 		thickness: thickMask
@@ -589,14 +589,12 @@ EagleBrdRenderer.prototype.drawCircles = function( params ) {
 			layer.orientContext( circle.elementParent, this.coordScale );
 		}
 
+		ctx.lineWidth = offset +
+			this.parseCoord( circle.getAttribute( "width" ) );
+
 		ctx.beginPath();
 		ctx.arc( x, x, radius, 0, Math.PI * 2 );
-		ctx.fill();
-
-		if ( offset ) {
-			ctx.lineWidth = offset;
-			ctx.stroke();
-		}
+		ctx.stroke();
 
 		ctx.restore();
 	}
@@ -988,25 +986,29 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 			only elements with a matching `layer` attribute will draw
 	**/
 
-	var angData, i, text,
+	var angData, flip, i, text, textAlign, textAlignX, textAlignY, textText,
 		ctx = params.layer.ctx,
 		layer = params.layer,
-		texts = params.texts,
-		offset = params.offset || 0;
+		localRot = 0,
+		texts = params.texts;
 
 	for ( i = 0; i < texts.length; i++ ) {
 		text = texts[ i ];
 
-		console.log( "Rendering text", text.innerHTML );
+		textText = text.innerHTML;
+		textText = textText.replace( /&gt;\w*/, "" );
 
 		if ( params.layerMatch &&
 				parseInt( text.getAttribute( "layer" ), 10 ) !==
-				params.layerMatch ) {
+				params.layerMatch ||
+				!textText ) {
 			continue;
 		}
 
+		console.log( "Rendering text", textText );
+
 		x = this.parseCoord( text.getAttribute( "x" ) );
-		y = this.parseCoord( text.getAttribute( "x" ) );
+		y = this.parseCoord( text.getAttribute( "y" ) );
 
 		ctx.save();
 
@@ -1015,16 +1017,45 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 			layer.orientContext( text.elementParent, this.coordScale );
 		}
 
-		ctx.translate( this.parseCoord( x ), this.parseCoord( y ) );
+		ctx.translate( x, y );
 
+		// Rotations
+
+		// Restore right-way-up
+		// as coordinate system of BRD doesn't match canvas conventions
+		ctx.scale( 1, -1 );
+
+		// Base rotation
+		angData = null;
+		localRot = 0;
+		flip = false;
 		if ( text.hasAttribute( "rot" ) ) {
 			angData = new EagleBrdRenderer.AngleData(
 				text.getAttribute( "rot" ) );
-			ctx.rotate( angData.angle );
+
+			// Rotation is inversed due to coordinates
+			ctx.rotate( -angData.angle );
 			ctx.scale(
 				angData.mirror ? -1 : 1,
 				angData.spin ? -1 : 1 );
 		}
+
+		// Face top
+		// EAGLE text is never upside-down
+		if ( angData ) {
+			localRot = angData.angle;
+		}
+		if ( text.elementParent ) {
+			localRot += ( new EagleBrdRenderer.AngleData(
+				text.elementParent ) ).angle;
+		}
+		localRot %= Math.PI * 2;
+		if ( localRot < -Math.PI / 2 && localRot > -Math.PI * 3 / 2 ||
+				localRot > Math.PI / 2 && localRot < Math.PI * 3 / 2 ) {
+			flip = true;
+		}
+		console.log( "localRot", localRot );
+
 
 
 		// Set font
@@ -1035,7 +1066,33 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 		ctx.font = Math.round( this.parseCoord(
 			text.getAttribute( "size" ) ) ) + "px " + "OCR A Std";
 
-		ctx.fillText( text.innerHTML, x, y );
+		// Set alignment
+		textAlign = text.getAttribute( "align" ) || "bottom-left";
+		textAlignX = textAlign.replace( /\w*-(\w*)/, "$1" );
+		textAlignY = textAlign.replace( /(\w*)-\w*/, "$1" );
+		if ( flip ) {
+			ctx.rotate( Math.PI );
+			if ( textAlignY === "bottom" ) {
+				textAlignY = "top";
+			} else if ( textAlignY === "top" ) {
+				textAlignY = "bottom";
+			}
+			if ( textAlignX === "left" ) {
+				textAlignX = "right";
+			} else if ( textAlignX === "right" ) {
+				textAlignX = "left";
+			}
+			if ( angData && angData.spin ) {
+				ctx.scale( 1, - 1 );
+			}
+		}
+		if ( textAlignY === "center" ) {
+			textAlignY = "middle";
+		}
+		ctx.textAlign = textAlignX;
+		ctx.textBaseline = textAlignY;
+
+		ctx.fillText( textText, 0, 0 );
 
 		ctx.restore();
 	}
@@ -1683,7 +1740,7 @@ EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 	ctx.strokeStyle = "rgb( 255, 255, 255 )";
 	ctx.lineCap = "round";
 
-	layerMatch = layer.hasTag( "Top" ) ? [ 21, 25 ] : [ 22, 26 ];
+	layerMatch = layer.hasTag( "Top" ) ? [ 21, 25, 51 ] : [ 22, 26, 52 ];
 	for ( i = 0; i < layerMatch.length; i++ ) {
 
 		// Draw polygons
@@ -2108,7 +2165,7 @@ EagleBrdRenderer.Layer.prototype.assessElementCandidate = function( el ) {
 	@return {EagleBrdRenderer.Layer} This Layer
 	**/
 
-	var extent1, extent2, i, mirror, oldLayer,
+	var extent1, extent2, i, oldLayer,
 		extent = el.getAttribute( "extent" ),
 		layer = parseInt( el.getAttribute( "layer" ), 10 ),
 		swapLayers = function( layerOriginal ) {
@@ -2128,6 +2185,14 @@ EagleBrdRenderer.Layer.prototype.assessElementCandidate = function( el ) {
 				case 26:
 					el.setAttribute( "layer", "25" );
 					layer = 25;
+					break;
+				case 51:
+					el.setAttribute( "layer", "52" );
+					layer = 52;
+					break;
+				case 52:
+					el.setAttribute( "layer", "51" );
+					layer = 51;
 					break;
 			}
 		};
