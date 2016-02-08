@@ -89,6 +89,8 @@ var EagleBrdRenderer = function( xml, params ) {
 	this.renderCopper();
 
 	this.renderSolderMask();
+
+	this.renderSolderpaste();
 };
 
 
@@ -1866,6 +1868,78 @@ EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 			smds: smds
 		} );
 	}
+
+	ctx.restore();
+
+
+
+
+	// Apply bounds mask
+	ctx.save();
+	ctx.globalCompositeOperation = "destination-in";
+	ctx.translate( -this.offsetX, this.height - this.offsetY );
+	ctx.scale( 1, -1 );
+	ctx.drawImage( this.getLayer( "Bounds" ).buffer, 0, 0 );
+	ctx.restore();
+};
+
+
+EagleBrdRenderer.prototype.renderSolderpaste = function() {
+
+	/**
+	Render all solder paste textures.
+
+	@method renderSolderpaste
+	**/
+
+	var i;
+
+	for ( i = 0; i < this.layers.length; i++ ) {
+		if ( this.layers[ i ].hasTag( "Solderpaste" ) ) {
+			this.renderSolderpasteLayer( this.layers[ i ] );
+		}
+	}
+};
+
+
+EagleBrdRenderer.prototype.renderSolderpasteLayer = function( layer ) {
+
+	/**
+	Render a solderpaste layer, also known as a cream layer.
+
+	@method renderSolderpasteLayer
+	@param layer {EagleBrdRenderer.Layer} Layer to initialize and parse
+	**/
+
+	var ctx;
+
+	layer.initBuffer();
+	ctx = layer.ctx;
+
+	// Stylize solder
+	ctx.fillStyle = "rgb( 192, 192, 164 )";
+
+	ctx.save();
+
+
+	// Draw rects
+	this.drawRectangles( {
+		layer: layer,
+		rects: layer.getElements( "rectangle" )
+	} );
+
+	// Draw circles
+	this.drawCircles( {
+		layer: layer,
+		circles: layer.getElements( "circle" )
+	} );
+
+	// Draw polys
+	this.drawPolygons( {
+		layer: layer,
+		polys: layer.getElements( "polygon" )
+	} );
+
 
 	ctx.restore();
 

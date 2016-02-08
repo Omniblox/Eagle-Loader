@@ -35,8 +35,10 @@
 			var ctx = c.getContext( "2d" );
 			ctx.drawImage( brd.getLayer( "Layer1" ).buffer, 0, 0 );
 			ctx.drawImage( brd.getLayer( "Top Mask" ).buffer, 0, 0 );
+			ctx.drawImage( brd.getLayer( "Top Solderpaste" ).buffer, 0, 0 );
 			// ctx.drawImage( brd.getLayer( "Layer16" ).buffer, 0, 0 );
 			// ctx.drawImage( brd.getLayer( "Bottom Mask" ).buffer, 0, 0 );
+			// ctx.drawImage( brd.getLayer( "Bottom Solderpaste" ).buffer, 0, 0 );
 		}
 	};
 	xhttp.open( "GET", src, true );
