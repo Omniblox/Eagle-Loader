@@ -13,16 +13,30 @@
 		xhttp = new XMLHttpRequest();
 
 	// src = "../brd/adafruit-cc3000-breakout.brd";
-	// src = "../brd/adafruit-flora-mainboard-2.brd";
+	src = "../brd/adafruit-flora-mainboard-2.brd";
 	// src = "../brd/adafruit-pro-trinket-3v3.brd";
-	src = "../brd/adafruit-pro-trinket-5v0.brd";
+	// src = "../brd/adafruit-pro-trinket-5v0.brd";
 
 	xhttp.onreadystatechange = function() {
 		if ( xhttp.readyState === 4 && xhttp.status === 200 ) {
 			brd = new EagleBrdRenderer( xhttp.responseXML );
 
 			// Diagnose output
-			document.body.appendChild( brd.getLayer( "Layer16" ).buffer );
+			// document.body.appendChild( brd.getLayer( "Top Mask" ).buffer );
+			// document.body.appendChild( brd.getLayer( "Layer1" ).buffer );
+			// document.body.appendChild( brd.getLayer( "Bottom Mask" ).buffer );
+			// document.body.appendChild( brd.getLayer( "Layer16" ).buffer );
+
+			// Layer output
+			var c = document.createElement( "canvas" );
+			c.width = brd.width;
+			c.height = brd.height;
+			document.body.appendChild( c );
+			var ctx = c.getContext( "2d" );
+			ctx.drawImage( brd.getLayer( "Layer1" ).buffer, 0, 0 );
+			ctx.drawImage( brd.getLayer( "Top Mask" ).buffer, 0, 0 );
+			// ctx.drawImage( brd.getLayer( "Layer16" ).buffer, 0, 0 );
+			// ctx.drawImage( brd.getLayer( "Bottom Mask" ).buffer, 0, 0 );
 		}
 	};
 	xhttp.open( "GET", src, true );
