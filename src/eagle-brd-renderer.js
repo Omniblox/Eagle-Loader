@@ -813,6 +813,13 @@ EagleBrdRenderer.prototype.drawPolygons = function( params ) {
 			continue;
 		}
 
+		// Debug
+		// console.log( "Polygon",
+		// 	"layer", polys[ i ].getAttribute( "layer" ),
+		// 	polys[ i ].elementParent ?
+		// 		polys[ i ].elementParent.getAttribute( "package" ) :
+		// 		"" );
+
 		ctx.save();
 
 		// Account for objects created by elements
@@ -825,8 +832,11 @@ EagleBrdRenderer.prototype.drawPolygons = function( params ) {
 		x = this.parseCoord( verts[ 0 ].getAttribute( "x" ) );
 		y = this.parseCoord( verts[ 0 ].getAttribute( "y" ) );
 		ctx.moveTo( x, y );
+		// console.log( x, y );
 
 		for ( j = 0; j < verts.length; j++ ) {
+			x = this.parseCoord( verts[ j ].getAttribute( "x" ) );
+			y = this.parseCoord( verts[ j ].getAttribute( "y" ) );
 			if ( verts[ j ].hasAttribute( "curve" ) ) {
 				chordData = new EagleBrdRenderer.ChordData( {
 					curve: parseFloat( verts[ j ].getAttribute( "curve" ) ),
@@ -845,10 +855,9 @@ EagleBrdRenderer.prototype.drawPolygons = function( params ) {
 					chordData.radius * this.coordScale,
 					chordData.bearing1, chordData.bearing2 );
 			} else {
-				x = this.parseCoord( verts[ j ].getAttribute( "x" ) );
-				y = this.parseCoord( verts[ j ].getAttribute( "y" ) );
 				ctx.lineTo( x, y );
 			}
+			// console.log( x, y );
 		}
 
 		ctx.closePath();
@@ -1005,7 +1014,8 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 			continue;
 		}
 
-		console.log( "Rendering text", textText );
+		// Debug
+		// console.log( "Rendering text", textText );
 
 		x = this.parseCoord( text.getAttribute( "x" ) );
 		y = this.parseCoord( text.getAttribute( "y" ) );
@@ -1054,8 +1064,6 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 				localRot > Math.PI / 2 && localRot < Math.PI * 3 / 2 ) {
 			flip = true;
 		}
-		console.log( "localRot", localRot );
-
 
 
 		// Set font
@@ -1700,8 +1708,7 @@ EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 	@param layer {EagleBrdRenderer.Layer} Layer to initialize and parse
 	**/
 
-	var ctx, i, probeLayer, smds, vias,
-		layerMatch = layer.hasTag( "Top" ) ? 29 : 30,
+	var ctx, i, layerMatch, probeLayer, smds, vias,
 		margin = this.parseDistanceMm( this.designRules.mlMinStopFrame ) *
 			this.coordScale;
 
@@ -1786,6 +1793,8 @@ EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 
 	// Erase mask holes
 	ctx.globalCompositeOperation = "destination-out";
+
+	layerMatch = layer.hasTag( "Top" ) ? 29 : 30;
 
 	// Cut polygons
 	this.drawPolygons( {
