@@ -98,23 +98,118 @@ var EagleBrdRenderer = function( xml, params ) {
 	this.renderIsolate();
 
 	// Generate geometry
-	this._buildLayerGeometry();
+	// this._buildLayerGeometry( false );
+	// this._buildLayerGeometry();
+	this._buildCompositeGeometry();
 };
 
 
-EagleBrdRenderer.prototype._buildLayerGeometry = function() {
+EagleBrdRenderer.prototype._buildCompositeGeometry = function( add ) {
+
+	/**
+	Construct THREE.js geometry, bearing composited textures from all layers.
+
+	@method _buildCompositeGeometry
+	@param [add=true] {boolean} Whether to add geometry to the board root
+	**/
+
+	var ctx, i;
+
+	add = add === false ? false : true;
+
+
+
+	/**
+	Composite of all layer textures, top-oriented.
+	This is simply a texture source.
+
+	@property layerCompositeTop {EagleBrdRenderer.Layer}
+	**/
+	this.layerCompositeTop = new EagleBrdRenderer.Layer( {
+		board: this,
+		name: "Composite Top",
+		thickness: 1,
+		tags: "Top"
+	} );
+
+	this.layerCompositeTop.initBuffer();
+	ctx = this.layerCompositeTop.ctx;
+
+	// Composite all textures
+	for ( i = this.layers.length - 1; i >= 0; i-- ) {
+		if ( this.layers[ i ].visible ) {
+			ctx.save();
+			ctx.translate( -this.offsetX, this.height - this.offsetY );
+			ctx.scale( 1, -1 );
+			ctx.drawImage( this.layers[ i ].buffer, 0, 0 );
+			ctx.restore();
+		}
+	}
+
+	this.layerCompositeTop.buildGeometry();
+	this.layerCompositeTop.geometry.faces.splice( 2, 2 );
+
+
+
+	/**
+	Composite of all layer textures, bottom-oriented.
+	This is simply a texture source.
+
+	@property layerCompositeBottom {EagleBrdRenderer.Layer}
+	**/
+	this.layerCompositeBottom = new EagleBrdRenderer.Layer( {
+		board: this,
+		name: "Composite Bottom",
+		thickness: 1,
+		tags: "Bottom",
+		height: this.thickness - 1
+	} );
+
+	this.layerCompositeBottom.initBuffer();
+	ctx = this.layerCompositeBottom.ctx;
+
+	// Composite all textures
+	for ( i = 0; i < this.layers.length; i++ ) {
+		if ( this.layers[ i ].visible ) {
+			ctx.save();
+			ctx.translate( -this.offsetX, this.height - this.offsetY );
+			ctx.scale( 1, -1 );
+			ctx.drawImage( this.layers[ i ].buffer, 0, 0 );
+			ctx.restore();
+		}
+	}
+
+	this.layerCompositeBottom.buildGeometry();
+	this.layerCompositeBottom.geometry.faces.splice( 0, 2 );
+	this.layerCompositeBottom.geometry.faceVertexUvs[ 0 ].splice( 0, 2 );
+
+
+
+	if ( add ) {
+		this.root.add( this.layerCompositeTop.mesh );
+		this.root.add( this.layerCompositeBottom.mesh );
+	}
+};
+
+
+EagleBrdRenderer.prototype._buildLayerGeometry = function( add ) {
 
 	/**
 	Construct THREE.js geometry bearing the generated textures.
+	This is probably too detailed for everyday use,
+	but might have some utility in generating exploded layer views.
 
 	@method _buildLayerGeometry
+	@param [add=true] {boolean} Whether to add geometry to the board root
 	**/
 
 	var i;
 
+	add = add === false ? false : true;
+
 	for ( i = 0; i < this.layers.length; i++ ) {
 		this.layers[ i ].buildGeometry();
-		if ( this.layers[ i ].visible ) {
+		if ( this.layers[ i ].visible && add ) {
 			this.root.add( this.layers[ i ].mesh );
 		}
 	}
@@ -2276,7 +2371,12 @@ EagleBrdRenderer.Layer = function( params ) {
 	**/
 	this.elements = [];
 
-	this.height = params.height;
+	/**
+	Depth displacement of layer relative to board origin.
+
+	@property height {number} 0
+	**/
+	this.height = params.height || 0;
 
 	/**
 	List of BRD layer numbers to follow
@@ -2456,12 +2556,14 @@ EagleBrdRenderer.Layer.prototype.buildGeometry = function() {
 	@method buildGeometry
 	**/
 
-	var matOptions = {
-			transparent: true
+	var i, j, x, y,
+		matOptions = {
+			transparent: true,
+			// side: THREE.DoubleSide
 		};
 
 	/**
-	Geometry for layer
+	Geometry for layer, consisting of two flat planes
 
 	@property geometry {THREE.BoxGeometry}
 	**/
@@ -2470,7 +2572,18 @@ EagleBrdRenderer.Layer.prototype.buildGeometry = function() {
 
 	// Just use faces 8-11 for the top and bottom
 	this.geometry.faces = this.geometry.faces.slice( 8, 12 );
-	this.geometry.verticesNeedUpdate = true;
+	this.geometry.elementsNeedUpdate = true;
+
+	// Flip bottom face UVs
+	for ( i = 2; i < 4; i++ ) {
+		for ( j = 0; j < this.geometry.faceVertexUvs[ 0 ][ i ].length; j++ ) {
+			x = this.geometry.faceVertexUvs[ 0 ][ i ][ j ].x;
+			y = this.geometry.faceVertexUvs[ 0 ][ i ][ j ].y;
+			this.geometry.faceVertexUvs[ 0 ][ i ][ j ] =
+				new THREE.Vector2( 1 - x, y );
+		}
+	}
+	this.geometry.uvsNeedUpdate = true;
 
 
 	/**
@@ -2482,9 +2595,10 @@ EagleBrdRenderer.Layer.prototype.buildGeometry = function() {
 	this.texture.needsUpdate = true;
 
 	matOptions.map = this.texture;
+	matOptions.bumpMap = this.texture;
 	if ( this.hasTag( "Copper" ) || this.hasTag( "Solderpaste" ) ) {
 		matOptions.specularMap = this.texture;
-		matOptions.shininess = 128;
+		matOptions.shininess = 256;
 	}
 
 	/**

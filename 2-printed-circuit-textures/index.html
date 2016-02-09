@@ -57,11 +57,11 @@
 			scene.add( brd.root );
 
 			// Light the mesh
-			light = new THREE.PointLight( 0xffffff, 0.5, 0 );
-			light.position.set( 800, -800, 800 );
+			light = new THREE.PointLight( 0xddeeff, 0.5, 0 );
+			light.position.set( 400, -800, 1600 );
 			scene.add( light );
-			light = new THREE.PointLight( 0xffffff, 0.5, 0 );
-			light.position.set( -400, 400, 800 );
+			light = new THREE.PointLight( 0xffeedd, 0.5, 0 );
+			light.position.set( -400, 800, 1600 );
 			scene.add( light );
 
 			// Commence rendering
@@ -70,9 +70,11 @@
 
 				requestAnimationFrame( animate );
 
-				brd.root.rotation.x = 0.2 * Math.sin( now * 0.00013 );
-				brd.root.rotation.y = 0.2 * Math.sin( now * 0.00022 );
-				brd.root.rotation.z = 0.2 * Math.sin( now * 0.00031 );
+				// brd.root.rotation.x = 0.2 * Math.sin( now * 0.00013 );
+				// brd.root.rotation.y = 0.2 * Math.sin( now * 0.00022 );
+				// brd.root.rotation.z = 0.2 * Math.sin( now * 0.00031 );
+
+				brd.root.rotation.y += 0.01;
 
 				renderer.render( scene, camera );
 			}
@@ -80,14 +82,16 @@
 		};
 
 	// src = "../brd/adafruit-cc3000-breakout.brd";
-	// src = "../brd/adafruit-flora-mainboard-2.brd";
+	src = "../brd/adafruit-flora-mainboard-2.brd";
 	// src = "../brd/adafruit-pro-trinket-3v3.brd";
-	src = "../brd/adafruit-pro-trinket-5v0.brd";
+	// src = "../brd/adafruit-pro-trinket-5v0.brd";
 	// src = "../brd/arduino_Uno_Rev3-02-TH.brd";
 
 	xhttp.onreadystatechange = function() {
 		if ( xhttp.readyState === 4 && xhttp.status === 200 ) {
-			brd = new EagleBrdRenderer( xhttp.responseXML );
+			brd = new EagleBrdRenderer( xhttp.responseXML, {
+				pixelMicrons: 35
+			} );
 
 			// showLayers( brd );
 			showMesh( brd );
