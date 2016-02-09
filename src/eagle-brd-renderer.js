@@ -41,11 +41,18 @@ var EagleBrdRenderer = function( xml, params ) {
 	console.log( "Beginning BRD parse" );
 
 	/**
-	Optional parameters used to configure render.
+	Optional parameters used to configure render
 
 	@property params {object}
 	**/
 	this.params = params;
+
+	/**
+	Root THREE.js transform, containing board elements
+
+	@property root {THREE.Object3D}
+	**/
+	this.root = new THREE.Object3D();
 
 	/**
 	XML document that contains the board data
@@ -85,14 +92,32 @@ var EagleBrdRenderer = function( xml, params ) {
 	this._parseBounds();
 
 	this.renderBounds();
-
 	this.renderCopper();
-
 	this.renderSolderMask();
-
 	this.renderSolderpaste();
-
 	this.renderIsolate();
+
+	// Generate geometry
+	this._buildLayerGeometry();
+};
+
+
+EagleBrdRenderer.prototype._buildLayerGeometry = function() {
+
+	/**
+	Construct THREE.js geometry bearing the generated textures.
+
+	@method _buildLayerGeometry
+	**/
+
+	var i;
+
+	for ( i = 0; i < this.layers.length; i++ ) {
+		this.layers[ i ].buildGeometry();
+		if ( this.layers[ i ].visible ) {
+			this.root.add( this.layers[ i ].mesh );
+		}
+	}
 };
 
 
@@ -508,7 +533,8 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 		layers: [ 20 ],
 		name: "Bounds",
 		tags: [ "Bounds" ],
-		thickness: 1
+		thickness: 1,
+		visible: false
 	} ) );
 
 	/**
@@ -2232,6 +2258,8 @@ EagleBrdRenderer.Layer = function( params ) {
 		@param params.name {string} Unique layer identifier
 		@param [params.tags] {array} List of tag strings
 		@param params.thickness {number} Thickness of layer in pixels
+		@param [params.visible=true] {boolean} Whether this layer is
+			part of the physical board
 	**/
 
 	/**
@@ -2277,6 +2305,14 @@ EagleBrdRenderer.Layer = function( params ) {
 	@property thickness {number}
 	**/
 	this.thickness = params.thickness;
+
+	/**
+	Whether this layer is part of the physical board
+
+	@property visible
+	@default true
+	**/
+	this.visible = params.visible === false ? false : true;
 };
 
 
@@ -2409,6 +2445,43 @@ EagleBrdRenderer.Layer.prototype.assessElementCandidate = function( el ) {
 	}
 
 	return this;
+};
+
+
+EagleBrdRenderer.Layer.prototype.buildGeometry = function() {
+
+	/**
+	Construct layer geometry. Paste the texture onto a rectangle.
+
+	@method buildGeometry
+	**/
+
+	/**
+	Geometry for layer
+
+	@property geometry {THREE.BoxGeometry}
+	**/
+	this.geometry = new THREE.BoxGeometry(
+		this.board.width, this.board.height, this.thickness );
+
+	/**
+	Material for layer
+
+	@property material {THREE.MeshBasicMaterial}
+	**/
+	this.material = new THREE.MeshBasicMaterial( {
+		color: 0xff0000,
+		wireframe: true
+	} );
+
+	/**
+	Mesh for layer; THREE scene component
+
+	@property mesh {THREE.Mesh}
+	**/
+	this.mesh = new THREE.Mesh( this.geometry, this.material );
+
+	this.mesh.translate.z += this.height;
 };
 
 
