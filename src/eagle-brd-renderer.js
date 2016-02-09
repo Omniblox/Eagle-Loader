@@ -2456,6 +2456,10 @@ EagleBrdRenderer.Layer.prototype.buildGeometry = function() {
 	@method buildGeometry
 	**/
 
+	var matOptions = {
+			transparent: true
+		};
+
 	/**
 	Geometry for layer
 
@@ -2464,15 +2468,31 @@ EagleBrdRenderer.Layer.prototype.buildGeometry = function() {
 	this.geometry = new THREE.BoxGeometry(
 		this.board.width, this.board.height, this.thickness );
 
+	// Just use faces 8-11 for the top and bottom
+	this.geometry.faces = this.geometry.faces.slice( 8, 12 );
+	this.geometry.verticesNeedUpdate = true;
+
+
+	/**
+	Texture for layer
+
+	@property texture {THREE.Texture}
+	**/
+	this.texture = new THREE.Texture( this.buffer );
+	this.texture.needsUpdate = true;
+
+	matOptions.map = this.texture;
+	if ( this.hasTag( "Copper" ) || this.hasTag( "Solderpaste" ) ) {
+		matOptions.specularMap = this.texture;
+		matOptions.shininess = 128;
+	}
+
 	/**
 	Material for layer
 
 	@property material {THREE.MeshBasicMaterial}
 	**/
-	this.material = new THREE.MeshBasicMaterial( {
-		color: 0xff0000,
-		wireframe: true
-	} );
+	this.material = new THREE.MeshPhongMaterial( matOptions );
 
 	/**
 	Mesh for layer; THREE scene component
@@ -2481,7 +2501,7 @@ EagleBrdRenderer.Layer.prototype.buildGeometry = function() {
 	**/
 	this.mesh = new THREE.Mesh( this.geometry, this.material );
 
-	this.mesh.translate.z += this.height;
+	this.mesh.position.z -= this.height + this.thickness / 2;
 };
 
 

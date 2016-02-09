@@ -11,7 +11,7 @@
 
 	// Load and initiate process
 	var brd, src,
-		scene, camera, renderer,
+		scene, camera, renderer, light,
 		xhttp = new XMLHttpRequest(),
 		showLayers = function( brd ) {
 			// Diagnose output
@@ -47,8 +47,8 @@
 			// Init view
 			scene = new THREE.Scene();
 			camera = new THREE.PerspectiveCamera(
-				75, window.innerWidth / window.innerHeight, 1, 10000 );
-			camera.position.z = brd.width + brd.height;
+				75, window.innerWidth / window.innerHeight, 100, 3000 );
+			camera.position.z = ( brd.width + brd.height ) / 1;
 			renderer = new THREE.WebGLRenderer();
 			renderer.setSize( window.innerWidth, window.innerHeight );
 			document.body.appendChild( renderer.domElement );
@@ -56,13 +56,23 @@
 			// View mesh
 			scene.add( brd.root );
 
+			// Light the mesh
+			light = new THREE.PointLight( 0xffffff, 0.5, 0 );
+			light.position.set( 800, -800, 800 );
+			scene.add( light );
+			light = new THREE.PointLight( 0xffffff, 0.5, 0 );
+			light.position.set( -400, 400, 800 );
+			scene.add( light );
+
 			// Commence rendering
 			var animate = function() {
+				var now = Date.now();
+
 				requestAnimationFrame( animate );
 
-				brd.root.rotation.x += 0.01;
-				brd.root.rotation.y += 0.01;
-				brd.root.rotation.z += 0.01;
+				brd.root.rotation.x = 0.2 * Math.sin( now * 0.00013 );
+				brd.root.rotation.y = 0.2 * Math.sin( now * 0.00022 );
+				brd.root.rotation.z = 0.2 * Math.sin( now * 0.00031 );
 
 				renderer.render( scene, camera );
 			}
@@ -72,8 +82,8 @@
 	// src = "../brd/adafruit-cc3000-breakout.brd";
 	// src = "../brd/adafruit-flora-mainboard-2.brd";
 	// src = "../brd/adafruit-pro-trinket-3v3.brd";
-	// src = "../brd/adafruit-pro-trinket-5v0.brd";
-	src = "../brd/arduino_Uno_Rev3-02-TH.brd";
+	src = "../brd/adafruit-pro-trinket-5v0.brd";
+	// src = "../brd/arduino_Uno_Rev3-02-TH.brd";
 
 	xhttp.onreadystatechange = function() {
 		if ( xhttp.readyState === 4 && xhttp.status === 200 ) {
