@@ -230,6 +230,8 @@ EagleBrdRenderer.prototype._buildDepthElements = function( add ) {
 	if ( add ) {
 		this.root.add( this.depthElements );
 	}
+	this.depthElements.position.x -= this.width / 2 - this.offsetX;
+	this.depthElements.position.y -= this.height / 2 - this.offsetY;
 
 
 	// Gather drills
