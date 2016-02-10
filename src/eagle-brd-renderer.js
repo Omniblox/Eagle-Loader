@@ -41,6 +41,16 @@ var EagleBrdRenderer = function( xml, params ) {
 	console.log( "Beginning BRD parse" );
 
 	/**
+	Collection of colors used to render boards.
+
+	@property colors {object}
+		@property colors.copper {string} "rgb( 255, 192, 128 )"
+	**/
+	this.colors = {
+		copper: "rgb( 255, 192, 128 )"
+	};
+
+	/**
 	Optional parameters used to configure render
 
 	@property params {object}
@@ -121,7 +131,6 @@ EagleBrdRenderer.prototype._buildCompositeGeometry = function( add ) {
 
 	/**
 	Composite of all layer textures, top-oriented.
-	This is simply a texture source.
 
 	@property layerCompositeTop {EagleBrdRenderer.Layer}
 	**/
@@ -153,7 +162,6 @@ EagleBrdRenderer.prototype._buildCompositeGeometry = function( add ) {
 
 	/**
 	Composite of all layer textures, bottom-oriented.
-	This is simply a texture source.
 
 	@property layerCompositeBottom {EagleBrdRenderer.Layer}
 	**/
@@ -188,6 +196,123 @@ EagleBrdRenderer.prototype._buildCompositeGeometry = function( add ) {
 	if ( add ) {
 		this.root.add( this.layerCompositeTop.mesh );
 		this.root.add( this.layerCompositeBottom.mesh );
+	}
+
+
+	this._buildDepthElements( add );
+};
+
+
+EagleBrdRenderer.prototype._buildDepthElements = function( add ) {
+
+	/**
+	Construct THREE.js geometry representing depth elements,
+	including drills in holes, vias, and pads, and board edges.
+
+	@method _buildDepthElements
+	@param [add=true] {boolean} Whether to add geometry to the board root
+	**/
+
+	var angData, drill, drills, geo, i, j, mat, mesh, parent, parent2,
+		x1, x2, y1, y2;
+
+	add = add === false ? false : true;
+
+
+	/**
+	Collection of THREE.js geometry representing depth elements.
+
+	@property depthElements {THREE.Object3D}
+	**/
+	this.depthElements = new THREE.Object3D();
+	if ( add ) {
+		this.root.add( this.depthElements );
+	}
+
+
+	// Gather drills
+	drills = [];
+	for ( i = 0; i < this.layers.length; i++ ) {
+		for ( j = 0; j < this.layers[ i ].elements.length; j++ ) {
+			drill = this.layers[ i ].elements[ j ];
+			if (
+					drill.tagName !== "via" &&
+					drill.tagName !== "hole" &&
+					drill.tagName !== "pad" ) {
+				continue;
+			}
+			drills.push( drill );
+		}
+	}
+
+
+	// Cull duplicate drills
+	for ( i = drills.length - 1; i > 0; i-- ) {
+		x1 = drills[ i ].getAttribute( "x" );
+		y1 = drills[ i ].getAttribute( "y" );
+		parent = drills[ i ].elementParent;
+		for ( j = i - 1; j >= 0; j-- ) {
+			x2 = drills[ j ].getAttribute( "x" );
+			y2 = drills[ j ].getAttribute( "y" );
+			parent2 = drills[ j ].elementParent;
+			if ( ( parent && parent === parent2 ) ||
+					( !parent && !parent2 ) ) {
+				if ( x1 === x2 && y1 === y2 ) {
+					console.log( "Match" );
+					drills.splice( i, 1 );
+					break;
+				}
+			}
+		}
+	}
+
+
+	// Create drills
+	mat = new THREE.MeshBasicMaterial( {
+		color: this.colors.copper,
+		side: THREE.BackSide
+	} );
+	for ( i = 0; i < drills.length; i++ ) {
+		drill = this.parseCoord( drills[ i ].getAttribute( "drill" ) ) / 2;
+		geo = new THREE.CylinderGeometry(
+			drill, drill, this.thickness, 16, 3 );
+		mesh = new THREE.Mesh( geo, mat );
+		console.log( "drill", drill );
+
+		// Orient drillmesh
+		mesh.rotation.x = Math.PI / 2;
+		mesh.position.z -= this.thickness / 2;
+
+		// Base positioning
+		mesh.position.x =
+			this.parseCoord( drills[ i ].getAttribute( "x" ) );
+		mesh.position.y =
+			this.parseCoord( drills[ i ].getAttribute( "y" ) );
+		this.depthElements.add( mesh );
+
+		// Optional parent positioning
+		if ( drills[ i ].elementParent ) {
+			parent = new THREE.Object3D();
+
+			parent.position.x = this.parseCoord(
+				drills[ i ].elementParent.getAttribute( "x" ) );
+			parent.position.y = this.parseCoord(
+				drills[ i ].elementParent.getAttribute( "y" ) );
+			if ( drills[ i ].elementParent.hasAttribute( "rot" ) ) {
+				angData = new EagleBrdRenderer.AngleData(
+					drills[ i ].elementParent.getAttribute( "rot" ) );
+				parent.rotation.z = angData.angle;
+				parent.scale.x = angData.mirror ? -1 : 1;
+				parent.scale.y = angData.spin ? -1 : 1;
+			}
+
+			parent.add( mesh );
+			this.depthElements.add( parent );
+
+			parent.updateMatrixWorld();
+			THREE.SceneUtils.detach( mesh, parent, this.depthElements );
+			this.depthElements.remove( parent );
+		}
 	}
 };
 
@@ -1690,7 +1815,7 @@ EagleBrdRenderer.prototype.renderCopperLayer = function( layer ) {
 	@param layer {EagleBrdRenderer.Layer} Layer to initialize and parse
 	**/
 
-	var chordData, ctx, i, j, verts, x, y,
+	var ctx,
 		margin = this.parseDistanceMm( this.designRules.slThermalIsolate ) *
 			this.coordScale,
 		pads = layer.getElements( "pad" ),
@@ -1704,8 +1829,8 @@ EagleBrdRenderer.prototype.renderCopperLayer = function( layer ) {
 
 
 	// Copper styles
-	ctx.fillStyle = "rgb( 255, 192, 128 )";
-	ctx.strokeStyle = "rgb( 255, 192, 128 )";
+	ctx.fillStyle = this.colors.copper;
+	ctx.strokeStyle = this.colors.copper;
 	ctx.lineCap = "round";
 
 
@@ -2373,6 +2498,7 @@ EagleBrdRenderer.Layer = function( params ) {
 
 	/**
 	Depth displacement of layer relative to board origin.
+	Note that greater height will position the layer further from the camera.
 
 	@property height {number} 0
 	**/
@@ -2606,7 +2732,7 @@ EagleBrdRenderer.Layer.prototype.buildGeometry = function() {
 
 	@property material {THREE.MeshBasicMaterial}
 	**/
-	this.material = new THREE.MeshPhongMaterial( matOptions );
+	this.material = new THREE.MeshBasicMaterial( matOptions );
 
 	/**
 	Mesh for layer; THREE scene component
