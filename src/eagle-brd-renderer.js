@@ -44,10 +44,20 @@ var EagleBrdRenderer = function( xml, params ) {
 	Collection of colors used to render boards.
 
 	@property colors {object}
+		@property colors.bounds {string} "rgb( 32, 192, 32 )"
 		@property colors.copper {string} "rgb( 255, 192, 128 )"
+		@property colors.prepreg {string} "rgb( 222, 222, 192 )"
+		@property colors.silkscreen {string} "rgb( 255, 255, 255 )"
+		@property colors.solderMask {string} "rgb( 32, 64, 192 )"
+		@property colors.solderPaste {string} "rgb( 192, 192, 192 )"
 	**/
 	this.colors = {
-		copper: "rgb( 255, 192, 128 )"
+		bounds: "rgb( 32, 192, 32 )",
+		copper: "rgb( 255, 192, 128 )",
+		prepreg: "rgb( 222, 222, 192 )",
+		silkscreen: "rgb( 255, 255, 255 )",
+		solderMask: "rgb( 32, 64, 192 )",
+		solderPaste: "rgb( 192, 192, 192 )"
 	};
 
 	/**
@@ -208,18 +218,11 @@ EagleBrdRenderer.prototype._buildDepthElements = function( add ) {
 
 	/**
 	Construct THREE.js geometry representing depth elements,
-	including drills in holes, vias, and pads, and board edges.
+	such as holes and edges.
 
 	@method _buildDepthElements
 	@param [add=true] {boolean} Whether to add geometry to the board root
 	**/
-
-	var angData, drill, drills, geo, i, j, mat, mesh, parent, parent2, vec2,
-		x1, x2, y1, y2,
-		cylDetail = 8;
-
-	add = add === false ? false : true;
-
 
 	/**
 	Collection of THREE.js geometry representing depth elements.
@@ -232,6 +235,91 @@ EagleBrdRenderer.prototype._buildDepthElements = function( add ) {
 	}
 	this.depthElements.position.x -= this.width / 2 - this.offsetX;
 	this.depthElements.position.y -= this.height / 2 - this.offsetY;
+
+
+	this._buildDepthEdges( add );
+	this._buildDepthHoles( add );
+};
+
+
+EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
+
+	/**
+	Construct THREE.js geometry representing depth edges.
+
+	@method _buildDepthHoles
+	@param [add=true] {boolean} Whether to add geometry to the board root
+	**/
+
+	var geo, i, j, k, mat, wire, x, y,
+		wireGrp = [],
+		wireGrps = [],
+		wires = this.getLayer( "Bounds" ).getElements( "wire" );
+
+
+	// Order wires
+	// Wire entities may be out of order in the BRD.
+	// This will cause fills to operate badly.
+	wireGrps.push( wireGrp );
+
+	// Sort wires into groups of single origin.
+	for ( i = 0; i < wires.length; i++ ) {
+		if ( wire && wire.elementParent !== wires[ i ].elementParent ) {
+			wireGrp = [];
+			wireGrps.push( wireGrp );
+		}
+		wire = wires[ i ];
+		wireGrp.push( wire );
+	}
+
+	// Sort wire groups by link.
+	for ( i = 0; i < wireGrps.length; i++ ) {
+		wireGrp = wireGrps[ i ];
+
+		for ( j = 0; j < wireGrp.length; j++ ) {
+			wire = wireGrp[ j ];
+			x = wire.getAttribute( "x2" );
+			y = wire.getAttribute( "y2" );
+			for ( k = j; k >= 0; k-- ) {
+				if ( x === wireGrp[ k ].getAttribute( "x1" ) &&
+						y === wireGrp[ k ].getAttribute( "y1" ) ) {
+					wireGrp.splice( j, 1 );
+					wireGrp.splice( k, 0, wire );
+					break;
+				}
+			}
+		}
+	}
+
+
+	// Draw wires
+	mat = new THREE.MeshPhongMaterial( {
+		color: this.colors.prepreg
+	} );
+	for ( i = 0; i < wireGrps.length; i++ ) {
+
+	}
+};
+
+
+EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
+
+	/**
+	Construct THREE.js geometry representing depth elements,
+	including drills in holes, vias, and pads.
+
+	NOTE: Currently, all holes are assumed to be copper-coated.
+
+	@method _buildDepthHoles
+	@param [add=true] {boolean} Whether to add geometry to the board root
+	**/
+
+	var angData, drill, drills, geo, i, j,
+		mat, mesh, parent, parent2, vec2,
+		x1, x2, y1, y2,
+		cylDetail = 8;
+
+	add = add === false ? false : true;
 
 
 	// Gather drills
@@ -277,6 +365,7 @@ EagleBrdRenderer.prototype._buildDepthElements = function( add ) {
 		color: this.colors.copper,
 		side: THREE.BackSide,
 		specular: this.colors.copper,
+		shininess: 128,
 	} );
 	for ( i = 0; i < drills.length; i++ ) {
 		drill = this.parseCoord( drills[ i ].getAttribute( "drill" ) ) / 2;
@@ -337,6 +426,8 @@ EagleBrdRenderer.prototype._buildDepthElements = function( add ) {
 			THREE.SceneUtils.detach( mesh, parent, this.depthElements );
 			this.depthElements.remove( parent );
 		}
+
+		// TODO: Merge geometries. This will render more efficiently.
 	}
 };
 
@@ -1669,7 +1760,7 @@ EagleBrdRenderer.prototype.renderBounds = function() {
 	layer.initBuffer();
 
 	// Setup draw style
-	layer.ctx.fillStyle = "rgb( 32, 192, 32 )";
+	layer.ctx.fillStyle = this.colors.bounds;
 	layer.ctx.save();
 
 
@@ -1774,7 +1865,6 @@ EagleBrdRenderer.prototype.renderBounds = function() {
 
 	layer.ctx.closePath();
 	layer.ctx.fill( "evenodd" );
-	// layer.ctx.stroke();
 
 
 
@@ -2001,7 +2091,7 @@ EagleBrdRenderer.prototype.renderIsolateLayer = function( layer, viaSource ) {
 	ctx.save();
 
 	// Stylize isolate
-	ctx.fillStyle = "rgb( 222, 222, 192 )";
+	ctx.fillStyle = this.colors.prepreg;
 
 
 	// Fill with material
@@ -2078,8 +2168,8 @@ EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 
 
 	// Mask styles
-	ctx.fillStyle = "rgb( 32, 64, 192 )";
-	ctx.strokeStyle = "rgb( 32, 64, 192 )";
+	ctx.fillStyle = this.colors.solderMask;
+	ctx.strokeStyle = this.colors.solderMask;
 	ctx.lineCap = "round";
 
 
@@ -2096,8 +2186,8 @@ EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 	ctx.save();
 
 	// Silkscreen styles
-	ctx.fillStyle = "rgb( 255, 255, 255 )";
-	ctx.strokeStyle = "rgb( 255, 255, 255 )";
+	ctx.fillStyle = this.colors.silkscreen;
+	ctx.strokeStyle = this.colors.silkscreen;
 	ctx.lineCap = "round";
 
 	layerMatch = layer.hasTag( "Top" ) ?
@@ -2261,7 +2351,7 @@ EagleBrdRenderer.prototype.renderSolderpasteLayer = function( layer ) {
 	ctx.save();
 
 	// Stylize solder
-	ctx.fillStyle = "rgb( 192, 192, 192 )";
+	ctx.fillStyle = this.colors.solderPaste;
 
 
 	// Draw rects
@@ -2751,7 +2841,7 @@ EagleBrdRenderer.Layer.prototype.buildGeometry = function() {
 	matOptions.bumpMap = this.texture;
 	if ( this.hasTag( "Copper" ) || this.hasTag( "Solderpaste" ) ) {
 		matOptions.specularMap = this.texture;
-		matOptions.shininess = 256;
+		matOptions.shininess = 128;
 	}
 
 	/**
