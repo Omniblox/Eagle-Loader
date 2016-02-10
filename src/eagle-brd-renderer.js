@@ -138,22 +138,23 @@ EagleBrdRenderer.prototype._buildCompositeGeometry = function( add ) {
 		board: this,
 		name: "Composite Top",
 		thickness: 1,
-		tags: "Top"
+		tags: "Top",
+		height: 1
 	} );
 
 	this.layerCompositeTop.initBuffer();
 	ctx = this.layerCompositeTop.ctx;
 
 	// Composite all textures
+	ctx.save();
+	ctx.translate( -this.offsetX, this.height - this.offsetY );
+	ctx.scale( 1, -1 );
 	for ( i = this.layers.length - 1; i >= 0; i-- ) {
 		if ( this.layers[ i ].visible ) {
-			ctx.save();
-			ctx.translate( -this.offsetX, this.height - this.offsetY );
-			ctx.scale( 1, -1 );
 			ctx.drawImage( this.layers[ i ].buffer, 0, 0 );
-			ctx.restore();
 		}
 	}
+	ctx.restore();
 
 	this.layerCompositeTop.buildGeometry();
 	this.layerCompositeTop.geometry.faces.splice( 2, 2 );
@@ -177,15 +178,15 @@ EagleBrdRenderer.prototype._buildCompositeGeometry = function( add ) {
 	ctx = this.layerCompositeBottom.ctx;
 
 	// Composite all textures
+	ctx.save();
+	ctx.translate( -this.offsetX, this.height - this.offsetY );
+	ctx.scale( 1, -1 );
 	for ( i = 0; i < this.layers.length; i++ ) {
 		if ( this.layers[ i ].visible ) {
-			ctx.save();
-			ctx.translate( -this.offsetX, this.height - this.offsetY );
-			ctx.scale( 1, -1 );
 			ctx.drawImage( this.layers[ i ].buffer, 0, 0 );
-			ctx.restore();
 		}
 	}
+	ctx.restore();
 
 	this.layerCompositeBottom.buildGeometry();
 	this.layerCompositeBottom.geometry.faces.splice( 0, 2 );
@@ -213,8 +214,9 @@ EagleBrdRenderer.prototype._buildDepthElements = function( add ) {
 	@param [add=true] {boolean} Whether to add geometry to the board root
 	**/
 
-	var angData, drill, drills, geo, i, j, mat, mesh, parent, parent2,
-		x1, x2, y1, y2;
+	var angData, drill, drills, geo, i, j, mat, mesh, parent, parent2, vec2,
+		x1, x2, y1, y2,
+		cylDetail = 8;
 
 	add = add === false ? false : true;
 
@@ -247,6 +249,8 @@ EagleBrdRenderer.prototype._buildDepthElements = function( add ) {
 
 
 	// Cull duplicate drills
+	// This will look for elements with the same parent element
+	// and the same spatial coordinates.
 	for ( i = drills.length - 1; i > 0; i-- ) {
 		x1 = drills[ i ].getAttribute( "x" );
 		y1 = drills[ i ].getAttribute( "y" );
@@ -258,7 +262,6 @@ EagleBrdRenderer.prototype._buildDepthElements = function( add ) {
 			if ( ( parent && parent === parent2 ) ||
 					( !parent && !parent2 ) ) {
 				if ( x1 === x2 && y1 === y2 ) {
-					console.log( "Match" );
 					drills.splice( i, 1 );
 					break;
 				}
@@ -268,16 +271,35 @@ EagleBrdRenderer.prototype._buildDepthElements = function( add ) {
 
 
 	// Create drills
-	mat = new THREE.MeshBasicMaterial( {
+	mat = new THREE.MeshPhongMaterial( {
 		color: this.colors.copper,
-		side: THREE.BackSide
+		side: THREE.BackSide,
+		specular: this.colors.copper,
 	} );
 	for ( i = 0; i < drills.length; i++ ) {
 		drill = this.parseCoord( drills[ i ].getAttribute( "drill" ) ) / 2;
 		geo = new THREE.CylinderGeometry(
-			drill, drill, this.thickness, 16, 3 );
+			drill, drill, this.thickness, cylDetail, 3, true );
 		mesh = new THREE.Mesh( geo, mat );
-		console.log( "drill", drill );
+
+		// Bevel drills
+		for ( j = 0; j < cylDetail + 1; j++ ) {
+			vec2 = new THREE.Vector2(
+				geo.vertices[ j ].x, geo.vertices[ j ].z );
+			vec2.multiplyScalar( 1.5 );
+			geo.vertices[ j ].x = vec2.x;
+			geo.vertices[ j ].z = vec2.y;
+
+			// Other end
+			geo.vertices[ j + ( cylDetail + 1 ) * 3 ].x = vec2.x;
+			geo.vertices[ j + ( cylDetail + 1 ) * 3 ].z = vec2.y;
+
+			// Elongate straight faces to exaggerate lip.
+			geo.vertices[ j + ( cylDetail + 1 ) * 1 ].y +=
+				this.thickness * 0.2;
+			geo.vertices[ j + ( cylDetail + 1 ) * 2 ].y -=
+				this.thickness * 0.2;
+		}
 
 		// Orient drillmesh
 		mesh.rotation.x = Math.PI / 2;
@@ -2730,9 +2752,9 @@ EagleBrdRenderer.Layer.prototype.buildGeometry = function() {
 	/**
 	Material for layer
 
-	@property material {THREE.MeshBasicMaterial}
+	@property material {THREE.MeshPhongMaterial}
 	**/
-	this.material = new THREE.MeshBasicMaterial( matOptions );
+	this.material = new THREE.MeshPhongMaterial( matOptions );
 
 	/**
 	Mesh for layer; THREE scene component
