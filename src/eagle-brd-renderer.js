@@ -659,6 +659,7 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 	// Note: Thickness of solder is a guess, based on a little research.
 	// The current 50-micron value should be reasonably accurate,
 	// but as of 2016-02-02 I haven't found a BRD specification.
+	offset = -thickSolder;
 	this.layers.push( new EagleBrdRenderer.Layer( {
 		board: this,
 		height: offset,
@@ -768,7 +769,8 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 		thickness: thickSolder
 	} ) );
 
-	offset += thickSolder;
+	// Do not incorporate solder into board thickness
+	// offset += thickSolder;
 
 	// Create board dimensions
 	this.layers.push( new EagleBrdRenderer.Layer( {
@@ -2709,6 +2711,7 @@ EagleBrdRenderer.Layer.prototype.buildGeometry = function() {
 	var i, j, x, y,
 		matOptions = {
 			transparent: true,
+			bumpScale: 3,
 			// side: THREE.DoubleSide
 		};
 

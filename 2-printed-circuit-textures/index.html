@@ -48,7 +48,7 @@
 			scene = new THREE.Scene();
 			camera = new THREE.PerspectiveCamera(
 				75, window.innerWidth / window.innerHeight, 100, 10000 );
-			camera.position.z = ( brd.width + brd.height ) / 1;
+			camera.position.z = ( brd.width + brd.height ) / 2;
 			renderer = new THREE.WebGLRenderer();
 			renderer.setSize( window.innerWidth, window.innerHeight );
 			document.body.appendChild( renderer.domElement );
@@ -62,6 +62,12 @@
 			scene.add( light );
 			light = new THREE.PointLight( 0xffeedd, 0.5, 0 );
 			light.position.set( -400, 800, 1600 );
+			scene.add( light );
+			light = new THREE.PointLight( 0x8888dd, 0.5, 0 );
+			light.position.set( -800, 0, -400 );
+			scene.add( light );
+			light = new THREE.PointLight( 0x8888dd, 0.5, 0 );
+			light.position.set( 800, 0, -400 );
 			scene.add( light );
 
 			// Commence rendering
@@ -84,8 +90,8 @@
 	// src = "../brd/adafruit-cc3000-breakout.brd";
 	// src = "../brd/adafruit-flora-mainboard-2.brd";
 	// src = "../brd/adafruit-pro-trinket-3v3.brd";
-	// src = "../brd/adafruit-pro-trinket-5v0.brd";
-	src = "../brd/arduino_Uno_Rev3-02-TH.brd";
+	src = "../brd/adafruit-pro-trinket-5v0.brd";
+	// src = "../brd/arduino_Uno_Rev3-02-TH.brd";
 
 	xhttp.onreadystatechange = function() {
 		if ( xhttp.readyState === 4 && xhttp.status === 200 ) {
