@@ -61,6 +61,13 @@ var EagleBrdRenderer = function( xml, params ) {
 	};
 
 	/**
+	Shininess of 3D components
+
+	@property shininess {number} 128
+	**/
+	this.shininess = 128;
+
+	/**
 	Optional parameters used to configure render
 
 	@property params {object}
@@ -168,6 +175,7 @@ EagleBrdRenderer.prototype._buildCompositeGeometry = function( add ) {
 
 	this.layerCompositeTop.buildGeometry();
 	this.layerCompositeTop.geometry.faces.splice( 2, 2 );
+	this.layerCompositeTop.material.shininess = this.shininess;
 
 
 
@@ -201,6 +209,7 @@ EagleBrdRenderer.prototype._buildCompositeGeometry = function( add ) {
 	this.layerCompositeBottom.buildGeometry();
 	this.layerCompositeBottom.geometry.faces.splice( 0, 2 );
 	this.layerCompositeBottom.geometry.faceVertexUvs[ 0 ].splice( 0, 2 );
+	this.layerCompositeBottom.material.shininess = this.shininess;
 
 
 
@@ -295,9 +304,10 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 
 
 	// Draw wires
-	mat = new THREE.MeshLambertMaterial( {
+	mat = new THREE.MeshPhongMaterial( {
 		color: new THREE.Color( this.colors.prepreg ),
-		side: THREE.DoubleSide
+		side: THREE.DoubleSide,
+		shininess: this.shininess
 	} );
 	for ( i = 0; i < wireGrps.length; i++ ) {
 
@@ -484,7 +494,7 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 		color: new THREE.Color( this.colors.copper ),
 		side: THREE.BackSide,
 		specular: new THREE.Color( this.colors.copper ),
-		shininess: 128,
+		shininess: this.shininess,
 	} );
 	for ( i = 0; i < drills.length; i++ ) {
 		drill = this.parseCoord( drills[ i ].getAttribute( "drill" ) ) / 2;
@@ -2927,7 +2937,7 @@ EagleBrdRenderer.Layer.prototype.buildGeometry = function() {
 	var i, j, x, y,
 		matOptions = {
 			transparent: true,
-			bumpScale: 3,
+			bumpScale: 1,
 			// side: THREE.DoubleSide
 		};
 
@@ -2967,7 +2977,7 @@ EagleBrdRenderer.Layer.prototype.buildGeometry = function() {
 	matOptions.bumpMap = this.texture;
 	if ( this.hasTag( "Copper" ) || this.hasTag( "Solderpaste" ) ) {
 		matOptions.specularMap = this.texture;
-		matOptions.shininess = 128;
+		matOptions.shininess = this.shininess;
 	}
 
 	/**
