@@ -446,7 +446,7 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 	var angData, drill, drills, geo, i, j,
 		mat, mesh, parent, parent2, vec2,
 		x1, x2, y1, y2,
-		cylDetail = 8;
+		cylDetail = 16;
 
 	add = add === false ? false : true;
 
@@ -506,13 +506,13 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 		for ( j = 0; j < cylDetail + 1; j++ ) {
 			vec2 = new THREE.Vector2(
 				geo.vertices[ j ].x, geo.vertices[ j ].z );
-			vec2.multiplyScalar( 1.5 );
-			geo.vertices[ j ].x = vec2.x;
-			geo.vertices[ j ].z = vec2.y;
+			vec2.multiplyScalar( 0.8 );
+			geo.vertices[ j + ( cylDetail + 1 ) * 1 ].x = vec2.x;
+			geo.vertices[ j + ( cylDetail + 1 ) * 1 ].z = vec2.y;
 
 			// Other end
-			geo.vertices[ j + ( cylDetail + 1 ) * 3 ].x = vec2.x;
-			geo.vertices[ j + ( cylDetail + 1 ) * 3 ].z = vec2.y;
+			geo.vertices[ j + ( cylDetail + 1 ) * 2 ].x = vec2.x;
+			geo.vertices[ j + ( cylDetail + 1 ) * 2 ].z = vec2.y;
 
 			// Elongate straight faces to exaggerate lip.
 			geo.vertices[ j + ( cylDetail + 1 ) * 1 ].y +=
