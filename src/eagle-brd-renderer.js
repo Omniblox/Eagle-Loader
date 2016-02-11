@@ -260,12 +260,45 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 	@param [add=true] {boolean} Whether to add geometry to the board root
 	**/
 
-	var angleData, chordData, firstX, firstY, geo, i, j, k, lastX, lastY,
-		mat, mesh, parent, shape, sumAngles, wire, x, y, x1, y1, x2, y2,
-		bevel = 4,
+	var angleData, chordData, ctx, firstX, firstY, geo,
+		i, j, k, lastX, lastY,
+		mat, mesh, parent, shape, sumAngles, wire,
+		x, x1, x2, y, y1, y2,
+		bevel = 8,
 		wireGrp = [],
 		wireGrps = [],
 		wires = this.getLayer( "Bounds" ).getElements( "wire" );
+
+	/**
+	Texture buffer to create bevel effect on edges
+
+	@property bufferEdge {HTMLCanvasElement}
+	**/
+	this.bufferEdge = document.createElement( "canvas" );
+	this.bufferEdge.width = 1;
+	this.bufferEdge.height = this.thickness;
+
+	ctx = this.bufferEdge.getContext( "2d" );
+
+	ctx.save();
+	for ( i = 0; i < bevel; i++ ) {
+		x = 1 - ( ( bevel - i ) / bevel );
+		x = Math.cos( ( 1 - x ) * Math.PI / 2 );
+		x = Math.round( 255 * x );
+		ctx.fillStyle = "rgb( " + x + ", " + x + ", " + x + " )";
+		ctx.fillRect(
+			0, i, this.bufferEdge.width, this.bufferEdge.height - i * 2 );
+	}
+	ctx.restore();
+
+
+	/**
+	THREE.js texture for beveled edges
+
+	@property textureEdge {THREE.Texture}
+	**/
+	this.textureEdge = new THREE.Texture( this.bufferEdge );
+	this.textureEdge.needsUpdate = true;
 
 
 	// Order wires
@@ -305,10 +338,15 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 
 	// Draw wires
 	mat = new THREE.MeshPhongMaterial( {
-		color: new THREE.Color( this.colors.prepreg ),
+		color: this.colors.prepreg,
+		// map: this.textureEdge,
+		// normalMap: this.textureEdge,
+		bumpMap: this.textureEdge,
 		side: THREE.DoubleSide,
-		shininess: this.shininess
+		shininess: this.shininess,
+		// wireframe: true
 	} );
+
 	for ( i = 0; i < wireGrps.length; i++ ) {
 
 		sumAngles = 0;
@@ -329,9 +367,7 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 				x2 -= Math.PI * 2;
 			}
 			sumAngles += x1 - x2;
-			console.log( "sa", sumAngles );
 		}
-		console.log( "Sum angles", sumAngles );
 
 		shape = new THREE.Shape();
 
@@ -382,10 +418,10 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 
 		// Extrude from path
 		geo = new THREE.ExtrudeGeometry( shape, {
-			amount: this.thickness - bevel * 2,
-			bevelEnabled: true,
-			bevelThickness: bevel,
-			curveSegments: 64
+			amount: this.thickness,
+			bevelEnabled: false,
+			curveSegments: 32,
+			// steps: 3
 		} );
 
 		// Cull top and bottom faces
@@ -395,9 +431,28 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 			}
 		}
 
+		// Perform Z-reliant UV mapping
+		for ( j = 0; j < geo.faces.length; j++ ) {
+
+			// Vertex A
+			geo.faceVertexUvs[ 0 ][ j ][ 0 ].x = 0;
+			geo.faceVertexUvs[ 0 ][ j ][ 0 ].y =
+				geo.vertices[ geo.faces[ j ].a ].z / this.thickness;
+
+			// Vertex B
+			geo.faceVertexUvs[ 0 ][ j ][ 1 ].x = 0;
+			geo.faceVertexUvs[ 0 ][ j ][ 1 ].y =
+				geo.vertices[ geo.faces[ j ].b ].z / this.thickness;
+
+			// Vertex C
+			geo.faceVertexUvs[ 0 ][ j ][ 2 ].x = 0;
+			geo.faceVertexUvs[ 0 ][ j ][ 2 ].y =
+				geo.vertices[ geo.faces[ j ].c ].z / this.thickness;
+		}
+
 
 		mesh = new THREE.Mesh( geo, mat );
-		mesh.position.z -= this.thickness - bevel;
+		mesh.position.z -= this.thickness;
 
 		// Reorient per parent transforms
 		wire = wireGrps[ i ][ 0 ];

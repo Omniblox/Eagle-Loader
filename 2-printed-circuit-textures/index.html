@@ -44,11 +44,13 @@
 		},
 		showMesh = function( brd ) {
 
+			var zoom = 1;
+
 			// Init view
 			scene = new THREE.Scene();
 			camera = new THREE.PerspectiveCamera(
 				75, window.innerWidth / window.innerHeight, 100, 10000 );
-			camera.position.z = ( brd.width + brd.height ) / 1;
+			camera.position.z = ( brd.width + brd.height ) / zoom;
 			renderer = new THREE.WebGLRenderer();
 			renderer.setSize( window.innerWidth, window.innerHeight );
 			document.body.appendChild( renderer.domElement );
@@ -66,7 +68,7 @@
 			light = new THREE.PointLight( 0x8888dd, 0.5, 0 );
 			light.position.set( -800, 0, -400 );
 			scene.add( light );
-			light = new THREE.PointLight( 0x8888dd, 0.5, 0 );
+			light = new THREE.PointLight( 0xdd8888, 0.5, 0 );
 			light.position.set( 800, 0, -400 );
 			scene.add( light );
 
@@ -76,11 +78,14 @@
 
 				requestAnimationFrame( animate );
 
-				brd.root.rotation.x = 0.2 * Math.sin( now * 0.00013 );
-				// brd.root.rotation.y = 0.2 * Math.sin( now * 0.00022 );
-				brd.root.rotation.z = 0.2 * Math.sin( now * 0.00031 );
+				brd.root.rotation.x =
+					0.2 * Math.sin( now * 0.00013 );
+				// brd.root.rotation.y =
+				// 	0.4 * Math.sin( now * 0.00022 ) + Math.PI / 2;
+				brd.root.rotation.z =
+					0.2 * Math.sin( now * 0.00031 );
 
-				brd.root.rotation.y += 0.01;
+				brd.root.rotation.y = now * 0.00022;
 
 				renderer.render( scene, camera );
 			}
