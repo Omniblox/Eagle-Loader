@@ -251,7 +251,9 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 	@param [add=true] {boolean} Whether to add geometry to the board root
 	**/
 
-	var geo, i, j, k, mat, wire, x, y,
+	var angleData, chordData, firstX, firstY, geo, i, j, k, lastX, lastY,
+		mat, mesh, parent, shape, wire, x, y, x1, y1, x2, y2,
+		bevel = 4,
 		wireGrp = [],
 		wireGrps = [],
 		wires = this.getLayer( "Bounds" ).getElements( "wire" );
@@ -293,11 +295,107 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 
 
 	// Draw wires
-	mat = new THREE.MeshPhongMaterial( {
-		color: this.colors.prepreg
+	mat = new THREE.MeshLambertMaterial( {
+		color: new THREE.Color( this.colors.prepreg ),
+		side: THREE.DoubleSide
 	} );
 	for ( i = 0; i < wireGrps.length; i++ ) {
 
+		shape = new THREE.Shape();
+
+		// Begin path
+		if ( wireGrps[ i ].length ) {
+			x = this.parseCoord( wireGrps[ i ][ 0 ].getAttribute( "x1" ) );
+			y = this.parseCoord( wireGrps[ i ][ 0 ].getAttribute( "y1" ) );
+			shape.moveTo( x, y );
+			lastX = x;
+			lastY = y;
+			firstX = x;
+			firstY = y;
+		}
+
+		for ( j = 0; j < wireGrps[ i ].length; j++ ) {
+			wire = wireGrps[ i ][ j ];
+			x1 = this.parseCoord( wire.getAttribute( "x1" ) );
+			y1 = this.parseCoord( wire.getAttribute( "y1" ) );
+			x2 = this.parseCoord( wire.getAttribute( "x2" ) );
+			y2 = this.parseCoord( wire.getAttribute( "y2" ) );
+
+			// Path discontinuities
+			if ( x1 !== lastX || y1 !== lastY ) {
+				shape.lineTo( firstX, firstY );
+				shape.moveTo( x1, y1 );
+				firstX = x1;
+				firstY = y1;
+			}
+
+			if ( wire.hasAttribute( "curve" ) ) {
+				chordData = new EagleBrdRenderer.ChordData( wire );
+				shape.absarc(
+					chordData.x * this.coordScale,
+					chordData.y * this.coordScale,
+					chordData.radius * this.coordScale,
+					chordData.bearing2,
+					chordData.bearing1,
+					chordData.curve < 0 );
+			} else {
+				shape.lineTo( x2, y2 );
+			}
+
+			lastX = x2;
+			lastY = y2;
+		}
+
+		// Extrude from path
+		geo = new THREE.ExtrudeGeometry( shape, {
+			amount: this.thickness - bevel * 2,
+			bevelEnabled: true,
+			bevelThickness: bevel,
+			curveSegments: 64
+		} );
+
+		// Cull top and bottom faces
+		for ( j = geo.faces.length - 1; j >= 0; j-- ) {
+			if ( Math.abs( geo.faces[ j ].normal.z ) > 0.5 ) {
+				geo.faces.splice( j, 1 );
+			}
+		}
+
+
+		mesh = new THREE.Mesh( geo, mat );
+		mesh.position.z -= this.thickness - bevel;
+
+		// Reorient per parent transforms
+		wire = wireGrps[ i ][ 0 ];
+		if ( wire.elementParent ) {
+			parent = new THREE.Object3D();
+			parent.position.x = this.parseCoord(
+				wire.elementParent.getAttribute( "x" ) );
+			parent.position.y = this.parseCoord(
+				wire.elementParent.getAttribute( "y" ) );
+			if ( wire.elementParent.hasAttribute( "rot" ) ) {
+				angleData = new EagleBrdRenderer.AngleData(
+					wire.elementParent.getAttribute( "rot" ) );
+				parent.rotation.z = angleData.angle;
+				parent.scale.x = angleData.spin ? -1 : 1;
+				parent.scale.y = angleData.mirror ? -1 : 1;
+			}
+
+			console.log( "Parent", wire.elementParent );
+			console.log( "xy", parent.position.x, parent.position.y );
+
+			// Extract
+			this.depthElements.add( parent );
+			parent.add( mesh );
+			parent.updateMatrixWorld();
+			THREE.SceneUtils.detach( mesh, parent, this.depthElements );
+			this.depthElements.remove( mesh );
+			this.depthElements.remove( parent );
+		}
+
+		if ( add ) {
+			this.depthElements.add( mesh );
+		}
 	}
 };
 
@@ -362,9 +460,9 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 
 	// Create drills
 	mat = new THREE.MeshPhongMaterial( {
-		color: this.colors.copper,
+		color: new THREE.Color( this.colors.copper ),
 		side: THREE.BackSide,
-		specular: this.colors.copper,
+		specular: new THREE.Color( this.colors.copper ),
 		shininess: 128,
 	} );
 	for ( i = 0; i < drills.length; i++ ) {
