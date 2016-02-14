@@ -1317,6 +1317,8 @@ EagleBrdRenderer.prototype.drawCircles = function( params ) {
 		@param params.circles {array} List of circle elements to draw
 		@param [params.layerMatch] {number} If defined,
 			only elements with a matching `layer` attribute will draw
+		@param [params.fill=false] {boolean} Whether to fill circles
+		@param [params.stroke=false] {boolean} Whether to stroke circles
 	**/
 
 	var circle, i, radius, x, y,
@@ -1336,7 +1338,7 @@ EagleBrdRenderer.prototype.drawCircles = function( params ) {
 
 		x = this.parseCoord( circle.getAttribute( "x" ) );
 		y = this.parseCoord( circle.getAttribute( "y" ) );
-		radius = this.parseCoord( circle.getAttribute( "radius" ) );
+		radius = this.parseCoord( circle.getAttribute( "radius" ) ) + offset;
 
 		ctx.save();
 
@@ -1350,7 +1352,13 @@ EagleBrdRenderer.prototype.drawCircles = function( params ) {
 
 		ctx.beginPath();
 		ctx.arc( x, x, radius, 0, Math.PI * 2 );
-		ctx.stroke();
+
+		if ( params.stroke ) {
+			ctx.stroke();
+		}
+		if ( params.fill ) {
+			ctx.fill();
+		}
 
 		ctx.restore();
 	}
@@ -2599,7 +2607,9 @@ EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 		this.drawCircles( {
 			layer: layer,
 			circles: layer.getElements( "circle" ),
-			layerMatch: layerMatch[ i ]
+			layerMatch: layerMatch[ i ],
+			stroke: true,
+			fill: false
 		} );
 
 		// Draw wires
@@ -2645,7 +2655,9 @@ EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 	this.drawCircles( {
 		layer: layer,
 		circles: layer.getElements( "circle" ),
-		layerMatch: layerMatch
+		layerMatch: layerMatch,
+		fill: true,
+		stroke: false
 	} );
 
 	// Cut pad rings
