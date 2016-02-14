@@ -84,15 +84,15 @@
 				brd.root.rotation.x =
 					0.2 * Math.sin( now * 0.00013 );
 				// brd.root.rotation.y =
-				// 	0.4 * Math.sin( now * 0.00022 ) + Math.PI / 2;
+				// 	0.4 * Math.sin( now * 0.00022 );// + Math.PI / 2;
 				brd.root.rotation.z =
 					0.2 * Math.sin( now * 0.00031 );
 
 				brd.root.rotation.y = now * 0.00022;
 
-				lightRig.rotation.x = 0.2 * Math.sin( now * 0.00027 );
-				lightRig.rotation.y = 0.2 * Math.sin( now * 0.00031 );
-				lightRig.rotation.z = 0.2 * Math.sin( now * 0.00041 );
+				// lightRig.rotation.x = 0.2 * Math.sin( now * 0.00027 );
+				// lightRig.rotation.y = 0.2 * Math.sin( now * 0.00031 );
+				// lightRig.rotation.z = 0.2 * Math.sin( now * 0.00041 );
 
 				renderer.render( scene, camera );
 			}
@@ -104,8 +104,8 @@
 	// src = "../brd/adafruit-cc3000-breakout.brd";
 	// src = "../brd/adafruit-flora-mainboard-2.brd";
 	// src = "../brd/adafruit-pro-trinket-3v3.brd";
-	// src = "../brd/adafruit-pro-trinket-5v0.brd";
-	src = "../brd/arduino_Uno_Rev3-02-TH.brd";
+	src = "../brd/adafruit-pro-trinket-5v0.brd";
+	// src = "../brd/arduino_Uno_Rev3-02-TH.brd";
 
 	xhttp.onreadystatechange = function() {
 		if ( xhttp.readyState === 4 && xhttp.status === 200 ) {

@@ -73,12 +73,19 @@ var EagleBrdRenderer = function( xml, params ) {
 	**/
 	this.colors = {
 		bounds: "rgb( 32, 192, 32 )",
-		copper: "rgb( 255, 192, 128 )",
+		copper: "rgb( 255, 222, 164 )",
 		prepreg: "rgb( 222, 222, 192 )",
 		silkscreen: "rgb( 255, 255, 255 )",
 		solderMask: "rgb( 32, 64, 192 )",
-		solderPaste: "rgb( 192, 192, 192 )"
+		solderPaste: "rgb( 192, 192, 222 )"
 	};
+
+	/**
+	Opacity of soldermask
+
+	@property maskOpacity {number} 0.8
+	**/
+	this.maskOpacity = params.maskOpacity || 0.8;
 
 	/**
 	Shininess of 3D components
@@ -2493,7 +2500,7 @@ EagleBrdRenderer.prototype.renderIsolateLayer = function( layer, viaSource ) {
 	// this is a crude approximation of subsurface scattering in
 	// resin-impregnated materials.
 	ctx.save();
-	ctx.globalAlpha = 1 - ( 1 / ( 1 + Math.pow( layer.thickness, 0.5 ) ) );
+	ctx.globalAlpha = 1 - ( 1 / ( 1 + Math.pow( layer.thickness, 1 ) ) );
 	ctx.fillRect( -this.offsetX, -this.offsetY, this.width , this.height );
 	ctx.restore();
 
@@ -2558,6 +2565,17 @@ EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 	ctx = layer.ctx;
 
 
+	// Derive associated copper layer
+	for ( i = 0; i < this.layers.length; i++ ) {
+		probeLayer = this.layers [ i ];
+		if ( ( layer.hasTag( "Bottom" ) && probeLayer.hasTag( "Bottom" ) ) ||
+				( layer.hasTag( "Top" ) && probeLayer.hasTag( "Top" ) ) &&
+				probeLayer.hasTag( "Copper" ) ) {
+			break;
+		}
+	}
+
+
 	ctx.save();
 
 
@@ -2569,8 +2587,17 @@ EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 
 	// Fill with mask
 	ctx.save();
-	ctx.globalAlpha = 0.8;
+	ctx.globalAlpha = this.maskOpacity;
 	ctx.fillRect( -this.offsetX, -this.offsetY, this.width , this.height );
+	ctx.restore();
+
+	// Reveal traces
+	ctx.save();
+	ctx.globalCompositeOperation = "destination-out";
+	ctx.globalAlpha = this.maskOpacity / 2;
+	ctx.translate( -this.offsetX, this.height - this.offsetY );
+	ctx.scale( 1, -1 );
+	ctx.drawImage( probeLayer.buffer, 0, 0 );
 	ctx.restore();
 
 
@@ -2673,16 +2700,6 @@ EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 		wires: layer.getElements( "wire" ),
 		layerMatch: layerMatch
 	} );
-
-	// Derive associated copper layer
-	for ( i = 0; i < this.layers.length; i++ ) {
-		probeLayer = this.layers [ i ];
-		if ( ( layer.hasTag( "Bottom" ) && probeLayer.hasTag( "Bottom" ) ) ||
-				( layer.hasTag( "Top" ) && probeLayer.hasTag( "Top" ) ) &&
-				probeLayer.hasTag( "Copper" ) ) {
-			break;
-		}
-	}
 
 	if ( probeLayer ) {
 
