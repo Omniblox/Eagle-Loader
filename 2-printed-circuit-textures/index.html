@@ -6,6 +6,7 @@
 <body>
 
 <script src="js/lib/three.js"></script>
+<script src="js/lib/connector-1.0.1.js"></script>
 <script src="../src/eagle-brd-renderer.js"></script>
 <script>
 
@@ -72,7 +73,6 @@
 			light.position.set( 800, 0, -400 );
 			scene.add( light );
 
-			// Commence rendering
 			var animate = function() {
 				var now = Date.now();
 
@@ -89,6 +89,8 @@
 
 				renderer.render( scene, camera );
 			}
+
+			// Commence rendering
 			animate();
 		};
 
@@ -101,7 +103,9 @@
 	xhttp.onreadystatechange = function() {
 		if ( xhttp.readyState === 4 && xhttp.status === 200 ) {
 			brd = new EagleBrdRenderer( xhttp.responseXML, {
-				pixelMicrons: 35
+				pixelMicrons: 35,
+				viewConnectors: false,
+				viewGhosts: false
 			} );
 
 			// showLayers( brd );

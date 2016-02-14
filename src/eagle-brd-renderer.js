@@ -36,9 +36,29 @@ var EagleBrdRenderer = function( xml, params ) {
 		@param [params.pixelMicrons=35] {number} Resolution of texture maps.
 			By default, this is 35 microns, equal to the thickness
 			of a default copper layer.
+		@param [params.viewConnectors=false] {boolean} Whether to visualize
+			Connector objects
+		@param [params.viewGhosts=false] {boolean} Whether to draw
+			approximate ghosts of on-board devices
 	**/
 
 	console.log( "Beginning BRD parse" );
+
+	/**
+	List of `Connector` objects associated with packaged elements,
+	such as resistors, surface-mounted devices, and other predefined
+	board components.
+
+	@property connectElements {array}
+	**/
+	this.connectElements = [];
+
+	/**
+	List of `Connector` objects associated with holes and pads.
+
+	@property connectHoles {array}
+	**/
+	this.connectHoles = [];
 
 	/**
 	Collection of colors used to render boards.
@@ -128,6 +148,13 @@ var EagleBrdRenderer = function( xml, params ) {
 	// this._buildLayerGeometry( false );
 	// this._buildLayerGeometry();
 	this._buildCompositeGeometry();
+
+	// Finalize element connectors
+	this._finalizeElementConnectors();
+
+	if ( params.viewGhosts ) {
+		this.buildGhostPackages();
+	}
 };
 
 
@@ -138,6 +165,7 @@ EagleBrdRenderer.prototype._buildCompositeGeometry = function( add ) {
 
 	@method _buildCompositeGeometry
 	@param [add=true] {boolean} Whether to add geometry to the board root
+	@private
 	**/
 
 	var ctx, i;
@@ -229,8 +257,12 @@ EagleBrdRenderer.prototype._buildDepthElements = function( add ) {
 	Construct THREE.js geometry representing depth elements,
 	such as holes and edges.
 
+	This grouping also includes element connectors,
+	to keep them out of the root child space.
+
 	@method _buildDepthElements
 	@param [add=true] {boolean} Whether to add geometry to the board root
+	@private
 	**/
 
 	/**
@@ -258,6 +290,7 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 
 	@method _buildDepthHoles
 	@param [add=true] {boolean} Whether to add geometry to the board root
+	@private
 	**/
 
 	var angleData, chordData, ctx, firstX, firstY, geo,
@@ -492,13 +525,18 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 	Construct THREE.js geometry representing depth elements,
 	including drills in holes, vias, and pads.
 
+	This includes `Connector` objects for holes and pads,
+	to allow the PCB to become part of an assembly.
+	These are listed in `connectHoles`.
+
 	NOTE: Currently, all holes are assumed to be copper-coated.
 
 	@method _buildDepthHoles
 	@param [add=true] {boolean} Whether to add geometry to the board root
+	@private
 	**/
 
-	var angData, drill, drills, geo, i, j,
+	var angData, connector, drill, drills, geo, i, j,
 		mat, mesh, parent, parent2, vec2,
 		x1, x2, y1, y2,
 		cylDetail = 16;
@@ -612,6 +650,30 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 		}
 
 		// TODO: Merge geometries. This will render more efficiently.
+
+		// Register connectors for holes and pads
+		if ( drills[ i ].tagName === "hole" ||
+				drills[ i ].tagName === "pad" ) {
+
+			// Top connector
+			connector = new Connector();
+			mesh.add( connector );
+			connector.master = this.root;
+			connector.position.y = this.thickness / 2;
+			this.connectHoles.push( connector );
+
+			this.visualizeConnector( connector );
+
+			// Bottom connector
+			connector = new Connector();
+			mesh.add( connector );
+			connector.master = this.root;
+			connector.position.y = -this.thickness / 2;
+			connector.rotation.x = Math.PI;
+			this.connectHoles.push( connector );
+
+			this.visualizeConnector( connector );
+		}
 	}
 };
 
@@ -625,6 +687,7 @@ EagleBrdRenderer.prototype._buildLayerGeometry = function( add ) {
 
 	@method _buildLayerGeometry
 	@param [add=true] {boolean} Whether to add geometry to the board root
+	@private
 	**/
 
 	var i;
@@ -636,6 +699,24 @@ EagleBrdRenderer.prototype._buildLayerGeometry = function( add ) {
 		if ( this.layers[ i ].visible && add ) {
 			this.root.add( this.layers[ i ].mesh );
 		}
+	}
+};
+
+
+EagleBrdRenderer.prototype._finalizeElementConnectors = function() {
+
+	/**
+	Apply offset to element connectors generated before that information
+	was available.
+
+	@method _finalizeElementConnectors
+	@private
+	**/
+
+	var i;
+
+	for ( i = 0; i < this.connectElements.length; i++ ) {
+		this.depthElements.add( this.connectElements[ i ] );
 	}
 };
 
@@ -832,11 +913,15 @@ EagleBrdRenderer.prototype._parseElement = function( el ) {
 	/**
 	Parse an `<element>` element from the XML library.
 
+	This will also register the element as a `Connector` object
+	in `connectElements`.
+
 	@method _parseElement
 	@param el {Element} `<element>` element to parse
+	@private
 	**/
 
-	var i, lib, libs, pack, packs,
+	var angle, connector, i, lib, libs, pack, packs,
 		libName = el.getAttribute( "library" ),
 		packName = el.getAttribute( "package" );
 
@@ -883,6 +968,33 @@ EagleBrdRenderer.prototype._parseElement = function( el ) {
 	// Parse the package into the layers
 	this._parseCollection( pack );
 
+
+	// Add element Connector
+	connector = new Connector();
+	connector.master = this.root;
+	this.connectElements.push( connector );
+
+	// Append library data
+	connector.userData.element = el;
+	connector.userData.package = pack;
+
+	// Transform is not final here, because offset has not been computed.
+	connector.position.x =
+		this.parseCoord( el.getAttribute( "x" ) );
+	connector.position.y =
+		this.parseCoord( el.getAttribute( "y" ) );
+	connector.rotation.x += Math.PI / 2;
+	if ( el.hasAttribute( "rot" ) ) {
+		angle = new EagleBrdRenderer.AngleData( el.getAttribute( "rot" ) );
+		if ( angle.mirror ) {
+			connector.rotation.x += Math.PI;
+			connector.position.z = -this.thickness;
+		}
+	}
+
+	this.visualizeConnector( connector, "rgb( 255, 0, 0 )" );
+
+
 	this._elementCurrent = null;
 };
 
@@ -917,6 +1029,7 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 	This method will also create cream, mask, and board layers.
 
 	@method _populateLayers
+	@private
 	**/
 
 	var config, extract, i, isNum, iso, layer,
@@ -1100,6 +1213,95 @@ EagleBrdRenderer.prototype._setDefaultParams = function() {
 	}
 
 	this.params.pixelMicrons = this.params.pixelMicrons || 35;
+};
+
+
+EagleBrdRenderer.prototype.buildGhostPackages = function() {
+
+	/**
+	Create ghost versions of the library components on the PCB.
+	These are not very accurate, as the library is purely a schematic,
+	but they'll serve as stand-ins.
+
+	@method buildGhostPackages
+	**/
+
+	var angle, child, el, geo, i, j, k, mat, mesh, pack, parent, radius, verts,
+		dx, dy, maxX, maxY, minX, minY, x, y;
+
+	/**
+	Grouping of ghost package meshes.
+
+	@property ghostPackages {THREE.Object3D}
+	**/
+	this.ghostPackages = new THREE.Object3D();
+	this.ghostPackages.position.x -= this.width / 2 - this.offsetX;
+	this.ghostPackages.position.y -= this.height / 2 - this.offsetY;
+	this.root.add( this.ghostPackages );
+
+	mat = new THREE.MeshBasicMaterial( {
+		color: "rgb( 255, 255, 255 )",
+		wireframe: true
+	} );
+
+	for ( i = 0; i < this.connectElements.length; i++ ) {
+		el = this.connectElements[ i ].userData.element;
+
+		// Create offset frame
+		parent = new THREE.Object3D();
+		parent.position.x = this.parseCoord( el.getAttribute( "x" ) );
+		parent.position.y = this.parseCoord( el.getAttribute( "y" ) );
+		if ( el.hasAttribute( "rot" ) ) {
+			angle = new EagleBrdRenderer.AngleData( el.getAttribute( "rot" ) );
+			parent.rotation.z = angle.angle;
+			if ( angle.mirror ) {
+				parent.rotation.y = Math.PI;
+				parent.position.z = -this.thickness;
+			}
+			if ( angle.spin ) {
+				parent.rotation.x = Math.PI;
+			}
+		}
+
+		pack = this.connectElements[ i ].userData.package;
+
+		minX = Infinity;
+		maxX = -Infinity;
+		minY = Infinity;
+		maxY = -Infinity;
+		for ( j = 0; j < pack.children.length; j++ ) {
+			child = pack.children[ j ];
+			if ( child.tagName === "pad" || child.tagName === "smd" ) {
+				x = child.getAttribute( "x" );
+				y = child.getAttribute( "y" );
+				minX = Math.min( x, minX );
+				maxX = Math.max( x, maxX );
+				minY = Math.min( y, minY );
+				maxY = Math.max( y, maxY );
+			}
+		}
+
+		// console.log( "Element", minX, minY, maxX, maxY );
+
+		if (
+				minX !== Infinity && maxX !== -Infinity &&
+				minY !== Infinity && maxX !== -Infinity ) {
+			dx = this.parseCoord( maxX - minX );
+			dy = this.parseCoord( maxY - minY );
+			if ( dx !== 0 && dy !== 0 ) {
+				geo = new THREE.BoxGeometry( dx, dy, 20 );
+				mesh = new THREE.Mesh( geo, mat );
+				parent.add( mesh );
+				mesh.position.x = minX;
+				mesh.position.y = minY;
+				mesh.position.z = 10;
+			}
+		}
+
+		if ( parent.children.length > 0 ) {
+			this.ghostPackages.add( parent );
+		}
+	}
 };
 
 
@@ -2567,6 +2769,41 @@ EagleBrdRenderer.prototype.renderSolderpasteLayer = function( layer ) {
 	ctx.scale( 1, -1 );
 	ctx.drawImage( this.getLayer( "Bounds" ).buffer, 0, 0 );
 	ctx.restore();
+};
+
+
+EagleBrdRenderer.prototype.visualizeConnector = function( connector, color ) {
+
+	/**
+	Put a wireframe dome over a `Connector` object to indicate its position.
+	This method will not create geometry unless `params.visualize` was set
+	to `true`.
+
+	@method visualizeConnector
+	@param connector {Object3D} Connector to which to append geometry
+	@param [color="rgb( 255, 255, 0 )"] {string} Color of wireframe
+	@return {THREE.Mesh} Wireframe entity
+	**/
+
+	var mesh;
+
+	if ( !this.params.viewConnectors ) {
+		return;
+	}
+
+	color = color || "rgb( 255, 255, 0 )";
+
+	mesh = new THREE.Mesh(
+			new THREE.SphereGeometry(
+				32, 8, 2, 0, Math.PI * 2, 0, Math.PI / 2 ),
+			new THREE.MeshBasicMaterial( {
+				color: color,
+				wireframe: true
+			} ) );
+
+	connector.add( mesh );
+
+	return mesh;
 };
 
 
