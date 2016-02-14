@@ -3393,12 +3393,12 @@ EagleBrdRenderer.Layer.prototype.orientContext = function( el, scale ) {
 
 	this.ctx.translate( x, y );
 
-	this.ctx.rotate( ang.angle );
-
 	if ( ang.mirror ) {
 		this.ctx.scale( -1, 1 );
 	}
 	if ( ang.spin ) {
 		this.ctx.scale( 1, -1 );
 	}
+
+	this.ctx.rotate( ang.angle );
 };
