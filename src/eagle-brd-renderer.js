@@ -198,8 +198,8 @@ var EagleBrdRenderer = function( xml, params ) {
 
 	// Optional visualizations
 	this.buildGhostPackages();
-	this.viewConnectors( !( params.viewConnectors === false ) );
-	this.viewGhosts( !( params.viewGhosts === false ) );
+	this.viewConnectors( !!params.viewConnectors );
+	this.viewGhosts( !!params.viewGhosts );
 };
 
 
