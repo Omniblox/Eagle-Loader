@@ -193,9 +193,10 @@ var EagleBrdRenderer = function( xml, params ) {
 	// Finalize element connectors
 	this._finalizeElementConnectors();
 
-	if ( params.viewGhosts ) {
-		this.buildGhostPackages();
-	}
+	// Optional visualizations
+	this.buildGhostPackages();
+	this.viewConnectors( !( params.viewConnectors === false ) );
+	this.viewGhosts( !( params.viewGhosts === false ) );
 };
 
 
@@ -1257,7 +1258,7 @@ EagleBrdRenderer.prototype.buildGhostPackages = function() {
 	@method buildGhostPackages
 	**/
 
-	var angle, child, el, geo, i, j, k, mat, mesh, pack, parent, radius, verts,
+	var angle, child, el, geo, i, j, mat, mesh, pack, parent,
 		dx, dy, maxX, maxY, minX, minY, x, y;
 
 	/**
@@ -2841,6 +2842,22 @@ EagleBrdRenderer.prototype.viewConnectors = function( show ) {
 	for ( i = 0; i < this.connectorHandles.length; i++ ) {
 		this.connectorHandles[ i ].visible = show;
 	}
+};
+
+
+EagleBrdRenderer.prototype.viewGhosts = function( show ) {
+
+	/**
+	Set ghost device visibility. These are just an approximation of
+	possible devices, inferred from pad positions.
+
+	@method viewGhosts
+	@param [show=true] {boolean} Whether to show ghosts or not
+	**/
+
+	show = show === false ? false : true;
+
+	this.ghostPackages.visible = show;
 };
 
 
