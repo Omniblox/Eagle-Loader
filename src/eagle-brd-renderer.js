@@ -683,6 +683,11 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 
 			this.visualizeConnector( connector );
 
+			connector.userData.drill = drills[ i ];
+			if ( drills[ i ].elementParent ) {
+				connector.userData.element = drills[ i ].elementParent;
+			}
+
 			// Bottom connector
 			connector = new Connector();
 			mesh.add( connector );
