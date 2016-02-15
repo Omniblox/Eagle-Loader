@@ -53,6 +53,8 @@ var EagleBrdRenderer = function( xml, params ) {
 
 	console.log( "Beginning BRD parse" );
 
+	params = params || {};
+
 	/**
 	Collection of colors used to render boards.
 
