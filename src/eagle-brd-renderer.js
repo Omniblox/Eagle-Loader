@@ -33,6 +33,12 @@ var EagleBrdRenderer = function( xml, params ) {
 	@constructor
 	@param xml {Document} XML document to parse
 	@param [params] {object} Composite parameter object
+		@param [params.color] {object} Define custom colors; see `this.colors`
+		@param [params.composite=true] {boolean} Whether to composite layers,
+			or render them as individual geometries. Warning: individual
+			layers are very slow.
+		@param [params.maskOpacity=0.8] {number} Opacity of solder mask;
+			opacity is halved over copper traces
 		@param [params.pixelMicrons=35] {number} Resolution of texture maps.
 			By default, this is 35 microns, equal to the thickness
 			of a default copper layer.
@@ -71,13 +77,14 @@ var EagleBrdRenderer = function( xml, params ) {
 		@property colors.solderMask {string} "rgb( 32, 64, 192 )"
 		@property colors.solderPaste {string} "rgb( 192, 192, 192 )"
 	**/
+	this.colors = params.colors || {};
 	this.colors = {
-		bounds: "rgb( 32, 192, 32 )",
-		copper: "rgb( 255, 222, 164 )",
-		prepreg: "rgb( 222, 222, 192 )",
-		silkscreen: "rgb( 255, 255, 255 )",
-		solderMask: "rgb( 32, 64, 192 )",
-		solderPaste: "rgb( 192, 192, 222 )"
+		bounds: this.colors.bounds || "rgb( 32, 192, 32 )",
+		copper: this.colors.copper || "rgb( 255, 222, 164 )",
+		prepreg: this.colors.prepreg || "rgb( 222, 222, 192 )",
+		silkscreen: this.colors.silkscreen || "rgb( 255, 255, 255 )",
+		solderMask: this.colors.solderMask || "rgb( 32, 64, 192 )",
+		solderPaste: this.colors.solderPaste || "rgb( 192, 192, 222 )"
 	};
 
 	/**
@@ -152,9 +159,12 @@ var EagleBrdRenderer = function( xml, params ) {
 	this.renderIsolate();
 
 	// Generate geometry
-	// this._buildLayerGeometry( false );
-	// this._buildLayerGeometry();
-	this._buildCompositeGeometry();
+	if ( params.composite === false ) {
+		this._buildLayerGeometry();
+		this._buildDepthElements();
+	} else {
+		this._buildCompositeGeometry();
+	}
 
 	// Finalize element connectors
 	this._finalizeElementConnectors();
@@ -271,6 +281,8 @@ EagleBrdRenderer.prototype._buildDepthElements = function( add ) {
 	@param [add=true] {boolean} Whether to add geometry to the board root
 	@private
 	**/
+
+	add = add === false ? false : true;
 
 	/**
 	Collection of THREE.js geometry representing depth elements.
