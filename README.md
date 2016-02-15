@@ -10,6 +10,8 @@ This script loads and renders a visualisation of a PCB (printed circuit board). 
 
 The script visualizes the PCB as a THREE.js model. It incorporates `Connector` objects, allowing it to be connected to other geometric objects. There are several options for generating the PCB.
 
+The script is not 100% accurate, and should not be used for critical applications. It is intended as a visualization aid only. Every opportunity has been taken to indicate where more work is needed.
+
 
 ## Files and Folders
 
@@ -63,3 +65,16 @@ This will create a PCB with green masking, at half the standard resolution (of 3
 You may also toggle connector and ghost visibility with `brd.viewConnectors( true )` and `brd.viewGhosts( true )`. Ghosts are approximations of certain mounted devices on the PCB.
 
 For more details and examples, consult the API documentation in `docs/` and the examples folders.
+
+
+## Future Development
+
+The following improvements would be most useful:
+
+* Generate full bump and specular map passes as well as color.
+* Generate texture maps using `<signal>` elements, rather than collections of components. This will allow the script to correctly layer copper traces, connect to ground planes, and process orphans.
+* Ensure that copper polygons may fuse properly with pads according to EAGLE rules.
+* Investigate the method whereby thermals are generated. Does it involve `<pin>` elements?
+* The current board edges are defined by wire cuts. If these are not present, no bounds will be generated. A `<polygon>` element tagged as OUTLINES may be a valid alternative, but this has not been implemented or tested yet.
+* Text orientation is sometimes different to physical board samples.
+* Gold coating is not interpreted.
