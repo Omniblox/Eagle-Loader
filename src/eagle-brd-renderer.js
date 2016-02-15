@@ -41,7 +41,8 @@ var EagleBrdRenderer = function( xml, params ) {
 			opacity is halved over copper traces
 		@param [params.pixelMicrons=35] {number} Resolution of texture maps.
 			By default, this is 35 microns, equal to the thickness
-			of a default copper layer.
+			of a default copper layer. Note that this will affect the
+			size of the board geometry.
 		@param [params.material="phong"] {string} Material shader to use.
 			Options include `"phong"` for realistic lighting,
 			`"lambert"` for flat lighting, and `"basic"` for no lighting.
