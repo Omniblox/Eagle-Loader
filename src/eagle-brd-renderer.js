@@ -42,6 +42,9 @@ var EagleBrdRenderer = function( xml, params ) {
 		@param [params.pixelMicrons=35] {number} Resolution of texture maps.
 			By default, this is 35 microns, equal to the thickness
 			of a default copper layer.
+		@param [params.material="phong"] {string} Material shader to use.
+			Options include `"phong"` for realistic lighting,
+			`"lambert"` for flat lighting, and `"basic"` for no lighting.
 		@param [params.viewConnectors=false] {boolean} Whether to visualize
 			Connector objects
 		@param [params.viewGhosts=false] {boolean} Whether to draw
@@ -49,22 +52,6 @@ var EagleBrdRenderer = function( xml, params ) {
 	**/
 
 	console.log( "Beginning BRD parse" );
-
-	/**
-	List of `Connector` objects associated with packaged elements,
-	such as resistors, surface-mounted devices, and other predefined
-	board components.
-
-	@property connectElements {array}
-	**/
-	this.connectElements = [];
-
-	/**
-	List of `Connector` objects associated with holes and pads.
-
-	@property connectHoles {array}
-	**/
-	this.connectHoles = [];
 
 	/**
 	Collection of colors used to render boards.
@@ -88,25 +75,64 @@ var EagleBrdRenderer = function( xml, params ) {
 	};
 
 	/**
+	List of `Connector` objects associated with packaged elements,
+	such as resistors, surface-mounted devices, and other predefined
+	board components
+
+	@property connectElements {array}
+	**/
+	this.connectElements = [];
+
+	/**
+	List of `Connector` objects associated with holes and pads
+
+	@property connectHoles {array}
+	**/
+	this.connectHoles = [];
+
+	/**
+	List of `Connector` handles; used to toggle visibility
+
+	@property connectorHangles {array}
+	**/
+	this.connectorHandles = [];
+
+	/**
 	Opacity of soldermask
 
-	@property maskOpacity {number} 0.8
+	@property _maskOpacity {number} 0.8
+	@private
 	**/
-	this.maskOpacity = params.maskOpacity || 0.8;
+	this._maskOpacity = params.maskOpacity || 0.8;
+
+	/**
+	Material shader to use.
+
+	@property material {function} THREE.MeshPhongMaterial
+	**/
+	params.material = typeof params.material === "string" ?
+		params.material : "phong";
+	params.material = params.material.toLowerCase();
+	this.material = params.material === "phong" ?
+		THREE.MeshPhongMaterial : params.material === "lambert" ?
+		THREE.MeshLambertMaterial :
+		THREE.MeshBasicMaterial;
 
 	/**
 	Shininess of 3D components
 
-	@property shininess {number} 128
+	@property _shininess {number} 128
+	@private
 	**/
-	this.shininess = 128;
+	this._shininess = 128;
 
 	/**
-	Optional parameters used to configure render
+	Microns per pixel. A higher pixelMicrons value produces a smaller board.
 
-	@property params {object}
+	@property pixelMicrons {number} 35
 	**/
-	this.params = params;
+	this.pixelMicrons =
+		isNaN( params.pixelMicrons ) ? 35 : params.pixelMicrons;
 
 	/**
 	Root THREE.js transform, containing board elements
@@ -134,8 +160,6 @@ var EagleBrdRenderer = function( xml, params ) {
 	**/
 	this.layers = [];
 
-	this._setDefaultParams();
-
 	/**
 	Scale factor for converting from millimeters to pixels.
 	Coords in the XML should be multiplied by this before drawing.
@@ -143,7 +167,7 @@ var EagleBrdRenderer = function( xml, params ) {
 	@property coordScale {number}
 	@default 28.57
 	**/
-	this.coordScale = 1000 / this.params.pixelMicrons;
+	this.coordScale = 1000 / this.pixelMicrons;
 
 	this._parseDesignRules();
 
@@ -220,7 +244,7 @@ EagleBrdRenderer.prototype._buildCompositeGeometry = function( add ) {
 
 	this.layerCompositeTop.buildGeometry();
 	this.layerCompositeTop.geometry.faces.splice( 2, 2 );
-	this.layerCompositeTop.material.shininess = this.shininess;
+	this.layerCompositeTop.material.shininess = this._shininess;
 
 
 
@@ -254,7 +278,7 @@ EagleBrdRenderer.prototype._buildCompositeGeometry = function( add ) {
 	this.layerCompositeBottom.buildGeometry();
 	this.layerCompositeBottom.geometry.faces.splice( 0, 2 );
 	this.layerCompositeBottom.geometry.faceVertexUvs[ 0 ].splice( 0, 2 );
-	this.layerCompositeBottom.material.shininess = this.shininess;
+	this.layerCompositeBottom.material.shininess = this._shininess;
 
 
 
@@ -389,13 +413,13 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 
 
 	// Draw wires
-	mat = new THREE.MeshPhongMaterial( {
+	mat = new this.material( {
 		color: this.colors.prepreg,
 		// map: this.textureEdge,
 		// normalMap: this.textureEdge,
 		bumpMap: this.textureEdge,
 		side: THREE.DoubleSide,
-		shininess: this.shininess,
+		shininess: this._shininess,
 		// wireframe: true
 	} );
 
@@ -602,11 +626,11 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 
 
 	// Create drills
-	mat = new THREE.MeshPhongMaterial( {
+	mat = new this.material( {
 		color: new THREE.Color( this.colors.copper ),
 		side: THREE.BackSide,
 		specular: new THREE.Color( this.colors.copper ),
-		shininess: this.shininess,
+		shininess: this._shininess,
 	} );
 	for ( i = 0; i < drills.length; i++ ) {
 		drill = this.parseCoord( drills[ i ].getAttribute( "drill" ) ) / 2;
@@ -1220,23 +1244,6 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 
 	console.log( "Populating elements..." );
 	this._parseCollection( this.xml.getElementsByTagName( "elements" )[ 0 ] );
-};
-
-
-EagleBrdRenderer.prototype._setDefaultParams = function() {
-
-	/**
-	Ensure that required params are set.
-
-	@method _setDefaultParams
-	@private
-	**/
-
-	if ( !this.params ) {
-		this.params = {};
-	}
-
-	this.params.pixelMicrons = this.params.pixelMicrons || 35;
 };
 
 
@@ -2604,14 +2611,14 @@ EagleBrdRenderer.prototype.renderSolderMaskLayer = function( layer ) {
 
 	// Fill with mask
 	ctx.save();
-	ctx.globalAlpha = this.maskOpacity;
+	ctx.globalAlpha = this._maskOpacity;
 	ctx.fillRect( -this.offsetX, -this.offsetY, this.width , this.height );
 	ctx.restore();
 
 	// Reveal traces
 	ctx.save();
 	ctx.globalCompositeOperation = "destination-out";
-	ctx.globalAlpha = this.maskOpacity / 2;
+	ctx.globalAlpha = this._maskOpacity / 2;
 	ctx.translate( -this.offsetX, this.height - this.offsetY );
 	ctx.scale( 1, -1 );
 	ctx.drawImage( probeLayer.buffer, 0, 0 );
@@ -2818,6 +2825,25 @@ EagleBrdRenderer.prototype.renderSolderpasteLayer = function( layer ) {
 };
 
 
+EagleBrdRenderer.prototype.viewConnectors = function( show ) {
+
+	/**
+	Set connector handle visibility.
+
+	@method viewConnectors
+	@param [show=true] {boolean} Whether to show connectors or not
+	**/
+
+	var i;
+
+	show = show === false ? false : true;
+
+	for ( i = 0; i < this.connectorHandles.length; i++ ) {
+		this.connectorHandles[ i ].visible = show;
+	}
+};
+
+
 EagleBrdRenderer.prototype.visualizeConnector = function( connector, color ) {
 
 	/**
@@ -2833,10 +2859,6 @@ EagleBrdRenderer.prototype.visualizeConnector = function( connector, color ) {
 
 	var mesh;
 
-	if ( !this.params.viewConnectors ) {
-		return;
-	}
-
 	color = color || "rgb( 255, 255, 0 )";
 
 	mesh = new THREE.Mesh(
@@ -2848,6 +2870,8 @@ EagleBrdRenderer.prototype.visualizeConnector = function( connector, color ) {
 			} ) );
 
 	connector.add( mesh );
+
+	this.connectorHandles.push( mesh );
 
 	return mesh;
 };
@@ -3315,15 +3339,15 @@ EagleBrdRenderer.Layer.prototype.buildGeometry = function() {
 	matOptions.bumpMap = this.texture;
 	if ( this.hasTag( "Copper" ) || this.hasTag( "Solderpaste" ) ) {
 		matOptions.specularMap = this.texture;
-		matOptions.shininess = this.shininess;
+		matOptions.shininess = this._shininess;
 	}
 
 	/**
 	Material for layer
 
-	@property material {THREE.MeshPhongMaterial}
+	@property material {THREE.Material}
 	**/
-	this.material = new THREE.MeshPhongMaterial( matOptions );
+	this.material = new this.board.material( matOptions );
 
 	/**
 	Mesh for layer; THREE scene component
