@@ -96,14 +96,15 @@ var EagleBrdRenderer = function( xml, params ) {
 	/**
 	List of `Connector` handles; used to toggle visibility
 
-	@property connectorHangles {array}
+	@property connectorHandles {array}
 	**/
 	this.connectorHandles = [];
 
 	/**
 	Opacity of soldermask
 
-	@property _maskOpacity {number} 0.8
+	@property _maskOpacity {number}
+	@default 0.8
 	@private
 	**/
 	this._maskOpacity = params.maskOpacity || 0.8;
@@ -111,7 +112,8 @@ var EagleBrdRenderer = function( xml, params ) {
 	/**
 	Material shader to use.
 
-	@property material {function} THREE.MeshPhongMaterial
+	@property material {function}
+	@default THREE.MeshPhongMaterial
 	**/
 	params.material = typeof params.material === "string" ?
 		params.material : "phong";
@@ -124,7 +126,8 @@ var EagleBrdRenderer = function( xml, params ) {
 	/**
 	Shininess of 3D components
 
-	@property _shininess {number} 128
+	@property _shininess {number}
+	@default 128
 	@private
 	**/
 	this._shininess = 128;
@@ -132,7 +135,8 @@ var EagleBrdRenderer = function( xml, params ) {
 	/**
 	Microns per pixel. A higher pixelMicrons value produces a smaller board.
 
-	@property pixelMicrons {number} 35
+	@property pixelMicrons {number}
+	@default 35
 	**/
 	this.pixelMicrons =
 		isNaN( params.pixelMicrons ) ? 35 : params.pixelMicrons;
@@ -1013,7 +1017,9 @@ EagleBrdRenderer.prototype._parseElement = function( el ) {
 	/**
 	Element currently being parsed. Used to append data to package elements.
 
-	@property _elementCurrent {Element} undefined
+	@property _elementCurrent {Element}
+	@default undefined
+	@private
 	**/
 	this._elementCurrent = el;
 
@@ -2922,19 +2928,26 @@ EagleBrdRenderer.AngleData = function( ang ) {
 		ang = "R0";
 	}
 
+	/**
+	Angle measurement in radians
+
+	@property angle {number}
+	**/
 	this.angle = parseFloat( ang.match( /[0-9.]+/ ) ) * Math.PI / 180;
 
 	/**
 	Whether the angle includes a horizontal mirror
 
-	@property mirror {boolean} false
+	@property mirror {boolean}
+	@default false
 	**/
 	this.mirror = ang.indexOf( "M" ) === -1 ? false : true;
 
 	/**
 	Whether the angle includes a vertical spin
 
-	@property spin {boolean} false
+	@property spin {boolean}
+	@default false
 	**/
 	this.spin = ang.indexOf( "S" ) === -1 ? false : true;
 };
@@ -3134,7 +3147,8 @@ EagleBrdRenderer.Layer = function( params ) {
 	Depth displacement of layer relative to board origin.
 	Note that greater height will position the layer further from the camera.
 
-	@property height {number} 0
+	@property height {number}
+	@default 0
 	**/
 	this.height = params.height || 0;
 

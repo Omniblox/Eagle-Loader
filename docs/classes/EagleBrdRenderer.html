@@ -39,7 +39,9 @@
                         <div id="api-tabview-panel">
                             <ul id="api-classes" class="apis classes">
                                 <li><a href="../classes/EagleBrdRenderer.html">EagleBrdRenderer</a></li>
+                                <li><a href="../classes/EagleBrdRenderer.AngleData.html">EagleBrdRenderer.AngleData</a></li>
                                 <li><a href="../classes/EagleBrdRenderer.ChordData.html">EagleBrdRenderer.ChordData</a></li>
+                                <li><a href="../classes/EagleBrdRenderer.Layer.html">EagleBrdRenderer.Layer</a></li>
                             </ul>
                 
                 
@@ -162,6 +164,42 @@ textures and geometry.</p>
 
                         <ul class="params-list">
                             <li class="param">
+                                    <code class="param-name optional">[color]</code>
+                                    <span class="type">Object</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Define custom colors; see <code>this.colors</code></p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[composite=true]</code>
+                                    <span class="type">Boolean</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Whether to composite layers,
+or render them as individual geometries. Warning: individual
+layers are very slow.</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[maskOpacity=0.8]</code>
+                                    <span class="type">Number</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Opacity of solder mask;
+opacity is halved over copper traces</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
                                     <code class="param-name optional">[pixelMicrons=35]</code>
                                     <span class="type">Number</span>
                                     <span class="flag optional" title="This parameter is optional.">optional</span>
@@ -169,7 +207,45 @@ textures and geometry.</p>
                                 <div class="param-description">
                                     <p>Resolution of texture maps.
 By default, this is 35 microns, equal to the thickness
-of a default copper layer.</p>
+of a default copper layer. Note that this will affect the
+size of the board geometry.</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[material=&quot;phong&quot;]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Material shader to use.
+Options include <code>&quot;phong&quot;</code> for realistic lighting,
+<code>&quot;lambert&quot;</code> for flat lighting, and <code>&quot;basic&quot;</code> for no lighting.</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[viewConnectors=false]</code>
+                                    <span class="type">Boolean</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Whether to visualize
+Connector objects</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[viewGhosts=false]</code>
+                                    <span class="type">Boolean</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Whether to draw
+approximate ghosts of on-board devices</p>
 
                                 </div>
 
@@ -201,7 +277,35 @@ of a default copper layer.</p>
 
                     <ul class="index-list methods">
                             <li class="index-item method private">
-                                <a href="#method__parseBoardBounds">_parseBoardBounds</a>
+                                <a href="#method__buildCompositeGeometry">_buildCompositeGeometry</a>
+
+                            </li>
+                            <li class="index-item method private">
+                                <a href="#method__buildDepthElements">_buildDepthElements</a>
+
+                            </li>
+                            <li class="index-item method private">
+                                <a href="#method__buildDepthHoles">_buildDepthHoles</a>
+
+                            </li>
+                            <li class="index-item method private">
+                                <a href="#method__buildDepthHoles">_buildDepthHoles</a>
+
+                            </li>
+                            <li class="index-item method private">
+                                <a href="#method__buildLayerGeometry">_buildLayerGeometry</a>
+
+                            </li>
+                            <li class="index-item method private">
+                                <a href="#method__finalizeElementConnectors">_finalizeElementConnectors</a>
+
+                            </li>
+                            <li class="index-item method private">
+                                <a href="#method__parseBounds">_parseBounds</a>
+
+                            </li>
+                            <li class="index-item method private">
+                                <a href="#method__parseCollection">_parseCollection</a>
 
                             </li>
                             <li class="index-item method private">
@@ -209,7 +313,51 @@ of a default copper layer.</p>
 
                             </li>
                             <li class="index-item method private">
-                                <a href="#method__setDefaultParams">_setDefaultParams</a>
+                                <a href="#method__parseElement">_parseElement</a>
+
+                            </li>
+                            <li class="index-item method private">
+                                <a href="#method__populateLayers">_populateLayers</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_buildGhostPackages">buildGhostPackages</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_drawCircles">drawCircles</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_drawHoles">drawHoles</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_drawPads">drawPads</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_drawPolygons">drawPolygons</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_drawRectangles">drawRectangles</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_drawSmds">drawSmds</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_drawTexts">drawTexts</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_drawViaRings">drawViaRings</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_drawWirePaths">drawWirePaths</a>
 
                             </li>
                             <li class="index-item method">
@@ -217,11 +365,63 @@ of a default copper layer.</p>
 
                             </li>
                             <li class="index-item method">
-                                <a href="#method_getElementsByTagNameAndLayer">getElementsByTagNameAndLayer</a>
+                                <a href="#method_getLayer">getLayer</a>
 
                             </li>
                             <li class="index-item method">
                                 <a href="#method_parseCoord">parseCoord</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_parseDistanceMm">parseDistanceMm</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_renderBounds">renderBounds</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_renderCopper">renderCopper</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_renderCopperLayer">renderCopperLayer</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_renderIsolate">renderIsolate</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_renderIsolateLayer">renderIsolateLayer</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_renderSolderMask">renderSolderMask</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_renderSolderMaskLayer">renderSolderMaskLayer</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_renderSolderpaste">renderSolderpaste</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_renderSolderpasteLayer">renderSolderpasteLayer</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_viewConnectors">viewConnectors</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_viewGhosts">viewGhosts</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_visualizeConnector">visualizeConnector</a>
 
                             </li>
                     </ul>
@@ -231,12 +431,40 @@ of a default copper layer.</p>
                     <h3>Properties</h3>
 
                     <ul class="index-list properties">
+                            <li class="index-item property private">
+                                <a href="#property__elementCurrent">_elementCurrent</a>
+
+                            </li>
+                            <li class="index-item property private">
+                                <a href="#property__maskOpacity">_maskOpacity</a>
+
+                            </li>
+                            <li class="index-item property private">
+                                <a href="#property__shininess">_shininess</a>
+
+                            </li>
                             <li class="index-item property">
                                 <a href="#property_bounds">bounds</a>
 
                             </li>
                             <li class="index-item property">
-                                <a href="#property_buffers">buffers</a>
+                                <a href="#property_bufferEdge">bufferEdge</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_colors">colors</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_connectElements">connectElements</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_connectHoles">connectHoles</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_connectorHandles">connectorHandles</a>
 
                             </li>
                             <li class="index-item property">
@@ -244,7 +472,15 @@ of a default copper layer.</p>
 
                             </li>
                             <li class="index-item property">
+                                <a href="#property_depthElements">depthElements</a>
+
+                            </li>
+                            <li class="index-item property">
                                 <a href="#property_designRules">designRules</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_ghostPackages">ghostPackages</a>
 
                             </li>
                             <li class="index-item property">
@@ -252,7 +488,19 @@ of a default copper layer.</p>
 
                             </li>
                             <li class="index-item property">
+                                <a href="#property_layerCompositeBottom">layerCompositeBottom</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_layerCompositeTop">layerCompositeTop</a>
+
+                            </li>
+                            <li class="index-item property">
                                 <a href="#property_layers">layers</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_material">material</a>
 
                             </li>
                             <li class="index-item property">
@@ -264,7 +512,19 @@ of a default copper layer.</p>
 
                             </li>
                             <li class="index-item property">
-                                <a href="#property_params">params</a>
+                                <a href="#property_pixelMicrons">pixelMicrons</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_root">root</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_textureEdge">textureEdge</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_thickness">thickness</a>
 
                             </li>
                             <li class="index-item property">
@@ -284,8 +544,298 @@ of a default copper layer.</p>
             <div id="methods" class="api-class-tabpanel">
                 <h2 class="off-left">Methods</h2>
 
-<div id="method__parseBoardBounds" class="method item private">
-    <h3 class="name"><code>_parseBoardBounds</code></h3>
+<div id="method__buildCompositeGeometry" class="method item private">
+    <h3 class="name"><code>_buildCompositeGeometry</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code class="optional">[add=true]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+        <span class="flag private">private</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l212"><code>src&#x2F;eagle-brd-renderer.js:212</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Construct THREE.js geometry, bearing composited textures from all layers.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name optional">[add=true]</code>
+                        <span class="type">Boolean</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>Whether to add geometry to the board root</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
+<div id="method__buildDepthElements" class="method item private">
+    <h3 class="name"><code>_buildDepthElements</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code class="optional">[add=true]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+        <span class="flag private">private</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l305"><code>src&#x2F;eagle-brd-renderer.js:305</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Construct THREE.js geometry representing depth elements,
+such as holes and edges.</p>
+<p>This grouping also includes element connectors,
+to keep them out of the root child space.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name optional">[add=true]</code>
+                        <span class="type">Boolean</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>Whether to add geometry to the board root</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
+<div id="method__buildDepthHoles" class="method item private">
+    <h3 class="name"><code>_buildDepthHoles</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code class="optional">[add=true]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+        <span class="flag private">private</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l575"><code>src&#x2F;eagle-brd-renderer.js:575</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Construct THREE.js geometry representing depth elements,
+including drills in holes, vias, and pads.</p>
+<p>This includes <code>Connector</code> objects for holes and pads,
+to allow the PCB to become part of an assembly.
+These are listed in <code>connectHoles</code>.</p>
+<p>NOTE: Currently, all holes are assumed to be copper-coated.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name optional">[add=true]</code>
+                        <span class="type">Boolean</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>Whether to add geometry to the board root</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
+<div id="method__buildDepthHoles" class="method item private">
+    <h3 class="name"><code>_buildDepthHoles</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code class="optional">[add=true]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+        <span class="flag private">private</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l339"><code>src&#x2F;eagle-brd-renderer.js:339</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Construct THREE.js geometry representing depth edges.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name optional">[add=true]</code>
+                        <span class="type">Boolean</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>Whether to add geometry to the board root</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
+<div id="method__buildLayerGeometry" class="method item private">
+    <h3 class="name"><code>_buildLayerGeometry</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code class="optional">[add=true]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+        <span class="flag private">private</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l739"><code>src&#x2F;eagle-brd-renderer.js:739</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Construct THREE.js geometry bearing the generated textures.
+This is probably too detailed for everyday use,
+but might have some utility in generating exploded layer views.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name optional">[add=true]</code>
+                        <span class="type">Boolean</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>Whether to add geometry to the board root</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
+<div id="method__finalizeElementConnectors" class="method item private">
+    <h3 class="name"><code>_finalizeElementConnectors</code></h3>
 
         <span class="paren">()</span>
 
@@ -300,7 +850,40 @@ of a default copper layer.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l126"><code>src&#x2F;eagle-brd-renderer.js:126</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l764"><code>src&#x2F;eagle-brd-renderer.js:764</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Apply offset to element connectors generated before that information
+was available.</p>
+
+    </div>
+
+
+
+
+</div>
+<div id="method__parseBounds" class="method item private">
+    <h3 class="name"><code>_parseBounds</code></h3>
+
+        <span class="paren">()</span>
+
+
+
+        <span class="flag private">private</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l782"><code>src&#x2F;eagle-brd-renderer.js:782</code></a>
         </p>
 
 
@@ -313,6 +896,64 @@ This is derived from <code>eagle.drawing.board.plain</code> wires.</p>
 
     </div>
 
+
+
+
+</div>
+<div id="method__parseCollection" class="method item private">
+    <h3 class="name"><code>_parseCollection</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>el</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+        <span class="flag private">private</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l894"><code>src&#x2F;eagle-brd-renderer.js:894</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Parse an element from the BRD which contains primitives.
+If if encounters a package, it will recurse and parse that element.
+Primitives are deployed to any number of layers, from 0 to all,
+depending on which layers want it.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">el</code>
+                        <span class="type">Element</span>
+
+
+                    <div class="param-description">
+                        <p>XML element from BRD to parse</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
 
 
 
@@ -333,7 +974,7 @@ This is derived from <code>eagle.drawing.board.plain</code> wires.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l97"><code>src&#x2F;eagle-brd-renderer.js:97</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l938"><code>src&#x2F;eagle-brd-renderer.js:938</code></a>
         </p>
 
 
@@ -349,8 +990,65 @@ This is derived from <code>eagle.drawing.board.plain</code> wires.</p>
 
 
 </div>
-<div id="method__setDefaultParams" class="method item private">
-    <h3 class="name"><code>_setDefaultParams</code></h3>
+<div id="method__parseElement" class="method item private">
+    <h3 class="name"><code>_parseElement</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>el</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+        <span class="flag private">private</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l969"><code>src&#x2F;eagle-brd-renderer.js:969</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Parse an <code>&lt;element&gt;</code> element from the XML library.</p>
+<p>This will also register the element as a <code>Connector</code> object
+in <code>connectElements</code>.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">el</code>
+                        <span class="type">Element</span>
+
+
+                    <div class="param-description">
+                        <p><code>&lt;element&gt;</code> element to parse</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
+<div id="method__populateLayers" class="method item private">
+    <h3 class="name"><code>_populateLayers</code></h3>
 
         <span class="paren">()</span>
 
@@ -365,7 +1063,7 @@ This is derived from <code>eagle.drawing.board.plain</code> wires.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l308"><code>src&#x2F;eagle-brd-renderer.js:308</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l1062"><code>src&#x2F;eagle-brd-renderer.js:1062</code></a>
         </p>
 
 
@@ -373,10 +1071,933 @@ This is derived from <code>eagle.drawing.board.plain</code> wires.</p>
     </div>
 
     <div class="description">
-        <p>Ensure that required params are set.</p>
+        <p>Initialize layers and populate them with the BRD elements.</p>
+<p>Derives layer identities from designrules.
+These are described as layers and combinations.</p>
+<p>Layers are identified by numbers.
+Combinations are either &quot;+&quot; or &quot;*&quot;.</p>
+<ul>
+<li>&quot;*&quot; combinations are core-fused.</li>
+<li>&quot;+&quot; combinations are prepreg-fused.</li>
+<li>&quot;:&quot; combinations are discardable information about blind vias.</li>
+<li>&quot;(&quot; and &quot;[&quot; are also discardable via information.</li>
+</ul>
+<p>The combination method doesn't really matter, except for texturing.
+What matters is that we discard blind vias,
+and correctly identify copper and isolate layers in sequence.
+Thickness is defined in designrules as mtCopper and mtIsolate,
+in order of encountered types.</p>
+<p>For example, <code>(1*16)</code> can be simplified to <code>1*16</code>, and means
+&quot;copper layer 1, then a core isolate layer, then copper layer 2&quot;.
+The copper layer thicknesses are found in <code>mtCopper</code> [ 0 ] and [ 1 ].
+The isolate layer is found in <code>mtIsolate</code> [ 0 ].</p>
+<p>This method will also create cream, mask, and board layers.</p>
 
     </div>
 
+
+
+
+</div>
+<div id="method_buildGhostPackages" class="method item">
+    <h3 class="name"><code>buildGhostPackages</code></h3>
+
+        <span class="paren">()</span>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l1262"><code>src&#x2F;eagle-brd-renderer.js:1262</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Create ghost versions of the library components on the PCB.
+These are not very accurate, as the library is purely a schematic,
+but they'll serve as stand-ins.</p>
+
+    </div>
+
+
+
+
+</div>
+<div id="method_drawCircles" class="method item">
+    <h3 class="name"><code>drawCircles</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>params</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l1351"><code>src&#x2F;eagle-brd-renderer.js:1351</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Draw a series of circles, using current drawing styles.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">params</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>Composite parameter object</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name">layer</code>
+                                    <span class="type"><a href="../classes/EagleBrdRenderer.Layer.html" class="crosslink">EagleBrdRenderer.Layer</a></span>
+
+                                <div class="param-description">
+                                    <p>Layer being drawn</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[offset=0]</code>
+                                    <span class="type"></span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Extra size</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name">circles</code>
+                                    <span class="type">Array</span>
+
+                                <div class="param-description">
+                                    <p>List of circle elements to draw</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[layerMatch]</code>
+                                    <span class="type">Number</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>If defined,
+only elements with a matching <code>layer</code> attribute will draw</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[fill=false]</code>
+                                    <span class="type">Boolean</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Whether to fill circles</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[stroke=false]</code>
+                                    <span class="type">Boolean</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Whether to stroke circles</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
+<div id="method_drawHoles" class="method item">
+    <h3 class="name"><code>drawHoles</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>params</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l1411"><code>src&#x2F;eagle-brd-renderer.js:1411</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Draw a series of drill holes, using current drawing styles.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">params</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>Composite parameter object</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name">layer</code>
+                                    <span class="type"><a href="../classes/EagleBrdRenderer.Layer.html" class="crosslink">EagleBrdRenderer.Layer</a></span>
+
+                                <div class="param-description">
+                                    <p>Layer being drawn</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[offset=0]</code>
+                                    <span class="type">Number</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Extra radius</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name">holes</code>
+                                    <span class="type">Array</span>
+
+                                <div class="param-description">
+                                    <p>List of hole or via elements to draw</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
+<div id="method_drawPads" class="method item">
+    <h3 class="name"><code>drawPads</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>params</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l1462"><code>src&#x2F;eagle-brd-renderer.js:1462</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Draw a series of pads, using current drawing styles.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">params</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>Composite parameter object</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name">layer</code>
+                                    <span class="type"><a href="../classes/EagleBrdRenderer.Layer.html" class="crosslink">EagleBrdRenderer.Layer</a></span>
+
+                                <div class="param-description">
+                                    <p>Layer being drawn</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[offset=0]</code>
+                                    <span class="type">Number</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Extra radius</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name">pads</code>
+                                    <span class="type">Array</span>
+
+                                <div class="param-description">
+                                    <p>List of pad elements to draw</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
+<div id="method_drawPolygons" class="method item">
+    <h3 class="name"><code>drawPolygons</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>params</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l1584"><code>src&#x2F;eagle-brd-renderer.js:1584</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Draw a series of polygons, using current draw styles.</p>
+<p>NOTE: Some polygons can become part of pads.
+This is not implemented in this version. A thin isolation gap
+will appear around the core pad. Signal merging would be optimal.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">params</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>Composite parameter object</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name">layer</code>
+                                    <span class="type"><a href="../classes/EagleBrdRenderer.Layer.html" class="crosslink">EagleBrdRenderer.Layer</a></span>
+
+                                <div class="param-description">
+                                    <p>Layer being drawn</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[layerMatch]</code>
+                                    <span class="type">Number</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>If defined,
+only elements with a matching <code>layer</code> attribute will draw</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name">polys</code>
+                                    <span class="type">Array</span>
+
+                                <div class="param-description">
+                                    <p>List of polygon elements to render</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[offset=0]</code>
+                                    <span class="type">Number</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Extra margins</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
+<div id="method_drawRectangles" class="method item">
+    <h3 class="name"><code>drawRectangles</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>params</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l1683"><code>src&#x2F;eagle-brd-renderer.js:1683</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Draw a series of rectangles, using current drawing styles.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">params</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>Composite parameter object</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name">layer</code>
+                                    <span class="type"><a href="../classes/EagleBrdRenderer.Layer.html" class="crosslink">EagleBrdRenderer.Layer</a></span>
+
+                                <div class="param-description">
+                                    <p>Layer being drawn</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[offset=0]</code>
+                                    <span class="type"></span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Extra size</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name">rects</code>
+                                    <span class="type">Array</span>
+
+                                <div class="param-description">
+                                    <p>List of rectangle elements to draw</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[layerMatch]</code>
+                                    <span class="type">Number</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>If defined,
+only elements with a matching <code>layer</code> attribute will draw</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
+<div id="method_drawSmds" class="method item">
+    <h3 class="name"><code>drawSmds</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>params</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l1738"><code>src&#x2F;eagle-brd-renderer.js:1738</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Draw a series of smds, using current drawing styles.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">params</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>Composite parameter object</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name">layer</code>
+                                    <span class="type"><a href="../classes/EagleBrdRenderer.Layer.html" class="crosslink">EagleBrdRenderer.Layer</a></span>
+
+                                <div class="param-description">
+                                    <p>Layer being drawn</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[offset=0]</code>
+                                    <span class="type"></span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Extra size</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name">smds</code>
+                                    <span class="type">Array</span>
+
+                                <div class="param-description">
+                                    <p>List of SMD elements to draw</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
+<div id="method_drawTexts" class="method item">
+    <h3 class="name"><code>drawTexts</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>params</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l1791"><code>src&#x2F;eagle-brd-renderer.js:1791</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Draw a series of text legends, using current drawing styles.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">params</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>Composite parameter object</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name">layer</code>
+                                    <span class="type"><a href="../classes/EagleBrdRenderer.Layer.html" class="crosslink">EagleBrdRenderer.Layer</a></span>
+
+                                <div class="param-description">
+                                    <p>Layer being drawn</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[offset=0]</code>
+                                    <span class="type"></span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Extra size</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name">texts</code>
+                                    <span class="type">Array</span>
+
+                                <div class="param-description">
+                                    <p>List of text elements to draw</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[layerMatch]</code>
+                                    <span class="type">Number</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>If defined,
+only elements with a matching <code>layer</code> attribute will draw</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
+<div id="method_drawViaRings" class="method item">
+    <h3 class="name"><code>drawViaRings</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>params</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l1923"><code>src&#x2F;eagle-brd-renderer.js:1923</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Draw a series of via rings, using current drawing styles.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">params</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>Composite parameter object</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name">layer</code>
+                                    <span class="type"><a href="../classes/EagleBrdRenderer.Layer.html" class="crosslink">EagleBrdRenderer.Layer</a></span>
+
+                                <div class="param-description">
+                                    <p>Layer being drawn</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[offset=0]</code>
+                                    <span class="type">Number</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Extra radius</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name">vias</code>
+                                    <span class="type">Array</span>
+
+                                <div class="param-description">
+                                    <p>List of via elements to draw</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
+<div id="method_drawWirePaths" class="method item">
+    <h3 class="name"><code>drawWirePaths</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>params</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l1994"><code>src&#x2F;eagle-brd-renderer.js:1994</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Draw a series of paths from an array of wires.
+These paths are not continuous. Each has its own stroke width.</p>
+<p>Stroke style, other than width, does not change.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">params</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>Composite parameter object</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name">layer</code>
+                                    <span class="type"><a href="../classes/EagleBrdRenderer.Layer.html" class="crosslink">EagleBrdRenderer.Layer</a></span>
+
+                                <div class="param-description">
+                                    <p>Layer being drawn</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[widthOffset=0]</code>
+                                    <span class="type">Number</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Extra width</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name">wires</code>
+                                    <span class="type">Array</span>
+
+                                <div class="param-description">
+                                    <p>List of wire elements to draw</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[layerMatch]</code>
+                                    <span class="type">Number</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>If defined,
+only elements with a matching <code>layer</code> attribute will draw</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
 
 
 
@@ -399,7 +2020,7 @@ This is derived from <code>eagle.drawing.board.plain</code> wires.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l325"><code>src&#x2F;eagle-brd-renderer.js:325</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l2061"><code>src&#x2F;eagle-brd-renderer.js:2061</code></a>
         </p>
 
 
@@ -425,16 +2046,13 @@ curvature of the wire parameter. This list may be length 0.</p>
 
 
 </div>
-<div id="method_getElementsByTagNameAndLayer" class="method item">
-    <h3 class="name"><code>getElementsByTagNameAndLayer</code></h3>
+<div id="method_getLayer" class="method item">
+    <h3 class="name"><code>getLayer</code></h3>
 
         <div class="args">
             <span class="paren">(</span><ul class="args-list inline commas">
                 <li class="arg">
-                        <code>tag</code>
-                </li>
-                <li class="arg">
-                        <code>layer</code>
+                        <code>name</code>
                 </li>
             </ul><span class="paren">)</span>
         </div>
@@ -452,7 +2070,7 @@ curvature of the wire parameter. This list may be length 0.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l393"><code>src&#x2F;eagle-brd-renderer.js:393</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l2111"><code>src&#x2F;eagle-brd-renderer.js:2111</code></a>
         </p>
 
 
@@ -460,7 +2078,7 @@ curvature of the wire parameter. This list may be length 0.</p>
     </div>
 
     <div class="description">
-        <p>Return a list of all specified tags on a specified layer.</p>
+        <p>Return a layer of the specified name.</p>
 
     </div>
 
@@ -469,23 +2087,12 @@ curvature of the wire parameter. This list may be length 0.</p>
 
             <ul class="params-list">
                 <li class="param">
-                        <code class="param-name">tag</code>
+                        <code class="param-name">name</code>
                         <span class="type">String</span>
 
 
                     <div class="param-description">
-                        <p>Tag name</p>
-
-                    </div>
-
-                </li>
-                <li class="param">
-                        <code class="param-name">layer</code>
-                        <span class="type">String</span>
-
-
-                    <div class="param-description">
-                        <p>Layer number (note: still a string)</p>
+                        <p>Identifier of the layer</p>
 
                     </div>
 
@@ -497,7 +2104,7 @@ curvature of the wire parameter. This list may be length 0.</p>
             <h4>Returns:</h4>
 
             <div class="returns-description">
-                    <p>array</p>
+                    <p>EagleBrdRenderer.Layer</p>
 
             </div>
         </div>
@@ -528,7 +2135,7 @@ curvature of the wire parameter. This list may be length 0.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l418"><code>src&#x2F;eagle-brd-renderer.js:418</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l2131"><code>src&#x2F;eagle-brd-renderer.js:2131</code></a>
         </p>
 
 
@@ -570,11 +2177,738 @@ curvature of the wire parameter. This list may be length 0.</p>
 
 
 </div>
+<div id="method_parseDistanceMm" class="method item">
+    <h3 class="name"><code>parseDistanceMm</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>dist</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Number</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l2145"><code>src&#x2F;eagle-brd-renderer.js:2145</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Return the distance measured by a BRD string, e.g. &quot;0.035mm&quot;.
+This distance is measured in mm.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">dist</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>Distance string from BRD XML</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Number</span>:
+                    <p>Distance in mm</p>
+
+            </div>
+        </div>
+
+
+</div>
+<div id="method_renderBounds" class="method item">
+    <h3 class="name"><code>renderBounds</code></h3>
+
+        <span class="paren">()</span>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l2183"><code>src&#x2F;eagle-brd-renderer.js:2183</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Render the bounds to a buffer.</p>
+
+    </div>
+
+
+
+
+</div>
+<div id="method_renderCopper" class="method item">
+    <h3 class="name"><code>renderCopper</code></h3>
+
+        <span class="paren">()</span>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l2344"><code>src&#x2F;eagle-brd-renderer.js:2344</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Render all copper textures.</p>
+
+    </div>
+
+
+
+
+</div>
+<div id="method_renderCopperLayer" class="method item">
+    <h3 class="name"><code>renderCopperLayer</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>layer</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l2362"><code>src&#x2F;eagle-brd-renderer.js:2362</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Render a copper layer.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">layer</code>
+                        <span class="type"><a href="../classes/EagleBrdRenderer.Layer.html" class="crosslink">EagleBrdRenderer.Layer</a></span>
+
+
+                    <div class="param-description">
+                        <p>Layer to initialize and parse</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
+<div id="method_renderIsolate" class="method item">
+    <h3 class="name"><code>renderIsolate</code></h3>
+
+        <span class="paren">()</span>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l2496"><code>src&#x2F;eagle-brd-renderer.js:2496</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Render all isolate textures, including prepreg and core.</p>
+
+    </div>
+
+
+
+
+</div>
+<div id="method_renderIsolateLayer" class="method item">
+    <h3 class="name"><code>renderIsolateLayer</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>layer</code>
+                </li>
+                <li class="arg">
+                        <code>viaSource</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l2514"><code>src&#x2F;eagle-brd-renderer.js:2514</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Render an isolate layer, either prepreg or core.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">layer</code>
+                        <span class="type"><a href="../classes/EagleBrdRenderer.Layer.html" class="crosslink">EagleBrdRenderer.Layer</a></span>
+
+
+                    <div class="param-description">
+                        <p>Layer to initialize and parse</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name">viaSource</code>
+                        <span class="type"><a href="../classes/EagleBrdRenderer.Layer.html" class="crosslink">EagleBrdRenderer.Layer</a></span>
+
+
+                    <div class="param-description">
+                        <p>Layer with vias to use</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
+<div id="method_renderSolderMask" class="method item">
+    <h3 class="name"><code>renderSolderMask</code></h3>
+
+        <span class="paren">()</span>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l2564"><code>src&#x2F;eagle-brd-renderer.js:2564</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Render all solder mask textures. These bear silkscreen.</p>
+
+    </div>
+
+
+
+
+</div>
+<div id="method_renderSolderMaskLayer" class="method item">
+    <h3 class="name"><code>renderSolderMaskLayer</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>layer</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l2582"><code>src&#x2F;eagle-brd-renderer.js:2582</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Render a solder mask layer. This bears silkscreen legends.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">layer</code>
+                        <span class="type"><a href="../classes/EagleBrdRenderer.Layer.html" class="crosslink">EagleBrdRenderer.Layer</a></span>
+
+
+                    <div class="param-description">
+                        <p>Layer to initialize and parse</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
+<div id="method_renderSolderpaste" class="method item">
+    <h3 class="name"><code>renderSolderpaste</code></h3>
+
+        <span class="paren">()</span>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l2771"><code>src&#x2F;eagle-brd-renderer.js:2771</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Render all solder paste textures.</p>
+
+    </div>
+
+
+
+
+</div>
+<div id="method_renderSolderpasteLayer" class="method item">
+    <h3 class="name"><code>renderSolderpasteLayer</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>layer</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l2789"><code>src&#x2F;eagle-brd-renderer.js:2789</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Render a solderpaste layer, also known as a cream layer.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">layer</code>
+                        <span class="type"><a href="../classes/EagleBrdRenderer.Layer.html" class="crosslink">EagleBrdRenderer.Layer</a></span>
+
+
+                    <div class="param-description">
+                        <p>Layer to initialize and parse</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
+<div id="method_viewConnectors" class="method item">
+    <h3 class="name"><code>viewConnectors</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code class="optional">[show=true]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l2840"><code>src&#x2F;eagle-brd-renderer.js:2840</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Set connector handle visibility.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name optional">[show=true]</code>
+                        <span class="type">Boolean</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>Whether to show connectors or not</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
+<div id="method_viewGhosts" class="method item">
+    <h3 class="name"><code>viewGhosts</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code class="optional">[show=true]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l2859"><code>src&#x2F;eagle-brd-renderer.js:2859</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Set ghost device visibility. These are just an approximation of
+possible devices, inferred from pad positions.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name optional">[show=true]</code>
+                        <span class="type">Boolean</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>Whether to show ghosts or not</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
+<div id="method_visualizeConnector" class="method item">
+    <h3 class="name"><code>visualizeConnector</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>connector</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[color=&quot;rgb( 255, 255, 0 )&quot;]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">THREE.Mesh</span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l2875"><code>src&#x2F;eagle-brd-renderer.js:2875</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Put a wireframe dome over a <code>Connector</code> object to indicate its position.
+This method will not create geometry unless <code>params.visualize</code> was set
+to <code>true</code>.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">connector</code>
+                        <span class="type">Object3D</span>
+
+
+                    <div class="param-description">
+                        <p>Connector to which to append geometry</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[color=&quot;rgb( 255, 255, 0 )&quot;]</code>
+                        <span class="type">String</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>Color of wireframe</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">THREE.Mesh</span>:
+                    <p>Wireframe entity</p>
+
+            </div>
+        </div>
+
+
+</div>
             </div>
 
             <div id="properties" class="api-class-tabpanel">
                 <h2 class="off-left">Properties</h2>
 
+<div id="property__elementCurrent" class="property item private">
+    <h3 class="name"><code>_elementCurrent</code></h3>
+    <span class="type">Element</span>
+
+
+        <span class="flag private">private</span>
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l1017"><code>src&#x2F;eagle-brd-renderer.js:1017</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Element currently being parsed. Used to append data to package elements.</p>
+
+    </div>
+
+        <p><strong>Default:</strong> undefined</p>
+
+
+</div>
+<div id="property__maskOpacity" class="property item private">
+    <h3 class="name"><code>_maskOpacity</code></h3>
+    <span class="type">Number</span>
+
+
+        <span class="flag private">private</span>
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l103"><code>src&#x2F;eagle-brd-renderer.js:103</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Opacity of soldermask</p>
+
+    </div>
+
+        <p><strong>Default:</strong> 0.8</p>
+
+
+</div>
+<div id="property__shininess" class="property item private">
+    <h3 class="name"><code>_shininess</code></h3>
+    <span class="type">Number</span>
+
+
+        <span class="flag private">private</span>
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l126"><code>src&#x2F;eagle-brd-renderer.js:126</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Shininess of 3D components</p>
+
+    </div>
+
+        <p><strong>Default:</strong> 128</p>
+
+
+</div>
 <div id="property_bounds" class="property item">
     <h3 class="name"><code>bounds</code></h3>
     <span class="type">Object</span>
@@ -586,7 +2920,7 @@ curvature of the wire parameter. This list may be length 0.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l186"><code>src&#x2F;eagle-brd-renderer.js:186</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l836"><code>src&#x2F;eagle-brd-renderer.js:836</code></a>
         </p>
 
 
@@ -658,8 +2992,33 @@ curvature of the wire parameter. This list may be length 0.</p>
             </li>
         </ul>
 </div>
-<div id="property_buffers" class="property item">
-    <h3 class="name"><code>buffers</code></h3>
+<div id="property_bufferEdge" class="property item">
+    <h3 class="name"><code>bufferEdge</code></h3>
+    <span class="type">HTMLCanvasElement</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l356"><code>src&#x2F;eagle-brd-renderer.js:356</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Texture buffer to create bevel effect on edges</p>
+
+    </div>
+
+
+
+</div>
+<div id="property_colors" class="property item">
+    <h3 class="name"><code>colors</code></h3>
     <span class="type">Object</span>
 
 
@@ -669,18 +3028,158 @@ curvature of the wire parameter. This list may be length 0.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l55"><code>src&#x2F;eagle-brd-renderer.js:55</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l59"><code>src&#x2F;eagle-brd-renderer.js:59</code></a>
         </p>
 
 
     </div>
 
     <div class="description">
-        <p>Named textures. Includes layer textures and other data.</p>
+        <p>Collection of colors used to render boards.</p>
 
     </div>
 
-        <p><strong>Default:</strong> {}</p>
+
+
+        <h4>Sub-properties:</h4>
+
+        <ul class="params-list">
+            <li class="param">
+                    <code class="param-name">bounds</code>
+                    <span class="type">String</span>
+
+                <div class="param-description">
+                    <p>&quot;rgb( 32, 192, 32 )&quot;</p>
+
+                </div>
+
+            </li>
+            <li class="param">
+                    <code class="param-name">copper</code>
+                    <span class="type">String</span>
+
+                <div class="param-description">
+                    <p>&quot;rgb( 255, 222, 164 )&quot;</p>
+
+                </div>
+
+            </li>
+            <li class="param">
+                    <code class="param-name">prepreg</code>
+                    <span class="type">String</span>
+
+                <div class="param-description">
+                    <p>&quot;rgb( 238, 238, 230 )&quot;</p>
+
+                </div>
+
+            </li>
+            <li class="param">
+                    <code class="param-name">silkscreen</code>
+                    <span class="type">String</span>
+
+                <div class="param-description">
+                    <p>&quot;rgb( 255, 255, 255 )&quot;</p>
+
+                </div>
+
+            </li>
+            <li class="param">
+                    <code class="param-name">solderMask</code>
+                    <span class="type">String</span>
+
+                <div class="param-description">
+                    <p>&quot;rgb( 32, 64, 192 )&quot;</p>
+
+                </div>
+
+            </li>
+            <li class="param">
+                    <code class="param-name">solderPaste</code>
+                    <span class="type">String</span>
+
+                <div class="param-description">
+                    <p>&quot;rgb( 192, 192, 222 )&quot;</p>
+
+                </div>
+
+            </li>
+        </ul>
+</div>
+<div id="property_connectElements" class="property item">
+    <h3 class="name"><code>connectElements</code></h3>
+    <span class="type">Array</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l80"><code>src&#x2F;eagle-brd-renderer.js:80</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>List of <code>Connector</code> objects associated with packaged elements,
+such as resistors, surface-mounted devices, and other predefined
+board components</p>
+
+    </div>
+
+
+
+</div>
+<div id="property_connectHoles" class="property item">
+    <h3 class="name"><code>connectHoles</code></h3>
+    <span class="type">Array</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l89"><code>src&#x2F;eagle-brd-renderer.js:89</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>List of <code>Connector</code> objects associated with holes and pads</p>
+
+    </div>
+
+
+
+</div>
+<div id="property_connectorHandles" class="property item">
+    <h3 class="name"><code>connectorHandles</code></h3>
+    <span class="type">Array</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l96"><code>src&#x2F;eagle-brd-renderer.js:96</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>List of <code>Connector</code> handles; used to toggle visibility</p>
+
+    </div>
+
 
 
 </div>
@@ -695,7 +3194,7 @@ curvature of the wire parameter. This list may be length 0.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l73"><code>src&#x2F;eagle-brd-renderer.js:73</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l170"><code>src&#x2F;eagle-brd-renderer.js:170</code></a>
         </p>
 
 
@@ -711,6 +3210,31 @@ Coords in the XML should be multiplied by this before drawing.</p>
 
 
 </div>
+<div id="property_depthElements" class="property item">
+    <h3 class="name"><code>depthElements</code></h3>
+    <span class="type">THREE.Object3D</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l319"><code>src&#x2F;eagle-brd-renderer.js:319</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Collection of THREE.js geometry representing depth elements.</p>
+
+    </div>
+
+
+
+</div>
 <div id="property_designRules" class="property item">
     <h3 class="name"><code>designRules</code></h3>
     <span class="type">Object</span>
@@ -722,7 +3246,7 @@ Coords in the XML should be multiplied by this before drawing.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l108"><code>src&#x2F;eagle-brd-renderer.js:108</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l951"><code>src&#x2F;eagle-brd-renderer.js:951</code></a>
         </p>
 
 
@@ -738,6 +3262,31 @@ various important layout characteristics.</p>
 
 
 </div>
+<div id="property_ghostPackages" class="property item">
+    <h3 class="name"><code>ghostPackages</code></h3>
+    <span class="type">THREE.Object3D</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l1273"><code>src&#x2F;eagle-brd-renderer.js:1273</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Grouping of ghost package meshes.</p>
+
+    </div>
+
+
+
+</div>
 <div id="property_height" class="property item">
     <h3 class="name"><code>height</code></h3>
     <span class="type">Number</span>
@@ -749,7 +3298,7 @@ various important layout characteristics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l213"><code>src&#x2F;eagle-brd-renderer.js:213</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l863"><code>src&#x2F;eagle-brd-renderer.js:863</code></a>
         </p>
 
 
@@ -757,6 +3306,56 @@ various important layout characteristics.</p>
 
     <div class="description">
         <p>Vertical resolution of this board's texture maps.</p>
+
+    </div>
+
+
+
+</div>
+<div id="property_layerCompositeBottom" class="property item">
+    <h3 class="name"><code>layerCompositeBottom</code></h3>
+    <span class="type"><a href="../classes/EagleBrdRenderer.Layer.html" class="crosslink">EagleBrdRenderer.Layer</a></span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l259"><code>src&#x2F;eagle-brd-renderer.js:259</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Composite of all layer textures, bottom-oriented.</p>
+
+    </div>
+
+
+
+</div>
+<div id="property_layerCompositeTop" class="property item">
+    <h3 class="name"><code>layerCompositeTop</code></h3>
+    <span class="type"><a href="../classes/EagleBrdRenderer.Layer.html" class="crosslink">EagleBrdRenderer.Layer</a></span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l226"><code>src&#x2F;eagle-brd-renderer.js:226</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Composite of all layer textures, top-oriented.</p>
 
     </div>
 
@@ -774,7 +3373,7 @@ various important layout characteristics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l63"><code>src&#x2F;eagle-brd-renderer.js:63</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l162"><code>src&#x2F;eagle-brd-renderer.js:162</code></a>
         </p>
 
 
@@ -789,6 +3388,32 @@ various important layout characteristics.</p>
 
 
 </div>
+<div id="property_material" class="property item">
+    <h3 class="name"><code>material</code></h3>
+    <span class="type">Function</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l112"><code>src&#x2F;eagle-brd-renderer.js:112</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Material shader to use.</p>
+
+    </div>
+
+        <p><strong>Default:</strong> THREE.MeshPhongMaterial</p>
+
+
+</div>
 <div id="property_offsetX" class="property item">
     <h3 class="name"><code>offsetX</code></h3>
     <span class="type">Number</span>
@@ -800,7 +3425,7 @@ various important layout characteristics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l220"><code>src&#x2F;eagle-brd-renderer.js:220</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l870"><code>src&#x2F;eagle-brd-renderer.js:870</code></a>
         </p>
 
 
@@ -825,7 +3450,7 @@ various important layout characteristics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l227"><code>src&#x2F;eagle-brd-renderer.js:227</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l877"><code>src&#x2F;eagle-brd-renderer.js:877</code></a>
         </p>
 
 
@@ -839,9 +3464,9 @@ various important layout characteristics.</p>
 
 
 </div>
-<div id="property_params" class="property item">
-    <h3 class="name"><code>params</code></h3>
-    <span class="type">Object</span>
+<div id="property_pixelMicrons" class="property item">
+    <h3 class="name"><code>pixelMicrons</code></h3>
+    <span class="type">Number</span>
 
 
 
@@ -850,14 +3475,91 @@ various important layout characteristics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l41"><code>src&#x2F;eagle-brd-renderer.js:41</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l135"><code>src&#x2F;eagle-brd-renderer.js:135</code></a>
         </p>
 
 
     </div>
 
     <div class="description">
-        <p>Optional parameters used to configure render.</p>
+        <p>Microns per pixel. A higher pixelMicrons value produces a smaller board.</p>
+
+    </div>
+
+        <p><strong>Default:</strong> 35</p>
+
+
+</div>
+<div id="property_root" class="property item">
+    <h3 class="name"><code>root</code></h3>
+    <span class="type">THREE.Object3D</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l144"><code>src&#x2F;eagle-brd-renderer.js:144</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Root THREE.js transform, containing board elements</p>
+
+    </div>
+
+
+
+</div>
+<div id="property_textureEdge" class="property item">
+    <h3 class="name"><code>textureEdge</code></h3>
+    <span class="type">THREE.Texture</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l379"><code>src&#x2F;eagle-brd-renderer.js:379</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>THREE.js texture for beveled edges</p>
+
+    </div>
+
+
+
+</div>
+<div id="property_thickness" class="property item">
+    <h3 class="name"><code>thickness</code></h3>
+    <span class="type">Number</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l1232"><code>src&#x2F;eagle-brd-renderer.js:1232</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Total thickness, including solderpaste and mask layers.
+Does not actually check for presence of solderpaste or mask.</p>
 
     </div>
 
@@ -875,7 +3577,7 @@ various important layout characteristics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l206"><code>src&#x2F;eagle-brd-renderer.js:206</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l856"><code>src&#x2F;eagle-brd-renderer.js:856</code></a>
         </p>
 
 
@@ -900,7 +3602,7 @@ various important layout characteristics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l48"><code>src&#x2F;eagle-brd-renderer.js:48</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l151"><code>src&#x2F;eagle-brd-renderer.js:151</code></a>
         </p>
 
 

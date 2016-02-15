@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>EagleBrdRenderer.Layer - EagleBrdViz</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="icon" href="../assets/favicon.ico">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+                <h1><img src="../assets/css/logo.png" title="EagleBrdViz" width="117" height="52"></h1>
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 1.0.0</em>
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+                    <h2 class="off-left">APIs</h2>
+                    <div id="api-tabview" class="tabview">
+                        <ul class="tabs">
+                            <li><a href="#api-classes">Classes</a></li>
+                            <li><a href="#api-modules">Modules</a></li>
+                        </ul>
+                
+                        <div id="api-tabview-filter">
+                            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+                        </div>
+                
+                        <div id="api-tabview-panel">
+                            <ul id="api-classes" class="apis classes">
+                                <li><a href="../classes/EagleBrdRenderer.html">EagleBrdRenderer</a></li>
+                                <li><a href="../classes/EagleBrdRenderer.AngleData.html">EagleBrdRenderer.AngleData</a></li>
+                                <li><a href="../classes/EagleBrdRenderer.ChordData.html">EagleBrdRenderer.ChordData</a></li>
+                                <li><a href="../classes/EagleBrdRenderer.Layer.html">EagleBrdRenderer.Layer</a></li>
+                            </ul>
+                
+                
+                            <ul id="api-modules" class="apis modules">
+                                <li><a href="../modules/EagleBrdRenderer.html">EagleBrdRenderer</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+                    Show:
+                    <label for="api-show-inherited">
+                        <input type="checkbox" id="api-show-inherited" checked>
+                        Inherited
+                    </label>
+            
+                    <label for="api-show-protected">
+                        <input type="checkbox" id="api-show-protected">
+                        Protected
+                    </label>
+            
+                    <label for="api-show-private">
+                        <input type="checkbox" id="api-show-private">
+                        Private
+                    </label>
+                    <label for="api-show-deprecated">
+                        <input type="checkbox" id="api-show-deprecated">
+                        Deprecated
+                    </label>
+            
+                </div>
+            
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<h1>EagleBrdRenderer.Layer Class</h1>
+<div class="box meta">
+
+
+        <div class="foundat">
+            Defined in: <a href="../files/src_eagle-brd-renderer.js.html#l3107"><code>src&#x2F;eagle-brd-renderer.js:3107</code></a>
+        </div>
+
+            Module: <a href="../modules/EagleBrdRenderer.html">EagleBrdRenderer</a>
+
+</div>
+
+
+<div class="box intro">
+    <p>Define a layer of a PCB board. This contains a list of elements,
+and the render of these elements.</p>
+<p>Layer objects do not correspond directly to BRD layers.
+They may combine many BRD layers into one target,
+such as for rendering silkscreen;
+share an element across multiple targets,
+such as with vias and holes;
+or ignore a BRD layer entirely,
+such as with Symbol layers.</p>
+
+</div>
+
+    <div class="constructor">
+        <h2>Constructor</h2>
+<div id="method_EagleBrdRenderer.Layer" class="method item">
+    <h3 class="name"><code>EagleBrdRenderer.Layer</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>params</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3107"><code>src&#x2F;eagle-brd-renderer.js:3107</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">params</code>
+                        <span class="type">Object</span>
+
+
+                    <div class="param-description">
+                        <p>Composite parameter object</p>
+
+                    </div>
+
+                        <ul class="params-list">
+                            <li class="param">
+                                    <code class="param-name">board</code>
+                                    <span class="type"><a href="../classes/EagleBrdRenderer.html" class="crosslink">EagleBrdRenderer</a></span>
+
+                                <div class="param-description">
+                                    <p>Master board</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[height=0]</code>
+                                    <span class="type">Number</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Offset of layer from base in pixels</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name">layers</code>
+                                    <span class="type">Array</span>
+
+                                <div class="param-description">
+                                    <p>List of BRD layer numbers to follow</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name">name</code>
+                                    <span class="type">String</span>
+
+                                <div class="param-description">
+                                    <p>Unique layer identifier</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[tags]</code>
+                                    <span class="type">Array</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>List of tag strings</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name">thickness</code>
+                                    <span class="type">Number</span>
+
+                                <div class="param-description">
+                                    <p>Thickness of layer in pixels</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[visible=true]</code>
+                                    <span class="type">Boolean</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Whether this layer is
+part of the physical board</p>
+
+                                </div>
+
+                            </li>
+                        </ul>
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
+    </div>
+
+<div id="classdocs" class="tabview">
+    <ul class="api-class-tabs">
+        <li class="api-class-tab index"><a href="#index">Index</a></li>
+
+            <li class="api-class-tab methods"><a href="#methods">Methods</a></li>
+            <li class="api-class-tab properties"><a href="#properties">Properties</a></li>
+    </ul>
+
+    <div>
+        <div id="index" class="api-class-tabpanel index">
+            <h2 class="off-left">Item Index</h2>
+
+                <div class="index-section methods">
+                    <h3>Methods</h3>
+
+                    <ul class="index-list methods">
+                            <li class="index-item method">
+                                <a href="#method_add">add</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_assessElementCandidate">assessElementCandidate</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_buildGeometry">buildGeometry</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_getElements">getElements</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_hasTag">hasTag</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_initBuffer">initBuffer</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_orientContext">orientContext</a>
+
+                            </li>
+                    </ul>
+                </div>
+
+                <div class="index-section properties">
+                    <h3>Properties</h3>
+
+                    <ul class="index-list properties">
+                            <li class="index-item property">
+                                <a href="#property_board">board</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_buffer">buffer</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_ctx">ctx</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_elements">elements</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_geometry">geometry</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_height">height</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_layers">layers</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_material">material</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_mesh">mesh</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_name">name</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_tags">tags</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_texture">texture</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_thickness">thickness</a>
+
+                            </li>
+                            <li class="index-item property">
+                                <a href="#property_visible">visible</a>
+
+                            </li>
+                    </ul>
+                </div>
+
+
+        </div>
+
+            <div id="methods" class="api-class-tabpanel">
+                <h2 class="off-left">Methods</h2>
+
+<div id="method_add" class="method item">
+    <h3 class="name"><code>add</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>el</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type"><a href="../classes/EagleBrdRenderer.Layer.html" class="crosslink">EagleBrdRenderer.Layer</a></span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3195"><code>src&#x2F;eagle-brd-renderer.js:3195</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Add an element (cloned) to this layer.
+The element will not be checked for layer information.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">el</code>
+                        <span class="type">Element</span>
+
+
+                    <div class="param-description">
+                        <p>XML element describing a BRD element</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type"><a href="../classes/EagleBrdRenderer.Layer.html" class="crosslink">EagleBrdRenderer.Layer</a></span>:
+                    <p>This Layer</p>
+
+            </div>
+        </div>
+
+
+</div>
+<div id="method_assessElementCandidate" class="method item">
+    <h3 class="name"><code>assessElementCandidate</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>el</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type"><a href="../classes/EagleBrdRenderer.Layer.html" class="crosslink">EagleBrdRenderer.Layer</a></span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3228"><code>src&#x2F;eagle-brd-renderer.js:3228</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Assess an element for inclusion in this layer.
+If the element contains or spans this layer, it is included.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">el</code>
+                        <span class="type">Element</span>
+
+
+                    <div class="param-description">
+                        <p>XML element describing a BRD primitive</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type"><a href="../classes/EagleBrdRenderer.Layer.html" class="crosslink">EagleBrdRenderer.Layer</a></span>:
+                    <p>This Layer</p>
+
+            </div>
+        </div>
+
+
+</div>
+<div id="method_buildGeometry" class="method item">
+    <h3 class="name"><code>buildGeometry</code></h3>
+
+        <span class="paren">()</span>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3327"><code>src&#x2F;eagle-brd-renderer.js:3327</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Construct layer geometry. Paste the texture onto a rectangle.</p>
+
+    </div>
+
+
+
+
+</div>
+<div id="method_getElements" class="method item">
+    <h3 class="name"><code>getElements</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code class="optional">[tags]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3399"><code>src&#x2F;eagle-brd-renderer.js:3399</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Return a list of elements. If no tags are passed as parameters,
+all elements will be returned. Otherwise, only elements that match
+one of the specified tags are returned.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name optional">[tags]</code>
+                        <span class="type">String</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                        <span class="flag multiple" title="This argument may occur one or more times.">multiple</span>
+
+                    <div class="param-description">
+                        <p>Tags to return</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
+<div id="method_hasTag" class="method item">
+    <h3 class="name"><code>hasTag</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>tag</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type"></span>
+        </span>
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3425"><code>src&#x2F;eagle-brd-renderer.js:3425</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Return whether this layer has the specified tag.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">tag</code>
+                        <span class="type">String</span>
+
+
+                    <div class="param-description">
+                        <p>Tag to assess</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                    <p>boolean</p>
+
+            </div>
+        </div>
+
+
+</div>
+<div id="method_initBuffer" class="method item">
+    <h3 class="name"><code>initBuffer</code></h3>
+
+        <span class="paren">()</span>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3442"><code>src&#x2F;eagle-brd-renderer.js:3442</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Initialise the buffer for this layer.</p>
+
+    </div>
+
+
+
+
+</div>
+<div id="method_orientContext" class="method item">
+    <h3 class="name"><code>orientContext</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>el</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[scale=1]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3475"><code>src&#x2F;eagle-brd-renderer.js:3475</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Transform the drawing context according to properties on BRD elements.</p>
+<p>Note: this method does not save or restore context transform.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">el</code>
+                        <span class="type">Element</span>
+
+
+                    <div class="param-description">
+                        <p>BRD element to serve as transformation basis</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[scale=1]</code>
+                        <span class="type">Number</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p><code>coordScale</code> factor</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
+            </div>
+
+            <div id="properties" class="api-class-tabpanel">
+                <h2 class="off-left">Properties</h2>
+
+<div id="property_board" class="property item">
+    <h3 class="name"><code>board</code></h3>
+    <span class="type"><a href="../classes/EagleBrdRenderer.html" class="crosslink">EagleBrdRenderer</a></span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3132"><code>src&#x2F;eagle-brd-renderer.js:3132</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Master board to which this layer belongs</p>
+
+    </div>
+
+
+
+</div>
+<div id="property_buffer" class="property item">
+    <h3 class="name"><code>buffer</code></h3>
+    <span class="type">HTMLCanvasElement</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3448"><code>src&#x2F;eagle-brd-renderer.js:3448</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Texture buffer to which layer elements are rendered</p>
+
+    </div>
+
+
+
+</div>
+<div id="property_ctx" class="property item">
+    <h3 class="name"><code>ctx</code></h3>
+    <span class="type">CanvasRenderingContext2D</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3457"><code>src&#x2F;eagle-brd-renderer.js:3457</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Texture drawing context for this layer</p>
+
+    </div>
+
+
+
+</div>
+<div id="property_elements" class="property item">
+    <h3 class="name"><code>elements</code></h3>
+    <span class="type">Array</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3139"><code>src&#x2F;eagle-brd-renderer.js:3139</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Unordered list of elements to be drawn to this layer</p>
+
+    </div>
+
+
+
+</div>
+<div id="property_geometry" class="property item">
+    <h3 class="name"><code>geometry</code></h3>
+    <span class="type">THREE.BoxGeometry</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3340"><code>src&#x2F;eagle-brd-renderer.js:3340</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Geometry for layer, consisting of two flat planes</p>
+
+    </div>
+
+
+
+</div>
+<div id="property_height" class="property item">
+    <h3 class="name"><code>height</code></h3>
+    <span class="type">Number</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3146"><code>src&#x2F;eagle-brd-renderer.js:3146</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Depth displacement of layer relative to board origin.
+Note that greater height will position the layer further from the camera.</p>
+
+    </div>
+
+        <p><strong>Default:</strong> 0</p>
+
+
+</div>
+<div id="property_layers" class="property item">
+    <h3 class="name"><code>layers</code></h3>
+    <span class="type">Array</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3155"><code>src&#x2F;eagle-brd-renderer.js:3155</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>List of BRD layer numbers to follow</p>
+
+    </div>
+
+
+
+</div>
+<div id="property_material" class="property item">
+    <h3 class="name"><code>material</code></h3>
+    <span class="type">THREE.Material</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3379"><code>src&#x2F;eagle-brd-renderer.js:3379</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Material for layer</p>
+
+    </div>
+
+
+
+</div>
+<div id="property_mesh" class="property item">
+    <h3 class="name"><code>mesh</code></h3>
+    <span class="type">THREE.Mesh</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3386"><code>src&#x2F;eagle-brd-renderer.js:3386</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Mesh for layer; THREE scene component</p>
+
+    </div>
+
+
+
+</div>
+<div id="property_name" class="property item">
+    <h3 class="name"><code>name</code></h3>
+    <span class="type">String</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3162"><code>src&#x2F;eagle-brd-renderer.js:3162</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Unique layer identifier</p>
+
+    </div>
+
+
+
+</div>
+<div id="property_tags" class="property item">
+    <h3 class="name"><code>tags</code></h3>
+    <span class="type">Array</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3169"><code>src&#x2F;eagle-brd-renderer.js:3169</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Tags on this layer. List of strings.</p>
+
+    </div>
+
+
+
+</div>
+<div id="property_texture" class="property item">
+    <h3 class="name"><code>texture</code></h3>
+    <span class="type">THREE.Texture</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3364"><code>src&#x2F;eagle-brd-renderer.js:3364</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Texture for layer</p>
+
+    </div>
+
+
+
+</div>
+<div id="property_thickness" class="property item">
+    <h3 class="name"><code>thickness</code></h3>
+    <span class="type">Number</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3176"><code>src&#x2F;eagle-brd-renderer.js:3176</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Thickness of this layer. Measured in pixels, but they may be fractional.</p>
+
+    </div>
+
+
+
+</div>
+<div id="property_visible" class="property item">
+    <h3 class="name"><code>visible</code></h3>
+    <span class="type">Unknown</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3183"><code>src&#x2F;eagle-brd-renderer.js:3183</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Whether this layer is part of the physical board</p>
+
+    </div>
+
+        <p><strong>Default:</strong> true</p>
+
+
+</div>
+            </div>
+
+
+    </div>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>

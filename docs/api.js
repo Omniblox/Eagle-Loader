@@ -2,7 +2,9 @@ YUI.add("yuidoc-meta", function(Y) {
    Y.YUIDoc = { meta: {
     "classes": [
         "EagleBrdRenderer",
-        "EagleBrdRenderer.ChordData"
+        "EagleBrdRenderer.AngleData",
+        "EagleBrdRenderer.ChordData",
+        "EagleBrdRenderer.Layer"
     ],
     "modules": [
         "EagleBrdRenderer"
