@@ -61,17 +61,17 @@ var EagleBrdRenderer = function( xml, params ) {
 
 	@property colors {object}
 		@property colors.bounds {string} "rgb( 32, 192, 32 )"
-		@property colors.copper {string} "rgb( 255, 192, 128 )"
-		@property colors.prepreg {string} "rgb( 222, 222, 192 )"
+		@property colors.copper {string} "rgb( 255, 222, 164 )"
+		@property colors.prepreg {string} "rgb( 238, 238, 230 )"
 		@property colors.silkscreen {string} "rgb( 255, 255, 255 )"
 		@property colors.solderMask {string} "rgb( 32, 64, 192 )"
-		@property colors.solderPaste {string} "rgb( 192, 192, 192 )"
+		@property colors.solderPaste {string} "rgb( 192, 192, 222 )"
 	**/
 	this.colors = params.colors || {};
 	this.colors = {
 		bounds: this.colors.bounds || "rgb( 32, 192, 32 )",
 		copper: this.colors.copper || "rgb( 255, 222, 164 )",
-		prepreg: this.colors.prepreg || "rgb( 222, 222, 192 )",
+		prepreg: this.colors.prepreg || "rgb( 238, 238, 230 )",
 		silkscreen: this.colors.silkscreen || "rgb( 255, 255, 255 )",
 		solderMask: this.colors.solderMask || "rgb( 32, 64, 192 )",
 		solderPaste: this.colors.solderPaste || "rgb( 192, 192, 222 )"
