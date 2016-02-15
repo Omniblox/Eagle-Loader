@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+
+<head></head>
+
+<body>
+
+<script src="../lib/three.js"></script>
+<script src="../lib/connector-1.0.1.js"></script>
+<script src="../src/eagle-brd-renderer.js"></script>
+<script>
+
+// Load and initiate process
+var brd1, brd2, src1, src2,
+	camera, renderer, scene,
+	xhttp = new XMLHttpRequest(),
+	initScene = function() {
+
+		var camRig, light, lightRig;
+
+		// Init view
+		scene = new THREE.Scene();
+		camera = new THREE.PerspectiveCamera(
+			75, window.innerWidth / window.innerHeight, 100, 10000 );
+		camera.position.z = 2000;
+		renderer = new THREE.WebGLRenderer();
+		renderer.setSize( window.innerWidth, window.innerHeight );
+		document.body.appendChild( renderer.domElement );
+
+		// Light the scene
+		lightRig = new THREE.Object3D();
+		scene.add( lightRig );
+		light = new THREE.PointLight( 0xddeeff, 0.5, 0 );
+		light.position.set( 400, -800, 1600 );
+		lightRig.add( light );
+		light = new THREE.PointLight( 0xffeedd, 0.5, 0 );
+		light.position.set( -400, 800, 1600 );
+		lightRig.add( light );
+		light = new THREE.PointLight( 0x8888dd, 0.5, 0 );
+		light.position.set( -800, 0, -400 );
+		lightRig.add( light );
+		light = new THREE.PointLight( 0xdd8888, 0.5, 0 );
+		light.position.set( 800, 0, -400 );
+		lightRig.add( light );
+
+		// Animate the camera
+		camRig = new THREE.Object3D();
+		camRig.add( camera );
+		scene.add( camRig );
+
+		var animate = function() {
+			var now = Date.now();
+
+			requestAnimationFrame( animate );
+
+			camRig.rotation.x =
+				0.2 * Math.sin( now * 0.00013 );
+			// camRig.rotation.y =
+			// 	0.4 * Math.sin( now * 0.00022 ) + Math.PI / 2;
+			camRig.rotation.z =
+				0.2 * Math.sin( now * 0.00031 );
+
+			camRig.rotation.y = now * 0.00037;
+
+			renderer.render( scene, camera );
+		}
+
+		// Commence rendering
+		animate();
+	};
+
+// Setup scene
+initScene();
+
+//
+// Toggle board to render here
+//
+// src1 = "../brd/adafruit-cc3000-breakout.brd";
+src1 = "../brd/adafruit-flora-mainboard-2.brd";
+// src1 = "../brd/adafruit-pro-trinket-3v3.brd";
+// src1 = "../brd/adafruit-pro-trinket-5v0.brd";
+// src1 = "../brd/arduino_Uno_Rev3-02-TH.brd";
+//
+// src2 = "../brd/adafruit-cc3000-breakout.brd";
+// src2 = "../brd/adafruit-flora-mainboard-2.brd";
+// src2 = "../brd/adafruit-pro-trinket-3v3.brd";
+src2 = "../brd/adafruit-pro-trinket-5v0.brd";
+// src2 = "../brd/arduino_Uno_Rev3-02-TH.brd";
+
+xhttp.onreadystatechange = function() {
+	if ( xhttp.readyState === 4 && xhttp.status === 200 ) {
+		brd1 = new EagleBrdRenderer( xhttp.responseXML, {
+			colors: {
+				solderMask: "rgb( 32, 168, 64 )"
+			}
+		} );
+
+		scene.add( brd1.root );
+
+		xhttp = new XMLHttpRequest();
+
+		xhttp.onreadystatechange = function() {
+			if ( xhttp.readyState === 4 && xhttp.status === 200 ) {
+				brd2 = new EagleBrdRenderer( xhttp.responseXML, {
+					colors: {
+						solderMask: "rgb( 168, 64, 32 )"
+					}
+				} );
+
+				scene.add( brd2.root );
+
+				// Test connectors
+				brd2.connectElements[ 0 ].connectTo(
+					brd1.connectElements[ 0 ], true );
+			}
+		};
+		xhttp.open( "GET", src2, true );
+		xhttp.send();
+	}
+};
+xhttp.open( "GET", src1, true );
+xhttp.send();
+
+</script>
+
+</body>
+
+</html>
