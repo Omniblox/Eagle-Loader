@@ -492,11 +492,31 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 
 		for ( j = 0; j &lt; wireGrp.length; j++ ) {
 			wire = wireGrp[ j ];
-			x = wire.getAttribute( &quot;x2&quot; );
-			y = wire.getAttribute( &quot;y2&quot; );
-			for ( k = j; k &gt;= 0; k-- ) {
-				if ( x === wireGrp[ k ].getAttribute( &quot;x1&quot; ) &amp;&amp;
-						y === wireGrp[ k ].getAttribute( &quot;y1&quot; ) ) {
+			x1 = wire.getAttribute( &quot;x1&quot; );
+			y1 = wire.getAttribute( &quot;y1&quot; );
+			x2 = wire.getAttribute( &quot;x2&quot; );
+			y2 = wire.getAttribute( &quot;y2&quot; );
+			for ( k = j - 1; k &gt;= 0; k-- ) {
+				x = wireGrp[ k ].getAttribute( &quot;x1&quot; );
+				y = wireGrp[ k ].getAttribute( &quot;y1&quot; );
+				if ( x2 === x &amp;&amp; y2 === y ) {
+
+					// Wire connects to place K
+					wireGrp.splice( j, 1 );
+					wireGrp.splice( k, 0, wire );
+					break;
+				} else if ( x1 === x &amp;&amp; y1 === y ) {
+
+					// Wire inversely connects to place K
+					wire.setAttribute( &quot;x1&quot;, x2 );
+					wire.setAttribute( &quot;y1&quot;, y2 );
+					wire.setAttribute( &quot;x2&quot;, x1 );
+					wire.setAttribute( &quot;y2&quot;, y1 );
+					if ( wire.hasAttribute( &quot;curve&quot; ) ) {
+						wire.setAttribute(
+							&quot;curve&quot;,
+							&quot;&quot; + -parseFloat( wire.getAttribute( &quot;curve&quot; ) ) );
+					}
 					wireGrp.splice( j, 1 );
 					wireGrp.splice( k, 0, wire );
 					break;
@@ -867,13 +887,15 @@ EagleBrdRenderer.prototype._parseBounds = function() {
 
 	/**
 	Determine and record the boundaries of the board surface.
-	This is derived from &#x60;eagle.drawing.board.plain&#x60; wires.
+	This is derived from &#x60;eagle.drawing.board.plain&#x60; elements.
 
 	@method _parseBounds
 	@private
 	**/
 
-	var chordPoints, layer, wires, i, j, x, y,
+	var chordPoints, circles, els, layer, polys,
+		radius, rects, verts, wire, wires,
+		i, j, x, y, x1, y1, x2, y2,
 		testMinMax = function( x, y ) {
 			minX = Math.min( x, minX );
 			minY = Math.min( y, minY );
@@ -886,6 +908,114 @@ EagleBrdRenderer.prototype._parseBounds = function() {
 		minY = 0;
 
 	layer = this.getLayer( &quot;Bounds&quot; );
+
+
+	// Transmute non-wire bound definitions into wires.
+	// This might not be the perfect solution, but it works.
+
+	// Circles must be created in quarter-arcs to preserve radius
+	circles = layer.getElements( &quot;circle&quot; );
+	for ( i = 0; i &lt; circles.length; i++ ) {
+		x = parseFloat( circles[ i ].getAttribute( &quot;x&quot; ) );
+		y = parseFloat( circles[ i ].getAttribute( &quot;y&quot; ) );
+		radius = parseFloat( circles[ i ].getAttribute( &quot;radius&quot; ) );
+		x1 = x - radius;
+		x2 = x + radius;
+		y1 = y - radius;
+		y2 = y + radius;
+
+		wire = this.xml.createElement( &quot;wire&quot; );
+		layer.elements.push( wire );
+		wire.setAttribute( &quot;x1&quot;, x1 );
+		wire.setAttribute( &quot;y1&quot;, y );
+		wire.setAttribute( &quot;x2&quot;, x );
+		wire.setAttribute( &quot;y2&quot;, y1 );
+		wire.setAttribute( &quot;curve&quot;, 90 );
+
+		wire = this.xml.createElement( &quot;wire&quot; );
+		layer.elements.push( wire );
+		wire.setAttribute( &quot;x1&quot;, x );
+		wire.setAttribute( &quot;y1&quot;, y1 );
+		wire.setAttribute( &quot;x2&quot;, x2 );
+		wire.setAttribute( &quot;y2&quot;, y );
+		wire.setAttribute( &quot;curve&quot;, 90 );
+
+		wire = this.xml.createElement( &quot;wire&quot; );
+		layer.elements.push( wire );
+		wire.setAttribute( &quot;x1&quot;, x2 );
+		wire.setAttribute( &quot;y1&quot;, y );
+		wire.setAttribute( &quot;x2&quot;, x );
+		wire.setAttribute( &quot;y2&quot;, y2 );
+		wire.setAttribute( &quot;curve&quot;, 90 );
+
+		wire = this.xml.createElement( &quot;wire&quot; );
+		layer.elements.push( wire );
+		wire.setAttribute( &quot;x1&quot;, x );
+		wire.setAttribute( &quot;y1&quot;, y2 );
+		wire.setAttribute( &quot;x2&quot;, x1 );
+		wire.setAttribute( &quot;y2&quot;, y );
+		wire.setAttribute( &quot;curve&quot;, 90 );
+	}
+
+	// Create poly segments
+	polys = layer.getElements( &quot;polygon&quot; );
+	for ( i = 0; i &lt; polys.length; i++ ) {
+		verts = polys[ i ].getElementsByTagName( &quot;vertex&quot; );
+		if ( verts.length &lt; 3 ) {
+			continue;
+		}
+		for ( j = 1; j &lt; verts.length; j++ ) {
+			wire = this.xml.createElement( &quot;wire&quot; );
+			layer.elements.push( wire );
+			wire.setAttribute( &quot;x1&quot;, verts[ j - 1 ].getAttribute( &quot;x&quot; ) );
+			wire.setAttribute( &quot;y1&quot;, verts[ j - 1 ].getAttribute( &quot;y&quot; ) );
+			wire.setAttribute( &quot;x2&quot;, verts[ j ].getAttribute( &quot;x&quot; ) );
+			wire.setAttribute( &quot;y2&quot;, verts[ j ].getAttribute( &quot;y&quot; ) );
+			if ( verts[ j - 1 ].hasAttribute( &quot;curve&quot; ) ) {
+				wire.setAttribute(
+					&quot;curve&quot;, verts[ j - 1 ].getAttribute( &quot;curve&quot; ) );
+			}
+		}
+	}
+
+	// Create rects
+	rects = layer.getElements( &quot;rectangle&quot; );
+	for ( i = 0; i &lt; rects.length; i++ ) {
+		x1 = parseFloat( rects[ i ].getAttribute( &quot;x1&quot; ) );
+		y1 = parseFloat( rects[ i ].getAttribute( &quot;y1&quot; ) );
+		x2 = parseFloat( rects[ i ].getAttribute( &quot;x2&quot; ) );
+		y2 = parseFloat( rects[ i ].getAttribute( &quot;y2&quot; ) );
+
+		wire = this.xml.createElement( &quot;wire&quot; );
+		layer.elements.push( wire );
+		wire.setAttribute( &quot;x1&quot;, x1 );
+		wire.setAttribute( &quot;y1&quot;, y1 );
+		wire.setAttribute( &quot;x2&quot;, x2 );
+		wire.setAttribute( &quot;y2&quot;, y1 );
+
+		wire = this.xml.createElement( &quot;wire&quot; );
+		layer.elements.push( wire );
+		wire.setAttribute( &quot;x1&quot;, x2 );
+		wire.setAttribute( &quot;y1&quot;, y1 );
+		wire.setAttribute( &quot;x2&quot;, x2 );
+		wire.setAttribute( &quot;y2&quot;, y2 );
+
+		wire = this.xml.createElement( &quot;wire&quot; );
+		layer.elements.push( wire );
+		wire.setAttribute( &quot;x1&quot;, x2 );
+		wire.setAttribute( &quot;y1&quot;, y2 );
+		wire.setAttribute( &quot;x2&quot;, x1 );
+		wire.setAttribute( &quot;y2&quot;, y2 );
+
+		wire = this.xml.createElement( &quot;wire&quot; );
+		layer.elements.push( wire );
+		wire.setAttribute( &quot;x1&quot;, x1 );
+		wire.setAttribute( &quot;y1&quot;, y2 );
+		wire.setAttribute( &quot;x2&quot;, x1 );
+		wire.setAttribute( &quot;y2&quot;, y1 );
+	}
+
+
 	wires = layer.getElements( &quot;wire&quot; );
 
 	/*
@@ -901,12 +1031,14 @@ EagleBrdRenderer.prototype._parseBounds = function() {
 	*/
 
 	// Assemble boundaries
+
+	// Probe wires
 	for ( i = 0; i &lt; wires.length; i++ ) {
 
 		// Simple minmax point test
 		for ( j = 1; j &lt;= 2; j++ ) {
-			x = wires[ i ].getAttribute( &quot;x&quot; + j );
-			y = wires[ i ].getAttribute( &quot;y&quot; + j );
+			x = parseFloat( wires[ i ].getAttribute( &quot;x&quot; + j ) );
+			y = parseFloat( wires[ i ].getAttribute( &quot;y&quot; + j ) );
 			testMinMax( x, y );
 		}
 
@@ -2142,20 +2274,27 @@ EagleBrdRenderer.prototype.drawWirePaths = function( params ) {
 };
 
 
-EagleBrdRenderer.prototype.getChordPoints = function( wire ) {
+EagleBrdRenderer.prototype.getChordPoints = function( el ) {
 
 	/**
 	Return a list of &#x60;[ x, y ]&#x60; coordinate pairs
 	representing the cardinal points of a circle described by the
-	curvature of the wire parameter. This list may be length 0.
+	curvature of the parameter.
+
+	The parameter may be a wire or polygon vertex element.
+
+	This list may be length 0.
 
 	@method getChordPoints
+	@param el {Element} Wire or vertex element to assess
 	@return array
 	**/
 
-	var centroidX, centroidY, radius, sweepMin, sweepMax,
-		chordData = new EagleBrdRenderer.ChordData( wire ),
+	var centroidX, centroidY, chordData, radius, sweepMin, sweepMax,
 		points = [];
+
+	// Analyze chord
+	chordData = new EagleBrdRenderer.ChordData( el );
 
 	// Pull data from chord analytics
 	centroidX = chordData.x;
@@ -2174,7 +2313,7 @@ EagleBrdRenderer.prototype.getChordPoints = function( wire ) {
 
 	// Determine points that fall within sweep.
 	// Note that perfect matches are discarded,
-	// as this indicates the wire point is on that cardinal point.
+	// as this indicates the element point is on that cardinal point.
 	if ( sweepMin &lt; -Math.PI / 2 &amp;&amp; sweepMax &gt; -Math.PI / 2 ) {
 		points.push( [ centroidX, centroidY + radius ] );
 	}
@@ -2273,7 +2412,7 @@ EagleBrdRenderer.prototype.renderBounds = function() {
 	**/
 
 	var chordData, holes, pads,
-		i, j, k, x, y, firstX, firstY, lastX, lastY,
+		i, j, k, x, y, x1, y1, x2, y2, firstX, firstY, lastX, lastY,
 		wireGrps, wireGrp, wire,
 		layer = this.getLayer( &quot;Bounds&quot; ),
 		wires = layer.getElements( &quot;wire&quot; );
@@ -2283,7 +2422,6 @@ EagleBrdRenderer.prototype.renderBounds = function() {
 	// Setup draw style
 	layer.ctx.fillStyle = this.colors.bounds;
 	layer.ctx.save();
-
 
 
 	// Order wires
@@ -2309,11 +2447,31 @@ EagleBrdRenderer.prototype.renderBounds = function() {
 
 		for ( j = 0; j &lt; wireGrp.length; j++ ) {
 			wire = wireGrp[ j ];
-			x = wire.getAttribute( &quot;x2&quot; );
-			y = wire.getAttribute( &quot;y2&quot; );
-			for ( k = j; k &gt;= 0; k-- ) {
-				if ( x === wireGrp[ k ].getAttribute( &quot;x1&quot; ) &amp;&amp;
-						y === wireGrp[ k ].getAttribute( &quot;y1&quot; ) ) {
+			x1 = wire.getAttribute( &quot;x1&quot; );
+			y1 = wire.getAttribute( &quot;y1&quot; );
+			x2 = wire.getAttribute( &quot;x2&quot; );
+			y2 = wire.getAttribute( &quot;y2&quot; );
+			for ( k = j - 1; k &gt;= 0; k-- ) {
+				x = wireGrp[ k ].getAttribute( &quot;x1&quot; );
+				y = wireGrp[ k ].getAttribute( &quot;y1&quot; );
+				if ( x2 === x &amp;&amp; y2 === y ) {
+
+					// Wire connects to place K
+					wireGrp.splice( j, 1 );
+					wireGrp.splice( k, 0, wire );
+					break;
+				} else if ( x1 === x &amp;&amp; y1 === y ) {
+
+					// Wire inversely connects to place K
+					wire.setAttribute( &quot;x1&quot;, x2 );
+					wire.setAttribute( &quot;y1&quot;, y2 );
+					wire.setAttribute( &quot;x2&quot;, x1 );
+					wire.setAttribute( &quot;y2&quot;, y1 );
+					if ( wire.hasAttribute( &quot;curve&quot; ) ) {
+						wire.setAttribute(
+							&quot;curve&quot;,
+							&quot;&quot; + -parseFloat( wire.getAttribute( &quot;curve&quot; ) ) );
+					}
 					wireGrp.splice( j, 1 );
 					wireGrp.splice( k, 0, wire );
 					break;
@@ -2326,7 +2484,6 @@ EagleBrdRenderer.prototype.renderBounds = function() {
 	for ( i = 0; i &lt; wireGrps.length; i++ ) {
 		wires = wires.concat( wireGrps[ i ] );
 	}
-
 
 
 	// Draw wire outlines
@@ -3054,16 +3211,31 @@ EagleBrdRenderer.ChordData = function( chord ) {
 		May also be a JS object definition.
 	**/
 
-	var ang,
+	var ang, chordIndex, chordPrecedent, verts,
 		curve, x1, x2, y1, y2;
 
 	// Parse feed
 	if ( chord.getAttribute ) {
-		curve = parseFloat( chord.getAttribute( &quot;curve&quot; ) );
-		x1 = parseFloat( chord.getAttribute( &quot;x1&quot; ) );
-		x2 = parseFloat( chord.getAttribute( &quot;x2&quot; ) );
-		y1 = parseFloat( chord.getAttribute( &quot;y1&quot; ) );
-		y2 = parseFloat( chord.getAttribute( &quot;y2&quot; ) );
+		if ( chord.tagName === &quot;wire&quot; ) {
+			curve = parseFloat( chord.getAttribute( &quot;curve&quot; ) );
+			x1 = parseFloat( chord.getAttribute( &quot;x1&quot; ) );
+			x2 = parseFloat( chord.getAttribute( &quot;x2&quot; ) );
+			y1 = parseFloat( chord.getAttribute( &quot;y1&quot; ) );
+			y2 = parseFloat( chord.getAttribute( &quot;y2&quot; ) );
+		} else if ( chord.tagName === &quot;vertex&quot; ) {
+			verts = chord.parentNode.getElementsByTagName( &quot;vertex&quot; );
+			chordIndex = verts.indexOf( chord );
+			chordPrecedent = verts[ chordIndex - 1 ];
+			if ( !chordPrecedent ) {
+				console.warn( &quot;No prior vertex, aborting ChordData&quot; );
+				return;
+			}
+			curve = parseFloat( chord.getAttribute( &quot;curve&quot; ) ) || 0;
+			x1 = parseFloat( chordPrecedent.getAttribute( &quot;x&quot; ) );
+			y1 = parseFloat( chordPrecedent.getAttribute( &quot;y&quot; ) );
+			x2 = parseFloat( chord.getAttribute( &quot;x&quot; ) );
+			y2 = parseFloat( chord.getAttribute( &quot;y&quot; ) );
+		}
 	} else {
 		curve = chord.curve;
 		x1 = chord.x1;
