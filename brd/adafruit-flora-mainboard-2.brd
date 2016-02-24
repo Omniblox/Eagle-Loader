@@ -7565,10 +7565,10 @@ We've spent an enormous amount of time creating and checking these footprints an
 <designrules name="adafruit">
 <description language="de">&lt;b&gt;EAGLE Design Rules&lt;/b&gt;
 &lt;p&gt;
-Die Standard-Design-Rules sind so gewählt, dass sie für 
-die meisten Anwendungen passen. Sollte ihre Platine 
+Die Standard-Design-Rules sind so gewählt, dass sie für
+die meisten Anwendungen passen. Sollte ihre Platine
 besondere Anforderungen haben, treffen Sie die erforderlichen
-Einstellungen hier und speichern die Design Rules unter 
+Einstellungen hier und speichern die Design Rules unter
 einem neuen Namen ab.</description>
 <description language="en">&lt;b&gt;Adafruit board design rules&lt;/b&gt;
 &lt;p&gt;

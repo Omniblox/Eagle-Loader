@@ -6,7 +6,7 @@
 <body>
 
 <script src="../lib/three.js"></script>
-<script src="../lib/connector-1.0.1.js"></script>
+<script src="../lib/connector.js"></script>
 <script src="../src/eagle-brd-renderer.js"></script>
 <script>
 
@@ -28,7 +28,10 @@
 
 	xhttp.onreadystatechange = function() {
 		if ( xhttp.readyState === 4 && xhttp.status === 200 ) {
-			brd = new EagleBrdRenderer( xhttp.responseXML );
+			console.log(xhttp.responseText);
+			var parser = new DOMParser();
+      var xmlDoc = parser.parseFromString(xhttp.responseText,"text/xml");
+			brd = new EagleBrdRenderer( xmlDoc );
 
 			showLayers( brd );
 		}

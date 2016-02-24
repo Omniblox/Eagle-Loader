@@ -727,7 +727,7 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 				drills[ i ].tagName === "pad" ) {
 
 			// Top connector
-			connector = new Connector();
+			connector = new THREE.Connector();
 			mesh.add( connector );
 			connector.master = this.root;
 			connector.position.y = this.thickness / 2;
@@ -741,7 +741,7 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 			}
 
 			// Bottom connector
-			connector = new Connector();
+			connector = new THREE.Connector();
 			mesh.add( connector );
 			connector.master = this.root;
 			connector.position.y = -this.thickness / 2;
@@ -1160,7 +1160,7 @@ EagleBrdRenderer.prototype._parseElement = function( el ) {
 
 
 	// Add element Connector
-	connector = new Connector();
+	connector = new THREE.Connector();
 	connector.master = this.root;
 	this.connectElements.push( connector );
 
@@ -1610,7 +1610,7 @@ EagleBrdRenderer.prototype.drawPads = function( params ) {
 
 	for ( i = 0; i < pads.length; i++ ) {
 		pad = pads[ i ];
-		
+
 		ctx.save();
 
 		// Account for objects created by elements
