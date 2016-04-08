@@ -1,0 +1,187 @@
+<html>
+  <head>
+    <script src="lib/three.js"></script>
+    <script src="lib/connector.js"></script>
+    <script src="lib/OrbitControls.js"></script>
+    <script src="../src/eagle-brd-renderer.js"></script>
+    <script src="../src/BRDLoader.js"></script>
+
+    <style>
+    body {
+      background-color: #000;
+      font-family: Helvetica, arial, sans-serif
+    }
+    a, a:visited {
+      color: #fff;
+    }
+    </style>
+
+  </head>
+  <body>
+    <style>
+        #blog-threejs{
+          visibility: hidden;
+        }
+        #blog-threejs canvas {
+          /* force the canvas to fill out the entire area */
+
+          /* force the z-pos of the canvas to be on-top */
+          z-index: 0;
+        }
+        #info {
+          visibility: hidden;
+          color: #fff;
+          margin: -70px 0 0 500px;
+          z-index: 1;
+          position:relative;
+        }
+        .SparkFun{
+          background: url("images/sparkfun-logo.png");
+          background-size: 50px 50px;
+          background-repeat: no-repeat;
+          padding: 4px 0 0 50px;
+          width: 200px;
+          height: 75px;
+        }
+
+        .adafruit{
+          background: url("images/adafruit-logo.png");
+          background-size: 50px 50px;
+          background-repeat: no-repeat;
+          padding: 4px 0 0 50px;
+          width: 200px;
+          height: 75px;
+        }
+
+        #loading{
+          background: url("images/rolling.gif");
+          background-size: 70px 70px;
+          background-repeat: no-repeat;
+          background-position: center center;
+          width: 640px;
+          height: 480px;
+          background-color: #000;
+        }
+
+        #product-manufacturer{
+          font-weight: bold;
+        }
+
+    </style>
+
+    <div id="blog-threejs"></div>
+    <div id="info">
+      <div id="product-data" class="">
+        <span id="product-manufacturer"></span><br/>
+        <a href="" id="link-to-site" target="_blank"></a>
+      </div>
+    </div>
+
+    <div id="loading">
+    </div>
+    <script>
+    	// Load and initiate process
+    	var brd, src,
+    		camera, renderer, scene,
+    		xhttp = new XMLHttpRequest(),
+    		showMesh = function( product ) {
+
+    			var light, lightRig,
+    				zoom = 1.5,
+            brd = product.boardData;
+
+    			// Init view
+    			scene = new THREE.Scene();
+    			camera = new THREE.PerspectiveCamera(
+    				75, 640 / 480, 100, 10000 );
+
+          console.log(brd)
+
+    			camera.position.z = ( brd.width + brd.height ) / zoom;
+    			renderer = new THREE.WebGLRenderer();
+    			renderer.setSize( 640, 480 );
+    			renderer.setClearColor( 0x000000, 1);
+
+          controls = new THREE.OrbitControls( camera, renderer.domElement );
+    			controls.enableDamping = true;
+    			controls.dampingFactor = 0.25;
+
+    			var displayDiv = document.getElementById("blog-threejs");
+          var info = document.getElementById("info");
+          var loadingDiv = document.getElementById("loading");
+
+          document.getElementById("product-data").className = product.manufacturer;
+          document.getElementById("product-manufacturer").innerText = product.manufacturer;
+
+          var productLink = document.getElementById("link-to-site");
+          productLink.href = product.url;
+          productLink.innerText = product.name;
+
+          displayDiv.appendChild( renderer.domElement );
+          displayDiv.appendChild( info );
+
+          loadingDiv.style.visibility = "hidden";
+          loadingDiv.style.display = "none";
+          
+          info.style.visibility = "visible";
+          displayDiv.style.visibility = "visible";
+
+    			// View mesh
+    			scene.add( brd.root );
+
+    			// Light the mesh
+    			lightRig = new THREE.Object3D();
+    			scene.add( lightRig );
+    			light = new THREE.PointLight( 0xddeeff, 0.5, 0 );
+    			light.position.set( 400, -800, 1600 );
+    			lightRig.add( light );
+    			light = new THREE.PointLight( 0xffeedd, 0.5, 0 );
+    			light.position.set( -400, 800, 1600 );
+    			lightRig.add( light );
+    			light = new THREE.PointLight( 0x8888dd, 0.5, 0 );
+    			light.position.set( -800, 0, -400 );
+    			lightRig.add( light );
+    			light = new THREE.PointLight( 0xdd8888, 0.5, 0 );
+    			light.position.set( 800, 0, -400 );
+    			lightRig.add( light );
+
+    			var animate = function() {
+    				var now = Date.now();
+
+    				requestAnimationFrame( animate );
+
+    				brd.root.rotation.x =	0.2 * Math.sin( now * 0.00013 );
+    				brd.root.rotation.z =	0.2 * Math.sin( now * 0.00031 );
+    				brd.root.rotation.y = now * 0.00037;
+
+            controls.update();
+    				renderer.render( scene, camera );
+    			}
+
+    			// Commence rendering
+    			animate();
+    		};
+
+      var product = {
+          src: "brd-files/sparkpunk/sparkpunk.brd",
+          manufacturer: "SparkFun",
+          url: "",
+          name: "Sparkpunk",
+          boardData: null
+      }
+
+      var brdParams = {
+        colors: {solderMask: "rgb( 255, 0, 0 )"}
+      }
+
+      var loader = new THREE.BRDLoader();
+
+      loader.load( product.src, brdParams, function ( boardGeo ) {
+        product.boardData = boardGeo;
+        showMesh(product);
+      } );
+
+
+    </script>
+  </body>
+</html>
