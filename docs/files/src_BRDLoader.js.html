@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>EagleBrdRenderer - EagleBrdViz</title>
+    <title>src/BRDLoader.js - EagleBrdViz</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -81,58 +81,115 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-<h1>EagleBrdRenderer Module</h1>
-<div class="box clearfix meta">
+<h1 class="file-heading">File: src/BRDLoader.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/*
+
+EAGLE .BRD Loader for THREE.js
+
+David ten Have, St. Zeno Exploration Ltd.
+
+This script is a helper for loading the output of EagleBrdRenderer into a THREE.js environment
+
+*/
 
 
-        <div class="foundat">
-            Defined in: <a href="../files/src_eagle-brd-renderer.js.html#l3279"><code>src&#x2F;eagle-brd-renderer.js:3279</code></a>
-        </div>
 
-</div>
+THREE.BRDLoader = function ( manager ) {
 
+	this.manager = ( manager !== undefined ) ? manager : THREE.DefaultLoadingManager;
 
-<div class="box intro">
-    
-</div>
+};
 
+/**
+@class THREE.BRDLoader
+**/
 
-<div class="yui3-g">
-    <div class="yui3-u-1-2">
-            <p>This module provides the following classes:</p>
+THREE.BRDLoader.prototype = {
 
-            <ul class="module-classes">
-                <li class="module-class">
-                    <a href="../classes/EagleBrdRenderer.html">
-                        EagleBrdRenderer
-                    </a>
-                </li>
-                <li class="module-class">
-                    <a href="../classes/EagleBrdRenderer.AngleData.html">
-                        EagleBrdRenderer.AngleData
-                    </a>
-                </li>
-                <li class="module-class">
-                    <a href="../classes/EagleBrdRenderer.ChordData.html">
-                        EagleBrdRenderer.ChordData
-                    </a>
-                </li>
-                <li class="module-class">
-                    <a href="../classes/EagleBrdRenderer.Layer.html">
-                        EagleBrdRenderer.Layer
-                    </a>
-                </li>
-                <li class="module-class">
-                    <a href="../classes/THREE.BRDLoader.html">
-                        THREE.BRDLoader
-                    </a>
-                </li>
-            </ul>
-    </div>
+	constructor: THREE.BRDLoader,
 
+  /**
+  The load call for the .brd loader
 
-    <div class="yui3-u-1-2">
-    </div>
+  @method THREE.BRDLoader.load
+	@param url {String} .brd file URL
+	@param brdParams {object} Composite parameter object describing params for rendering the .brd file
+		@param [brdParams.color] {object} Define custom colors; see &#x60;this.colors&#x60;
+		@param [brdParams.composite=true] {boolean} Whether to composite layers,
+			or render them as individual geometries. Warning: individual
+			layers are very slow.
+		@param [brdParams.maskOpacity=0.8] {number} Opacity of solder mask;
+			opacity is halved over copper traces
+		@param [brdParams.pixelMicrons=35] {number} Resolution of texture maps.
+			By default, this is 35 microns, equal to the thickness
+			of a default copper layer. Note that this will affect the
+			size of the board geometry.
+		@param [brdParams.material=&quot;phong&quot;] {string} Material shader to use.
+			Options include &#x60;&quot;phong&quot;&#x60; for realistic lighting,
+			&#x60;&quot;lambert&quot;&#x60; for flat lighting, and &#x60;&quot;basic&quot;&#x60; for no lighting.
+		@param [brdParams.viewConnectors=false] {boolean} Whether to visualize
+			Connector objects
+		@param [brdParams.viewGhosts=false] {boolean} Whether to draw
+			approximate ghosts of on-board devices
+  @param onLoad {function} Will be called when load completes. The argument will be the loaded Object3D.
+  @param [onProgress] {function} Will be called while load progresses. The argument will be the XmlHttpRequest instance, that contain .total and .loaded bytes.
+  @param [onError] {function} Will be called when load errors.
+	**/
+
+  **/
+
+	load: function ( url, brdParams, onLoad, onProgress, onError ) {
+
+		var scope = this;
+
+		var loader = new THREE.XHRLoader( scope.manager );
+		loader.setCrossOrigin( this.crossOrigin );
+		loader.load( url, function ( text ) {
+
+			onLoad( scope.parse( text, brdParams ) );
+
+		}, onProgress, onError );
+
+	},
+
+  /**
+	Construct THREE.js geometry, bearing composited textures from all layers.
+
+  @method THREE.BRDLoader.parse
+  @param data {String} The contents of the .brd file as a string
+  @param brdParams {object} Composite parameter object describing params for rendering the .brd file
+    @param [brdParams.color] {object} Define custom colors; see &#x60;this.colors&#x60;
+    @param [brdParams.composite=true] {boolean} Whether to composite layers,
+      or render them as individual geometries. Warning: individual
+      layers are very slow.
+    @param [brdParams.maskOpacity=0.8] {number} Opacity of solder mask;
+      opacity is halved over copper traces
+    @param [brdParams.pixelMicrons=35] {number} Resolution of texture maps.
+      By default, this is 35 microns, equal to the thickness
+      of a default copper layer. Note that this will affect the
+      size of the board geometry.
+    @param [brdParams.material=&quot;phong&quot;] {string} Material shader to use.
+      Options include &#x60;&quot;phong&quot;&#x60; for realistic lighting, &#x60;&quot;lambert&quot;&#x60; for flat lighting, and &#x60;&quot;basic&quot;&#x60; for no lighting.
+    @param [brdParams.viewConnectors=false] {boolean} Whether to visualize Connector objects
+    @param [brdParams.viewGhosts=false] {boolean} Whether to draw approximate ghosts of on-board devices
+  @private
+	**/
+
+	parse: function ( data, brdParams ) {
+
+    var parser = new DOMParser();
+    var xmlBrd = parser.parseFromString(data, &quot;text/xml&quot;);
+    brd = new EagleBrdRenderer( xmlBrd, brdParams );
+
+    return brd.root;
+  }
+
+}
+
+    </pre>
 </div>
                     </div>
                 </div>

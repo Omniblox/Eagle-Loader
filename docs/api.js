@@ -4,7 +4,8 @@ YUI.add("yuidoc-meta", function(Y) {
         "EagleBrdRenderer",
         "EagleBrdRenderer.AngleData",
         "EagleBrdRenderer.ChordData",
-        "EagleBrdRenderer.Layer"
+        "EagleBrdRenderer.Layer",
+        "THREE.BRDLoader"
     ],
     "modules": [
         "EagleBrdRenderer"

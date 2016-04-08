@@ -3,9 +3,18 @@
         "name": "EagleBrdViz",
         "description": "Visualize EAGLE .brd files in the browser.",
         "version": "1.0.0",
-        "url": "http://www.kiwijs.org"
+        "url": "http://omniblox.io/three-brdloader"
     },
     "files": {
+        "src/BRDLoader.js": {
+            "name": "src/BRDLoader.js",
+            "modules": {},
+            "classes": {
+                "THREE.BRDLoader": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
         "src/eagle-brd-renderer.js": {
             "name": "src/eagle-brd-renderer.js",
             "modules": {
@@ -29,6 +38,7 @@
             "submodules": {},
             "elements": {},
             "classes": {
+                "THREE.BRDLoader": 1,
                 "EagleBrdRenderer": 1,
                 "EagleBrdRenderer.AngleData": 1,
                 "EagleBrdRenderer.ChordData": 1,
@@ -44,6 +54,18 @@
         }
     },
     "classes": {
+        "THREE.BRDLoader": {
+            "name": "THREE.BRDLoader",
+            "shortname": "THREE.BRDLoader",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "EagleBrdRenderer",
+            "file": "src/BRDLoader.js",
+            "line": 19
+        },
         "EagleBrdRenderer": {
             "name": "EagleBrdRenderer",
             "shortname": "EagleBrdRenderer",
@@ -233,6 +255,165 @@
     },
     "elements": {},
     "classitems": [
+        {
+            "file": "src/BRDLoader.js",
+            "line": 27,
+            "description": "The load call for the .brd loader",
+            "itemtype": "method",
+            "name": "THREE.BRDLoader.load",
+            "params": [
+                {
+                    "name": "url",
+                    "description": ".brd file URL",
+                    "type": "String"
+                },
+                {
+                    "name": "brdParams",
+                    "description": "Composite parameter object describing params for rendering the .brd file",
+                    "type": "Object",
+                    "props": [
+                        {
+                            "name": "color",
+                            "description": "Define custom colors; see `this.colors`",
+                            "type": "Object",
+                            "optional": true
+                        },
+                        {
+                            "name": "composite",
+                            "description": "Whether to composite layers,\n\t\t\tor render them as individual geometries. Warning: individual\n\t\t\tlayers are very slow.",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "true"
+                        },
+                        {
+                            "name": "maskOpacity",
+                            "description": "Opacity of solder mask;\n\t\t\topacity is halved over copper traces",
+                            "type": "Number",
+                            "optional": true,
+                            "optdefault": "0.8"
+                        },
+                        {
+                            "name": "pixelMicrons",
+                            "description": "Resolution of texture maps.\n\t\t\tBy default, this is 35 microns, equal to the thickness\n\t\t\tof a default copper layer. Note that this will affect the\n\t\t\tsize of the board geometry.",
+                            "type": "Number",
+                            "optional": true,
+                            "optdefault": "35"
+                        },
+                        {
+                            "name": "material",
+                            "description": "Material shader to use.\n\t\t\tOptions include `\"phong\"` for realistic lighting,\n\t\t\t`\"lambert\"` for flat lighting, and `\"basic\"` for no lighting.",
+                            "type": "String",
+                            "optional": true,
+                            "optdefault": "\"phong\""
+                        },
+                        {
+                            "name": "viewConnectors",
+                            "description": "Whether to visualize\n\t\t\tConnector objects",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "false"
+                        },
+                        {
+                            "name": "viewGhosts",
+                            "description": "Whether to draw\n\t\t\tapproximate ghosts of on-board devices",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "false"
+                        }
+                    ]
+                },
+                {
+                    "name": "onLoad",
+                    "description": "Will be called when load completes. The argument will be the loaded Object3D.",
+                    "type": "Function"
+                },
+                {
+                    "name": "onProgress",
+                    "description": "Will be called while load progresses. The argument will be the XmlHttpRequest instance, that contain .total and .loaded bytes.",
+                    "type": "Function",
+                    "optional": true
+                },
+                {
+                    "name": "onError",
+                    "description": "Will be called when load errors.",
+                    "type": "Function",
+                    "optional": true
+                }
+            ],
+            "class": "THREE.BRDLoader"
+        },
+        {
+            "file": "src/BRDLoader.js",
+            "line": 71,
+            "description": "Construct THREE.js geometry, bearing composited textures from all layers.",
+            "itemtype": "method",
+            "name": "THREE.BRDLoader.parse",
+            "params": [
+                {
+                    "name": "data",
+                    "description": "The contents of the .brd file as a string",
+                    "type": "String"
+                },
+                {
+                    "name": "brdParams",
+                    "description": "Composite parameter object describing params for rendering the .brd file",
+                    "type": "Object",
+                    "props": [
+                        {
+                            "name": "color",
+                            "description": "Define custom colors; see `this.colors`",
+                            "type": "Object",
+                            "optional": true
+                        },
+                        {
+                            "name": "composite",
+                            "description": "Whether to composite layers,\n      or render them as individual geometries. Warning: individual\n      layers are very slow.",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "true"
+                        },
+                        {
+                            "name": "maskOpacity",
+                            "description": "Opacity of solder mask;\n      opacity is halved over copper traces",
+                            "type": "Number",
+                            "optional": true,
+                            "optdefault": "0.8"
+                        },
+                        {
+                            "name": "pixelMicrons",
+                            "description": "Resolution of texture maps.\n      By default, this is 35 microns, equal to the thickness\n      of a default copper layer. Note that this will affect the\n      size of the board geometry.",
+                            "type": "Number",
+                            "optional": true,
+                            "optdefault": "35"
+                        },
+                        {
+                            "name": "material",
+                            "description": "Material shader to use.\n      Options include `\"phong\"` for realistic lighting, `\"lambert\"` for flat lighting, and `\"basic\"` for no lighting.",
+                            "type": "String",
+                            "optional": true,
+                            "optdefault": "\"phong\""
+                        },
+                        {
+                            "name": "viewConnectors",
+                            "description": "Whether to visualize Connector objects",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "false"
+                        },
+                        {
+                            "name": "viewGhosts",
+                            "description": "Whether to draw approximate ghosts of on-board devices",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "false"
+                        }
+                    ]
+                }
+            ],
+            "access": "private",
+            "tagname": "",
+            "class": "THREE.BRDLoader"
+        },
         {
             "file": "src/eagle-brd-renderer.js",
             "line": 59,
