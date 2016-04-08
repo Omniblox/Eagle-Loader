@@ -82,9 +82,9 @@
     <script>
     	// Load and initiate process
     	var brd, src,
-    		camera, renderer, scene,
-    		xhttp = new XMLHttpRequest(),
-    		showMesh = function( product ) {
+    		camera, renderer, scene;
+
+    	var showMesh = function( product ) {
 
     			var light, lightRig,
     				zoom = 1.5,
@@ -94,8 +94,6 @@
     			scene = new THREE.Scene();
     			camera = new THREE.PerspectiveCamera(
     				75, 640 / 480, 100, 10000 );
-
-          console.log(brd)
 
     			camera.position.z = ( brd.width + brd.height ) / zoom;
     			renderer = new THREE.WebGLRenderer();
@@ -175,9 +173,8 @@
       }
 
       var loader = new THREE.BRDLoader();
-
-      loader.load( product.src, brdParams, function ( boardGeo ) {
-        product.boardData = boardGeo;
+      loader.load( product.src, brdParams, function ( brd ) {
+        product.boardData = brd;
         showMesh(product);
       } );
 

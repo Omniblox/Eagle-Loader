@@ -67,7 +67,7 @@ THREE.BRDLoader.prototype = {
 	},
 
   /**
-	Construct THREE.js geometry, bearing composited textures from all layers.
+	Construct the EagleBrdRenderer object THREE.js geometry (brd.root), bearing composited textures from all layers.
 
   @method THREE.BRDLoader.parse
   @param data {String} The contents of the .brd file as a string

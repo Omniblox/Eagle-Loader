@@ -1,9 +1,9 @@
 # EAGLE .brd Renderer
 
-Benjamin D. Richards
+Benjamin D. Richards,
 Gamelab
 
-David ten Have
+David ten Have,
 St Zeno Exploration Ltd
 
 Copyright (c) 2016, St. Zeno Exploration Ltd.
@@ -22,7 +22,7 @@ The script is not 100% accurate, and should not be used for critical application
 	docs/						Auto-generated API documentation.
 	eagle/						Example `.brd` files
 		eagle.dtd				Explanation of EAGLE XML format
-		eagle-xml-notes.md	Notes on the structure of EAGLE XML format
+		eagle-xml-notes.md				Notes on the structure of EAGLE XML format
 	examples/				Examples
 	lib/						Files necessary for the script to run
 	src/						The script
@@ -33,7 +33,7 @@ The script is not 100% accurate, and should not be used for critical application
 
 ## Using Script
 
-First, copy the THREE.js library and Connector script from `lib/`, and the visualizer script from `src/`. Ensure that you load them in this order: THREE, Connector, visualizer. See the examples for examples.
+First, copy the THREE.js library and Connector script from `lib/`, and the eagle-brd-renderer script from `src/`. Ensure that you load them in this order: THREE, Connector, eagle-brd-renderer. See the examples for examples.
 
 To create a PCB model using default options, use the following:
 
@@ -65,6 +65,28 @@ var brd = new EagleBrdRenderer( xml, {
 This will create a PCB with green masking, at half the standard resolution (of 35 microns per pixel), using a basic flat material instead of Phong lighting, with handles displayed for the auto-generated connectors.
 
 You may also toggle connector and ghost visibility with `brd.viewConnectors( true )` and `brd.viewGhosts( true )`. Ghosts are approximations of certain mounted devices on the PCB.
+
+You can use the BRDLoader (src/BRDLoader.js) in a similar manner. First, copy the THREE.js library and Connector script from `lib/`. Then take the eagle-brd-renderer and BRDLoader script from `src/`. Ensure that you load them in this order: THREE, Connector, eagle-brd-renderer, BRDLoader. To load the .brd file into an existing script do the following:
+
+```js
+var url = 'path/to/file.brd';
+var brdParams = {
+	color: {
+		solderMask: "rgb( 32, 168, 64 )"
+	},
+	pixelMicrons: 70,
+	material: "basic",
+	viewConnectors: true
+}
+
+var loader = new THREE.BRDLoader();
+loader.load( url, brdParams, function ( brd ) {
+	product.boardData = brd;
+	showMesh(product);
+} );
+```
+
+This will create a PCB with green masking, at half the standard resolution (of 35 microns per pixel), using a basic flat material instead of Phong lighting, with handles displayed for the auto-generated connectors.
 
 For more details and examples, consult the API documentation in `docs/` and the examples folders.
 
