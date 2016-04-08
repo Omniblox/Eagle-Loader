@@ -3,6 +3,10 @@
 Benjamin D. Richards
 Gamelab
 
+David ten Have
+St Zeno Exploration Ltd
+
+Copyright (c) 2016, St. Zeno Exploration Ltd.
 
 ## About Script
 
@@ -15,15 +19,13 @@ The script is not 100% accurate, and should not be used for critical application
 
 ## Files and Folders
 
-	brd/						Example `.brd` files
-		eagle.dtd				Explanation of EAGLE XML format
 	docs/						Auto-generated API documentation.
-	example-view-connections/	See an example of connected PCBs
-	example-view-model/			See an example of a rendered PCB
-	example-view-textures/		See an example of PCB textures
+	eagle/						Example `.brd` files
+		eagle.dtd				Explanation of EAGLE XML format
+		eagle-xml-notes.md	Notes on the structure of EAGLE XML format
+	examples/				Examples
 	lib/						Files necessary for the script to run
 	src/						The script
-	eagle-xml-notes.md			Notes on the structure of EAGLE XML format
 	gruntfile.js				Build systems
 	package.json				Build systems
 	README.md					This file
