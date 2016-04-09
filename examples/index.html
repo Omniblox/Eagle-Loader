@@ -2,34 +2,110 @@
   <head>
     <script src="../lib/three.js"></script>
     <script src="../lib/connector.js"></script>
-    <script src="OrbitControls.js"></script>
+
+    <script src="js/OrbitControls.js"></script>
+    <script src="js/jquery-2.2.3.min.js"></script>
+
     <script src="../src/eagle-brd-renderer.js"></script>
     <script src="../src/BRDLoader.js"></script>
 
     <style>
     body {
       background-color: #000;
-      font-family: Helvetica, arial, sans-serif
+      font-family: Helvetica, arial, sans-serif;
+      color: #fff;
     }
     a, a:visited {
       color: #fff;
     }
     </style>
 
+    <script>
+    var boards = {
+      feather: {
+        src: "brd-files/feather/feather.brd",
+        manufacturer: "adafruit",
+        url: "foo",
+        name: "Feather",
+        brdParams: {
+          colors: {solderMask: "rgb( 0, 0, 0 )"}
+        }
+      },
+      flora: {
+          src: "brd-files/flora/adafruit_flora_mainboard_2.brd",
+          manufacturer: "adafruit",
+          url: "foo",
+          name: "Flora",
+          brdParams: {
+            colors: {solderMask: "rgb( 0, 0, 0 )"}
+          }
+      },
+      gemma: {
+        src: "brd-files/gemma/gemma.brd",
+        manufacturer: "adafruit",
+        url: "foo",
+        name: "Gemma",
+        brdParams: {
+          colors: {solderMask: "rgb( 0, 0, 0 )"}
+        }
+      },
+      neopixel: {
+        src: "brd-files/neopixel/neopixel_ring_12.brd",
+        manufacturer: "adafruit",
+        url: "foo",
+        name: "Neopixel (12)",
+        brdParams: {
+          colors: {solderMask: "rgb( 0, 0, 0 )"}
+        }
+      },
+      trinket: {
+        src: "brd-files/trinket/trinket.brd",
+        manufacturer: "adafruit",
+        url: "foo",
+        name: "Trinket (3V)",
+        brdParams: {
+          colors: {solderMask: "rgb( 0, 0, 255 )"}
+        }
+      },
+      redstick: {
+        src: "brd-files/redstick/sparkfun_redstick.brd",
+        manufacturer: "SparkFun",
+        url: "foo",
+        name: "RedStick",
+        brdParams: {
+          colors: {solderMask: "rgb( 255, 0, 0 )"}
+        }
+      },
+      sparkpunk: {
+        src: "brd-files/sparkpunk/sparkpunk.brd",
+        manufacturer: "SparkFun",
+        url: "foo",
+        name: "Sparkpunk",
+        brdParams: {
+          colors: {solderMask: "rgb( 255, 0, 0 )"}
+        }
+      },
+      thing: {
+        src: "brd-files/thing/thing.brd",
+        manufacturer: "SparkFun",
+        url: "foo",
+        name: "Thing",
+        brdParams: {
+          colors: {solderMask: "rgb( 255, 0, 0 )"}
+        }
+      }
+    }
+    </script>
+
   </head>
   <body>
     <style>
-        #blog-threejs{
-          visibility: hidden;
-        }
-        #blog-threejs canvas {
-          /* force the canvas to fill out the entire area */
 
-          /* force the z-pos of the canvas to be on-top */
+        #bloard canvas {
           z-index: 0;
         }
+
         #info {
-          visibility: hidden;
           color: #fff;
           margin: -70px 0 0 500px;
           z-index: 1;
@@ -69,79 +145,71 @@
 
     </style>
 
-    <div id="blog-threejs"></div>
-    <div id="info">
-      <div id="product-data" class="">
-        <span id="product-manufacturer"></span><br/>
-        <a href="" id="link-to-site" target="_blank"></a>
+    <div id="board">
+
+      <div id="info">
+        <div id="product-data" class="">
+          <span id="product-manufacturer"></span><br/>
+          <a href="" id="link-to-site" target="_blank"></a>
+        </div>
+      </div>
+
+      <div>
+        Example:
+      <select id="examples">
+      </select>
       </div>
     </div>
+
 
     <div id="loading">
     </div>
     <script>
-    	// Load and initiate process
-    	var brd, src,
-    		camera, renderer, scene;
 
-    	var showMesh = function( product ) {
+      // Init view
+      var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(75, 640 / 480, 100, 10000 );
 
-    			var light, lightRig,
-    				zoom = 1.5,
-            brd = product.boardData;
+      var renderer = new THREE.WebGLRenderer();
+      renderer.setSize( 640, 480 );
+      renderer.setClearColor( 0x000000, 1);
+      $("#board").prepend(renderer.domElement)
 
-    			// Init view
-    			scene = new THREE.Scene();
-    			camera = new THREE.PerspectiveCamera(
-    				75, 640 / 480, 100, 10000 );
+      // set up controls
+      var controls = new THREE.OrbitControls( camera, renderer.domElement );
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.25;
+
+      // add lighting
+      var light, lightRig,
+      lightRig = new THREE.Object3D();
+      lightRig.name = "light-rig"
+      scene.add( lightRig );
+      light = new THREE.PointLight( 0xddeeff, 0.5, 0 );
+      light.position.set( 400, -800, 1600 );
+      lightRig.add( light );
+      light = new THREE.PointLight( 0xffeedd, 0.5, 0 );
+      light.position.set( -400, 800, 1600 );
+      lightRig.add( light );
+      light = new THREE.PointLight( 0x8888dd, 0.5, 0 );
+      light.position.set( -800, 0, -400 );
+      lightRig.add( light );
+      light = new THREE.PointLight( 0xdd8888, 0.5, 0 );
+      light.position.set( 800, 0, -400 );
+      lightRig.add( light );
+
+    	var addToScene = function( board ) {
+
+    			var zoom = 1.5,
+              brd = board.boardData;
 
     			camera.position.z = ( brd.width + brd.height ) / zoom;
-    			renderer = new THREE.WebGLRenderer();
-    			renderer.setSize( 640, 480 );
-    			renderer.setClearColor( 0x000000, 1);
 
-          controls = new THREE.OrbitControls( camera, renderer.domElement );
-    			controls.enableDamping = true;
-    			controls.dampingFactor = 0.25;
-
-    			var displayDiv = document.getElementById("blog-threejs");
-          var info = document.getElementById("info");
-          var loadingDiv = document.getElementById("loading");
-
-          document.getElementById("product-data").className = product.manufacturer;
-          document.getElementById("product-manufacturer").innerText = product.manufacturer;
-
-          var productLink = document.getElementById("link-to-site");
-          productLink.href = product.url;
-          productLink.innerText = product.name;
-
-          displayDiv.appendChild( renderer.domElement );
-          displayDiv.appendChild( info );
-
-          loadingDiv.style.visibility = "hidden";
-          loadingDiv.style.display = "none";
-
-          info.style.visibility = "visible";
-          displayDiv.style.visibility = "visible";
-
-    			// View mesh
+    			// add board to scene
+          var boardID = 'board-model';
+          scene.remove(scene.getObjectByName(boardID))
+          brd.root.name = boardID;
     			scene.add( brd.root );
-
-    			// Light the mesh
-    			lightRig = new THREE.Object3D();
-    			scene.add( lightRig );
-    			light = new THREE.PointLight( 0xddeeff, 0.5, 0 );
-    			light.position.set( 400, -800, 1600 );
-    			lightRig.add( light );
-    			light = new THREE.PointLight( 0xffeedd, 0.5, 0 );
-    			light.position.set( -400, 800, 1600 );
-    			lightRig.add( light );
-    			light = new THREE.PointLight( 0x8888dd, 0.5, 0 );
-    			light.position.set( -800, 0, -400 );
-    			lightRig.add( light );
-    			light = new THREE.PointLight( 0xdd8888, 0.5, 0 );
-    			light.position.set( 800, 0, -400 );
-    			lightRig.add( light );
 
     			var animate = function() {
     				var now = Date.now();
@@ -160,23 +228,51 @@
     			animate();
     		};
 
-      var product = {
-          src: "brd-files/sparkpunk/sparkpunk.brd",
-          manufacturer: "SparkFun",
-          url: "",
-          name: "Sparkpunk",
-          boardData: null
+      var showLoading = function () {
+        $("#loading").show();
+        $("#board").hide();
       }
 
-      var brdParams = {
-        colors: {solderMask: "rgb( 255, 0, 0 )"}
+      var showScene = function( board ){
+
+        // populate product info
+        $("#product-data").attr('class', board.manufacturer);
+        $("#product-manufacturer").text( board.manufacturer );
+
+        var productLink = $("#link-to-site");
+        productLink.attr('href', board.url);
+        productLink.text(board.name);
+
+        // show scene and info
+        $("#board").toggle();
+
+        // hide loading div
+        $("#loading").toggle();
+
       }
 
-      var loader = new THREE.BRDLoader();
-      loader.load( product.src, brdParams, function ( brd ) {
-        product.boardData = brd;
-        showMesh(product);
-      } );
+      var loadBoard = function( board ){
+        showLoading();
+        var loader = new THREE.BRDLoader();
+        loader.load( board.src, board.brdParams, function ( brd ) {
+          board.boardData = brd;
+          addToScene(board);
+          showScene(board);
+        } );
+      }
+
+      // populate and wire up examples selector
+      var select = $('#examples');
+      select.find('option').remove();
+      $.each(boards, function(key, value) {
+         $('<option>').val(key).text(value.name).appendTo(select);
+      });
+
+      select.change(function(){
+        loadBoard( boards[this.value]);
+      })
+
+      loadBoard( boards.trinket );
 
 
     </script>

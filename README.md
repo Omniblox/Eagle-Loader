@@ -81,8 +81,7 @@ var brdParams = {
 
 var loader = new THREE.BRDLoader();
 loader.load( url, brdParams, function ( brd ) {
-	product.boardData = brd;
-	showMesh(product);
+	scene.add(brd.root);
 } );
 ```
 
