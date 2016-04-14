@@ -1,0 +1,102 @@
+<html>
+  <head>
+    <script src="../lib/three.js"></script>
+    <script src="../lib/connector.js"></script>
+
+    <script src="js/OrbitControls.js"></script>
+
+    <script src="../src/eagle-brd-renderer.js"></script>
+    <script src="../src/BRDLoader.js"></script>
+
+    <style>
+    body {
+      background-color: #000;
+      font-family: Helvetica, arial, sans-serif;
+      color: #fff;
+    }
+    #board canvas {
+      z-index: 0;
+    }
+    </style>
+
+  </head>
+  <body>
+
+    <div id="board">
+    </div>
+
+    <script>
+
+      // Init view
+      var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(75, 640 / 480, 100, 10000 );
+
+      var renderer = new THREE.WebGLRenderer();
+      renderer.setSize( 640, 480 );
+      renderer.setClearColor( 0x000000, 1);
+      document.getElementById('board').appendChild(renderer.domElement)
+
+      // set up controls
+      var controls = new THREE.OrbitControls( camera, renderer.domElement );
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.25;
+
+      // add lighting
+      var light, lightRig,
+      lightRig = new THREE.Object3D();
+      lightRig.name = "light-rig"
+      scene.add( lightRig );
+      light = new THREE.PointLight( 0xddeeff, 0.5, 0 );
+      light.position.set( 400, -800, 1600 );
+      lightRig.add( light );
+      light = new THREE.PointLight( 0xffeedd, 0.5, 0 );
+      light.position.set( -400, 800, 1600 );
+      lightRig.add( light );
+      light = new THREE.PointLight( 0x8888dd, 0.5, 0 );
+      light.position.set( -800, 0, -400 );
+      lightRig.add( light );
+      light = new THREE.PointLight( 0xdd8888, 0.5, 0 );
+      light.position.set( 800, 0, -400 );
+      lightRig.add( light );
+
+    	var addToScene = function( board ) {
+
+    			var zoom = 1.5;
+
+    			camera.position.z = ( brd.width + brd.height ) / zoom;
+
+    			// add board to scene
+    			scene.add( board.root );
+
+    			var animate = function() {
+    				var now = Date.now();
+
+    				requestAnimationFrame( animate );
+
+    				board.root.rotation.x =	0.2 * Math.sin( now * 0.00013 );
+    				board.root.rotation.z =	0.2 * Math.sin( now * 0.00031 );
+    				board.root.rotation.y = now * 0.00037;
+
+            controls.update();
+    				renderer.render( scene, camera );
+    			}
+
+    			// Commence rendering
+    			animate();
+    		};
+
+      var url = 'brd-files/redstick/sparkfun_redstick.brd';
+      var brdParams = {
+      	colors: {
+      		solderMask: "rgb( 255, 0, 0 )"
+      	}
+      }
+
+      var loader = new THREE.BRDLoader();
+      loader.load( url, brdParams, function ( board ) {
+        addToScene(board);
+      } );
+
+    </script>
+  </body>
+</html>

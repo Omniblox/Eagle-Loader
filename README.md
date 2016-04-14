@@ -53,7 +53,7 @@ You may customize the PCB model upon generation; for example:
 
 ```js
 var brd = new EagleBrdRenderer( xml, {
-	color: {
+	colors: {
 		solderMask: "rgb( 32, 168, 64 )"
 	},
 	pixelMicrons: 70,
@@ -66,12 +66,12 @@ This will create a PCB with green masking, at half the standard resolution (of 3
 
 You may also toggle connector and ghost visibility with `brd.viewConnectors( true )` and `brd.viewGhosts( true )`. Ghosts are approximations of certain mounted devices on the PCB.
 
-You can use the BRDLoader (src/BRDLoader.js) in a similar manner. First, copy the THREE.js library and Connector script from `lib/`. Then take the eagle-brd-renderer and BRDLoader script from `src/`. Ensure that you load them in this order: THREE, Connector, eagle-brd-renderer, BRDLoader. To load the .brd file into an existing script do the following:
+You can use the BRDLoader (src/BRDLoader.js) in a similar manner. First, copy the THREE.js library and Connector script from `lib/`. Then take the eagle-brd-renderer and BRDLoader script from `src/`. Ensure that you load them in this order: THREE, Connector, eagle-brd-renderer, BRDLoader. To load the .brd file into an existing scene do the following:
 
 ```js
 var url = 'path/to/file.brd';
 var brdParams = {
-	color: {
+	colors: {
 		solderMask: "rgb( 32, 168, 64 )"
 	},
 	pixelMicrons: 70,
