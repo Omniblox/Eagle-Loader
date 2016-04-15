@@ -4,7 +4,7 @@ Benjamin D. Richards,
 Gamelab
 
 David ten Have,
-St Zeno Exploration Ltd
+St. Zeno Exploration Ltd
 
 Copyright (c) 2016, St. Zeno Exploration Ltd.
 

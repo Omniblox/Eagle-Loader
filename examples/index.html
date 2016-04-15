@@ -4,166 +4,23 @@
     <script src="../lib/connector.js"></script>
 
     <script src="js/OrbitControls.js"></script>
-    <script src="js/jquery-2.2.3.min.js"></script>
 
     <script src="../src/eagle-brd-renderer.js"></script>
     <script src="../src/BRDLoader.js"></script>
 
-    <style>
-    body {
-      background-color: #000;
-      font-family: Helvetica, arial, sans-serif;
-      color: #fff;
-    }
-    a, a:visited {
-      color: #fff;
-    }
-    </style>
-
-    <script>
-    var boards = {
-      feather: {
-        src: "brd-files/feather/feather.brd",
-        manufacturer: "adafruit",
-        url: "foo",
-        name: "Feather",
-        brdParams: {
-          colors: {solderMask: "rgb( 0, 0, 0 )"}
-        }
-      },
-      flora: {
-          src: "brd-files/flora/adafruit_flora_mainboard_2.brd",
-          manufacturer: "adafruit",
-          url: "foo",
-          name: "Flora",
-          brdParams: {
-            colors: {solderMask: "rgb( 0, 0, 0 )"}
-          }
-      },
-      gemma: {
-        src: "brd-files/gemma/gemma.brd",
-        manufacturer: "adafruit",
-        url: "foo",
-        name: "Gemma",
-        brdParams: {
-          colors: {solderMask: "rgb( 0, 0, 0 )"}
-        }
-      },
-      neopixel: {
-        src: "brd-files/neopixel/neopixel_ring_12.brd",
-        manufacturer: "adafruit",
-        url: "foo",
-        name: "Neopixel (12)",
-        brdParams: {
-          colors: {solderMask: "rgb( 0, 0, 0 )"}
-        }
-      },
-      trinket: {
-        src: "brd-files/trinket/trinket.brd",
-        manufacturer: "adafruit",
-        url: "foo",
-        name: "Trinket (3V)",
-        brdParams: {
-          colors: {solderMask: "rgb( 0, 0, 255 )"}
-        }
-      },
-      redstick: {
-        src: "brd-files/redstick/sparkfun_redstick.brd",
-        manufacturer: "SparkFun",
-        url: "foo",
-        name: "RedStick",
-        brdParams: {
-          colors: {solderMask: "rgb( 255, 0, 0 )"}
-        }
-      },
-      sparkpunk: {
-        src: "brd-files/sparkpunk/sparkpunk.brd",
-        manufacturer: "SparkFun",
-        url: "foo",
-        name: "Sparkpunk",
-        brdParams: {
-          colors: {solderMask: "rgb( 255, 0, 0 )"}
-        }
-      },
-      thing: {
-        src: "brd-files/thing/thing.brd",
-        manufacturer: "SparkFun",
-        url: "foo",
-        name: "Thing",
-        brdParams: {
-          colors: {solderMask: "rgb( 255, 0, 0 )"}
-        }
-      }
-    }
-    </script>
+    <link rel="stylesheet" type="text/css" href="style.css">
 
   </head>
   <body>
-    <style>
 
-        #bloard canvas {
-          z-index: 0;
-        }
-
-        #info {
-          color: #fff;
-          margin: -70px 0 0 500px;
-          z-index: 1;
-          position:relative;
-        }
-        .SparkFun{
-          background: url("images/sparkfun-logo.png");
-          background-size: 50px 50px;
-          background-repeat: no-repeat;
-          padding: 4px 0 0 50px;
-          width: 200px;
-          height: 75px;
-        }
-
-        .adafruit{
-          background: url("images/adafruit-logo.png");
-          background-size: 50px 50px;
-          background-repeat: no-repeat;
-          padding: 4px 0 0 50px;
-          width: 200px;
-          height: 75px;
-        }
-
-        #loading{
-          background: url("images/rolling.gif");
-          background-size: 70px 70px;
-          background-repeat: no-repeat;
-          background-position: center center;
-          width: 640px;
-          height: 480px;
-          background-color: #000;
-        }
-
-        #product-manufacturer{
-          font-weight: bold;
-        }
-
-    </style>
+    <h2>Simple Example</h2>
 
     <div id="board">
-
-      <div id="info">
-        <div id="product-data" class="">
-          <span id="product-manufacturer"></span><br/>
-          <a href="" id="link-to-site" target="_blank"></a>
-        </div>
-      </div>
-
-      <div>
-        Example:
-      <select id="examples">
-      </select>
-      </div>
     </div>
+    <p>
+      <a href="complex.html">Click here</a> for a more complex example.
+    </p>
 
-
-    <div id="loading">
-    </div>
     <script>
 
       // Init view
@@ -173,7 +30,7 @@
       var renderer = new THREE.WebGLRenderer();
       renderer.setSize( 640, 480 );
       renderer.setClearColor( 0x000000, 1);
-      $("#board").prepend(renderer.domElement)
+      document.getElementById('board').appendChild(renderer.domElement)
 
       // set up controls
       var controls = new THREE.OrbitControls( camera, renderer.domElement );
@@ -200,25 +57,21 @@
 
     	var addToScene = function( board ) {
 
-    			var zoom = 1.5,
-              brd = board.boardData;
+    			var zoom = 1.5;
 
     			camera.position.z = ( brd.width + brd.height ) / zoom;
 
     			// add board to scene
-          var boardID = 'board-model';
-          scene.remove(scene.getObjectByName(boardID))
-          brd.root.name = boardID;
-    			scene.add( brd.root );
+    			scene.add( board.root );
 
     			var animate = function() {
     				var now = Date.now();
 
     				requestAnimationFrame( animate );
 
-    				brd.root.rotation.x =	0.2 * Math.sin( now * 0.00013 );
-    				brd.root.rotation.z =	0.2 * Math.sin( now * 0.00031 );
-    				brd.root.rotation.y = now * 0.00037;
+    				board.root.rotation.x =	0.2 * Math.sin( now * 0.00013 );
+    				board.root.rotation.z =	0.2 * Math.sin( now * 0.00031 );
+    				board.root.rotation.y = now * 0.00037;
 
             controls.update();
     				renderer.render( scene, camera );
@@ -228,52 +81,17 @@
     			animate();
     		};
 
-      var showLoading = function () {
-        $("#loading").show();
-        $("#board").hide();
+      var url = 'brd-files/redstick/sparkfun_redstick.brd';
+      var brdParams = {
+      	colors: {
+      		solderMask: "rgb( 255, 0, 0 )"
+      	}
       }
 
-      var showScene = function( board ){
-
-        // populate product info
-        $("#product-data").attr('class', board.manufacturer);
-        $("#product-manufacturer").text( board.manufacturer );
-
-        var productLink = $("#link-to-site");
-        productLink.attr('href', board.url);
-        productLink.text(board.name);
-
-        // show scene and info
-        $("#board").toggle();
-
-        // hide loading div
-        $("#loading").toggle();
-
-      }
-
-      var loadBoard = function( board ){
-        showLoading();
-        var loader = new THREE.BRDLoader();
-        loader.load( board.src, board.brdParams, function ( brd ) {
-          board.boardData = brd;
-          addToScene(board);
-          showScene(board);
-        } );
-      }
-
-      // populate and wire up examples selector
-      var select = $('#examples');
-      select.find('option').remove();
-      $.each(boards, function(key, value) {
-         $('<option>').val(key).text(value.name).appendTo(select);
-      });
-
-      select.change(function(){
-        loadBoard( boards[this.value]);
-      })
-
-      loadBoard( boards.trinket );
-
+      var loader = new THREE.BRDLoader();
+      loader.load( url, brdParams, function ( board ) {
+        addToScene(board);
+      } );
 
     </script>
   </body>
