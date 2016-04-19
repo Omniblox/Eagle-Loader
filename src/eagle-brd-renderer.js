@@ -807,7 +807,7 @@ EagleBrdRenderer.prototype._parseBounds = function() {
 	@private
 	**/
 
-	var chordPoints, circles, els, layer, polys,
+	var chordPoints, circles, layer, polys,
 		radius, rects, verts, wire, wires,
 		i, j, x, y, x1, y1, x2, y2,
 		testMinMax = function( x, y ) {
@@ -2326,8 +2326,8 @@ EagleBrdRenderer.prototype.renderBounds = function() {
 	**/
 
 	var chordData, holes, pads,
-		i, j, k, x, y, x1, y1, x2, y2, firstX, firstY, lastX, lastY,
-		wireGrps, wireGrp, wire,
+		i, j, x, y, x1, y1, x2, y2, firstX, firstY, lastX, lastY,
+		wireGrps, wireGrp, wireGrp2, wire,
 		layer = this.getLayer( "Bounds" ),
 		wires = layer.getElements( "wire" );
 
@@ -2359,35 +2359,66 @@ EagleBrdRenderer.prototype.renderBounds = function() {
 	for ( i = 0; i < wireGrps.length; i++ ) {
 		wireGrp = wireGrps[ i ];
 
-		for ( j = 0; j < wireGrp.length; j++ ) {
-			wire = wireGrp[ j ];
-			x1 = wire.getAttribute( "x1" );
-			y1 = wire.getAttribute( "y1" );
-			x2 = wire.getAttribute( "x2" );
-			y2 = wire.getAttribute( "y2" );
-			for ( k = j - 1; k >= 0; k-- ) {
-				x = wireGrp[ k ].getAttribute( "x1" );
-				y = wireGrp[ k ].getAttribute( "y1" );
-				if ( x2 === x && y2 === y ) {
+		// Create new order
+		wireGrp2 = [];
+		wireGrps[ i ] = wireGrp2;
 
-					// Wire connects to place K
-					wireGrp.splice( j, 1 );
-					wireGrp.splice( k, 0, wire );
-					break;
-				} else if ( x1 === x && y1 === y ) {
+		while ( wireGrp.length ) {
 
-					// Wire inversely connects to place K
-					wire.setAttribute( "x1", x2 );
-					wire.setAttribute( "y1", y2 );
-					wire.setAttribute( "x2", x1 );
-					wire.setAttribute( "y2", y1 );
-					if ( wire.hasAttribute( "curve" ) ) {
-						wire.setAttribute(
-							"curve",
-							"" + -parseFloat( wire.getAttribute( "curve" ) ) );
+			// Seed arbitrary loop member
+			wire = wireGrp.shift();
+			wireGrp2.push( wire );
+
+			// Collect connectable wire segments
+			while ( true ) {
+
+				// Update wire terminus
+				x2 = wire.getAttribute( "x2" );
+				y2 = wire.getAttribute( "y2" );
+
+				for ( j = 0; j < wireGrp.length; j++ ) {
+
+					// Check near end of wire
+					x1 = wireGrp[ j ].getAttribute( "x1" );
+					y1 = wireGrp[ j ].getAttribute( "y1" );
+
+					if ( x1 === x2 && y1 === y2 ) {
+
+						// Wire K connects
+						wire = wireGrp.splice( j, 1 )[ 0 ];
+						wireGrp2.push( wire );
+
+						break;
 					}
-					wireGrp.splice( j, 1 );
-					wireGrp.splice( k, 0, wire );
+
+					// Check far end of wire
+					x1 = wireGrp[ j ].getAttribute( "x2" );
+					y1 = wireGrp[ j ].getAttribute( "y2" );
+
+					if ( x1 === x2 && y1 === y2 ) {
+
+						// Wire K connects when inverted
+						wire = wireGrp.splice( j, 1 )[ 0 ];
+						wireGrp2.push( wire );
+
+						// Swap ends
+						wire.setAttribute( "x2", wire.getAttribute( "x1" ) );
+						wire.setAttribute( "y2", wire.getAttribute( "y1" ) );
+						wire.setAttribute( "x1", x1 );
+						wire.setAttribute( "y1", y1 );
+						if ( wire.hasAttribute( "curve" ) ) {
+							wire.setAttribute(
+								"curve",
+								"" +
+								-parseFloat( wire.getAttribute( "curve" ) ) );
+						}
+
+						break;
+					}
+				}
+
+				// Break if nothing could be connected
+				if ( j === wireGrp.length ) {
 					break;
 				}
 			}
