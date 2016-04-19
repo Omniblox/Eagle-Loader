@@ -488,41 +488,7 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 
 	// Sort wire groups by link.
 	for ( i = 0; i &lt; wireGrps.length; i++ ) {
-		wireGrp = wireGrps[ i ];
-
-		for ( j = 0; j &lt; wireGrp.length; j++ ) {
-			wire = wireGrp[ j ];
-			x1 = wire.getAttribute( &quot;x1&quot; );
-			y1 = wire.getAttribute( &quot;y1&quot; );
-			x2 = wire.getAttribute( &quot;x2&quot; );
-			y2 = wire.getAttribute( &quot;y2&quot; );
-			for ( k = j - 1; k &gt;= 0; k-- ) {
-				x = wireGrp[ k ].getAttribute( &quot;x1&quot; );
-				y = wireGrp[ k ].getAttribute( &quot;y1&quot; );
-				if ( x2 === x &amp;&amp; y2 === y ) {
-
-					// Wire connects to place K
-					wireGrp.splice( j, 1 );
-					wireGrp.splice( k, 0, wire );
-					break;
-				} else if ( x1 === x &amp;&amp; y1 === y ) {
-
-					// Wire inversely connects to place K
-					wire.setAttribute( &quot;x1&quot;, x2 );
-					wire.setAttribute( &quot;y1&quot;, y2 );
-					wire.setAttribute( &quot;x2&quot;, x1 );
-					wire.setAttribute( &quot;y2&quot;, y1 );
-					if ( wire.hasAttribute( &quot;curve&quot; ) ) {
-						wire.setAttribute(
-							&quot;curve&quot;,
-							&quot;&quot; + -parseFloat( wire.getAttribute( &quot;curve&quot; ) ) );
-					}
-					wireGrp.splice( j, 1 );
-					wireGrp.splice( k, 0, wire );
-					break;
-				}
-			}
-		}
+		wireGrps[ i ] = this.sortWires( wireGrps[ i ] );
 	}
 
 
@@ -2412,8 +2378,8 @@ EagleBrdRenderer.prototype.renderBounds = function() {
 	**/
 
 	var chordData, holes, pads,
-		i, j, x, y, x1, y1, x2, y2, firstX, firstY, lastX, lastY,
-		wireGrps, wireGrp, wireGrp2, wire,
+		i, x, y, firstX, firstY, lastX, lastY,
+		wireGrps, wireGrp, wire,
 		layer = this.getLayer( &quot;Bounds&quot; ),
 		wires = layer.getElements( &quot;wire&quot; );
 
@@ -2443,81 +2409,10 @@ EagleBrdRenderer.prototype.renderBounds = function() {
 
 	// Sort wire groups by link.
 	for ( i = 0; i &lt; wireGrps.length; i++ ) {
-		wireGrp = wireGrps[ i ];
-
-		// Create new order
-		wireGrp2 = [];
-		wireGrps[ i ] = wireGrp2;
-
-		while ( wireGrp.length ) {
-
-			console.log( &quot;DEBUG: Began wire series&quot; );
-			console.log( &quot;&quot;, wireGrp.length, &quot;wires remaining&quot; );
-
-			// Seed arbitrary loop member
-			wire = wireGrp.shift();
-			wireGrp2.push( wire );
-
-			// Collect connectable wire segments
-			while ( true ) {
-
-				// Update wire terminus
-				x2 = wire.getAttribute( &quot;x2&quot; );
-				y2 = wire.getAttribute( &quot;y2&quot; );
-
-				for ( j = 0; j &lt; wireGrp.length; j++ ) {
-
-					// Check near end of wire
-					x1 = wireGrp[ j ].getAttribute( &quot;x1&quot; );
-					y1 = wireGrp[ j ].getAttribute( &quot;y1&quot; );
-
-					if ( x1 === x2 &amp;&amp; y1 === y2 ) {
-
-						console.log( &quot;DEBUG: Connected wire&quot; );
-
-						// Wire K connects
-						wire = wireGrp.splice( j, 1 )[ 0 ];
-						wireGrp2.push( wire );
-
-						break;
-					}
-
-					// Check far end of wire
-					x1 = wireGrp[ j ].getAttribute( &quot;x2&quot; );
-					y1 = wireGrp[ j ].getAttribute( &quot;y2&quot; );
-
-					if ( x1 === x2 &amp;&amp; y1 === y2 ) {
-
-						console.log( &quot;DEBUG: Reversed wire&quot; );
-
-						// Wire K connects when inverted
-						wire = wireGrp.splice( j, 1 )[ 0 ];
-						wireGrp2.push( wire );
-
-						// Swap ends
-						wire.setAttribute( &quot;x2&quot;, wire.getAttribute( &quot;x1&quot; ) );
-						wire.setAttribute( &quot;y2&quot;, wire.getAttribute( &quot;y1&quot; ) );
-						wire.setAttribute( &quot;x1&quot;, x1 );
-						wire.setAttribute( &quot;y1&quot;, y1 );
-						if ( wire.hasAttribute( &quot;curve&quot; ) ) {
-							wire.setAttribute(
-								&quot;curve&quot;,
-								&quot;&quot; +
-								-parseFloat( wire.getAttribute( &quot;curve&quot; ) ) );
-						}
-
-						break;
-					}
-				}
-
-				// Break if nothing could be connected
-				if ( j === wireGrp.length ) {
-					break;
-				}
-			}
-		}
+		wireGrps[ i ] = this.sortWires( wireGrps[ i ] );
 	}
 
+	// Connect wires into single series
 	wires = [];
 	for ( i = 0; i &lt; wireGrps.length; i++ ) {
 		wires = wires.concat( wireGrps[ i ] );
@@ -3113,6 +3008,88 @@ EagleBrdRenderer.prototype.renderSolderpasteLayer = function( layer ) {
 	ctx.scale( 1, -1 );
 	ctx.drawImage( this.getLayer( &quot;Bounds&quot; ).buffer, 0, 0 );
 	ctx.restore();
+};
+
+
+EagleBrdRenderer.prototype.sortWires = function( wires ) {
+
+	/**
+	Sort the wires in a list so that they connect end-to-end
+	whenever possible. Wires may be reversed to fit into sequence.
+
+	@method sortWires
+	@param wires {array} List of wires to sort
+	@return {array} Sorted list
+	**/
+
+	var i, wire, wires2, x1, x2, y1, y2;
+
+	// Copy original array for destructive operations
+	wires = wires.slice();
+	wires2 = [];
+
+	while ( wires.length ) {
+
+		// Seed arbitrary loop member
+		wire = wires.shift();
+		wires2.push( wire );
+
+		// Collect connectable wire segments
+		while ( true ) {
+
+			// Update wire terminus
+			x2 = wire.getAttribute( &quot;x2&quot; );
+			y2 = wire.getAttribute( &quot;y2&quot; );
+
+			for ( i = 0; i &lt; wires.length; i++ ) {
+
+				// Check near end of wire
+				x1 = wires[ i ].getAttribute( &quot;x1&quot; );
+				y1 = wires[ i ].getAttribute( &quot;y1&quot; );
+
+				if ( x1 === x2 &amp;&amp; y1 === y2 ) {
+
+					// Wire K connects
+					wire = wires.splice( i, 1 )[ 0 ];
+					wires2.push( wire );
+
+					break;
+				}
+
+				// Check far end of wire
+				x1 = wires[ i ].getAttribute( &quot;x2&quot; );
+				y1 = wires[ i ].getAttribute( &quot;y2&quot; );
+
+				if ( x1 === x2 &amp;&amp; y1 === y2 ) {
+
+					// Wire K connects when inverted
+					wire = wires.splice( i, 1 )[ 0 ];
+					wires2.push( wire );
+
+					// Swap ends
+					wire.setAttribute( &quot;x2&quot;, wire.getAttribute( &quot;x1&quot; ) );
+					wire.setAttribute( &quot;y2&quot;, wire.getAttribute( &quot;y1&quot; ) );
+					wire.setAttribute( &quot;x1&quot;, x1 );
+					wire.setAttribute( &quot;y1&quot;, y1 );
+					if ( wire.hasAttribute( &quot;curve&quot; ) ) {
+						wire.setAttribute(
+							&quot;curve&quot;,
+							&quot;&quot; +
+							-parseFloat( wire.getAttribute( &quot;curve&quot; ) ) );
+					}
+
+					break;
+				}
+			}
+
+			// Break if nothing could be connected
+			if ( i === wires.length ) {
+				break;
+			}
+		}
+	}
+
+	return wires2;
 };
 
 

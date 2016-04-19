@@ -402,46 +402,7 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 
 	// Sort wire groups by link.
 	for ( i = 0; i < wireGrps.length; i++ ) {
-
 		wireGrps[ i ] = this.sortWires( wireGrps[ i ] );
-
-		/*
-		wireGrp = wireGrps[ i ];
-
-		for ( j = 0; j < wireGrp.length; j++ ) {
-			wire = wireGrp[ j ];
-			x1 = wire.getAttribute( "x1" );
-			y1 = wire.getAttribute( "y1" );
-			x2 = wire.getAttribute( "x2" );
-			y2 = wire.getAttribute( "y2" );
-			for ( k = j - 1; k >= 0; k-- ) {
-				x = wireGrp[ k ].getAttribute( "x1" );
-				y = wireGrp[ k ].getAttribute( "y1" );
-				if ( x2 === x && y2 === y ) {
-
-					// Wire connects to place K
-					wireGrp.splice( j, 1 );
-					wireGrp.splice( k, 0, wire );
-					break;
-				} else if ( x1 === x && y1 === y ) {
-
-					// Wire inversely connects to place K
-					wire.setAttribute( "x1", x2 );
-					wire.setAttribute( "y1", y2 );
-					wire.setAttribute( "x2", x1 );
-					wire.setAttribute( "y2", y1 );
-					if ( wire.hasAttribute( "curve" ) ) {
-						wire.setAttribute(
-							"curve",
-							"" + -parseFloat( wire.getAttribute( "curve" ) ) );
-					}
-					wireGrp.splice( j, 1 );
-					wireGrp.splice( k, 0, wire );
-					break;
-				}
-			}
-		}
-		*/
 	}
 
 
