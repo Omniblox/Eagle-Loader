@@ -2944,8 +2944,6 @@ EagleBrdRenderer.prototype.sortWires = function( wires ) {
 
 	while ( wires.length ) {
 
-		console.log( "DEBUG: Beginning wire sequence" );
-
 		// Seed arbitrary loop member
 		wire = wires.shift();
 		wires2.push( wire );
@@ -2971,8 +2969,6 @@ EagleBrdRenderer.prototype.sortWires = function( wires ) {
 
 				if ( x1 === x2 && y1 === y2 ) {
 
-					console.log( "DEBUG: Connect wire" );
-
 					// Wire K connects
 					wire = wires.splice( i, 1 )[ 0 ];
 					wires2.push( wire );
@@ -2982,8 +2978,6 @@ EagleBrdRenderer.prototype.sortWires = function( wires ) {
 				}
 
 				if ( x1 === x0 && y1 === y0 ) {
-
-					console.log( "DEBUG: Connect to start, reversed" );
 
 					// Wire K connects to start of queue when inverted
 					wires2.unshift( wires.splice( i, 1 )[ 0 ] );
@@ -3015,8 +3009,6 @@ EagleBrdRenderer.prototype.sortWires = function( wires ) {
 
 				if ( x1 === x2 && y1 === y2 ) {
 
-					console.log( "DEBUG: Reverse wire" );
-
 					// Wire K connects when inverted
 					wire = wires.splice( i, 1 )[ 0 ];
 					wires2.push( wire );
@@ -3039,8 +3031,6 @@ EagleBrdRenderer.prototype.sortWires = function( wires ) {
 
 				if ( x1 === x0 && y1 === y0 ) {
 
-					console.log( "DEBUG: Connect to start" );
-
 					// Wire K connects to start of queue
 					wires2.unshift( wires.splice( i, 1 )[ 0 ] );
 					connected = true;
@@ -3055,27 +3045,6 @@ EagleBrdRenderer.prototype.sortWires = function( wires ) {
 			}
 		}
 	}
-
-
-	// Settle gaps
-	// If we cycle the array until it has looped once,
-	// or it has hit a discontinuity,
-	// we can be assured that there isn't a discontinuity in the middle.
-	for ( i = 0; i < wires2.length; i++ ) {
-
-		x1 = wires2[ 0 ].getAttribute( "x1" );
-		y1 = wires2[ 0 ].getAttribute( "y1" );
-		x2 = wires2[ wires2.length - 1 ].getAttribute( "x2" );
-		y2 = wires2[ wires2.length - 1 ].getAttribute( "y2" );
-
-		if ( x1 === x2 && y1 === y2 ) {
-			wires2.unshift( wires2.pop() );
-		} else {
-			console.log( "DEBUG: Settled", i, "places to eliminate discontinuities" );
-			break;
-		}
-	}
-
 
 	return wires2;
 };
