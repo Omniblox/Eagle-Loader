@@ -2936,13 +2936,15 @@ EagleBrdRenderer.prototype.sortWires = function( wires ) {
 	@return {array} Sorted list
 	**/
 
-	var i, wire, wires2, x1, x2, y1, y2;
+	var connected, i, wire, wires2, x0, x1, x2, y0, y1, y2;
 
 	// Copy original array for destructive operations
 	wires = wires.slice();
 	wires2 = [];
 
 	while ( wires.length ) {
+
+		console.log( "DEBUG: Beginning wire sequence" );
 
 		// Seed arbitrary loop member
 		wire = wires.shift();
@@ -2955,6 +2957,12 @@ EagleBrdRenderer.prototype.sortWires = function( wires ) {
 			x2 = wire.getAttribute( "x2" );
 			y2 = wire.getAttribute( "y2" );
 
+			// Update wire origin
+			x0 = wires2[ 0 ].getAttribute( "x1" );
+			y0 = wires2[ 0 ].getAttribute( "y1" );
+
+			connected = false;
+
 			for ( i = 0; i < wires.length; i++ ) {
 
 				// Check near end of wire
@@ -2963,9 +2971,40 @@ EagleBrdRenderer.prototype.sortWires = function( wires ) {
 
 				if ( x1 === x2 && y1 === y2 ) {
 
+					console.log( "DEBUG: Connect wire" );
+
 					// Wire K connects
 					wire = wires.splice( i, 1 )[ 0 ];
 					wires2.push( wire );
+					connected = true;
+
+					break;
+				}
+
+				if ( x1 === x0 && y1 === y0 ) {
+
+					console.log( "DEBUG: Connect to start, reversed" );
+
+					// Wire K connects to start of queue when inverted
+					wires2.unshift( wires.splice( i, 1 )[ 0 ] );
+					connected = true;
+
+					// Swap ends
+					wires2[ 0 ].setAttribute(
+						"x1", wires2[ 0 ].getAttribute( "x2" ) );
+					wires2[ 0 ].setAttribute(
+						"y1", wires2[ 0 ].getAttribute( "y2" ) );
+					wires2[ 0 ].setAttribute(
+						"x2", x1 );
+					wires2[ 0 ].setAttribute(
+						"y2", y1 );
+					if ( wires2[ 0 ].hasAttribute( "curve" ) ) {
+						wires2[ 0 ].setAttribute(
+							"curve",
+							"" +
+							-parseFloat( wires2[ 0 ].getAttribute( "curve" ) )
+						);
+					}
 
 					break;
 				}
@@ -2976,9 +3015,12 @@ EagleBrdRenderer.prototype.sortWires = function( wires ) {
 
 				if ( x1 === x2 && y1 === y2 ) {
 
+					console.log( "DEBUG: Reverse wire" );
+
 					// Wire K connects when inverted
 					wire = wires.splice( i, 1 )[ 0 ];
 					wires2.push( wire );
+					connected = true;
 
 					// Swap ends
 					wire.setAttribute( "x2", wire.getAttribute( "x1" ) );
@@ -2994,14 +3036,46 @@ EagleBrdRenderer.prototype.sortWires = function( wires ) {
 
 					break;
 				}
+
+				if ( x1 === x0 && y1 === y0 ) {
+
+					console.log( "DEBUG: Connect to start" );
+
+					// Wire K connects to start of queue
+					wires2.unshift( wires.splice( i, 1 )[ 0 ] );
+					connected = true;
+
+					break;
+				}
 			}
 
 			// Break if nothing could be connected
-			if ( i === wires.length ) {
+			if ( connected === false ) {
 				break;
 			}
 		}
 	}
+
+
+	// Settle gaps
+	// If we cycle the array until it has looped once,
+	// or it has hit a discontinuity,
+	// we can be assured that there isn't a discontinuity in the middle.
+	for ( i = 0; i < wires2.length; i++ ) {
+
+		x1 = wires2[ 0 ].getAttribute( "x1" );
+		y1 = wires2[ 0 ].getAttribute( "y1" );
+		x2 = wires2[ wires2.length - 1 ].getAttribute( "x2" );
+		y2 = wires2[ wires2.length - 1 ].getAttribute( "y2" );
+
+		if ( x1 === x2 && y1 === y2 ) {
+			wires2.unshift( wires2.pop() );
+		} else {
+			console.log( "DEBUG: Settled", i, "places to eliminate discontinuities" );
+			break;
+		}
+	}
+
 
 	return wires2;
 };
