@@ -2929,20 +2929,76 @@ EagleBrdRenderer.prototype.sortWires = function( wires ) {
 
 	/**
 	Sort the wires in a list so that they connect end-to-end
-	whenever possible. Wires may be reversed to fit into sequence.
+	whenever possible.
+
+	Wires may be reversed to fit into sequence.
+
+	Duplicate wires will be discarded. Note that duplication only considers
+	endpoints, not curvature.
 
 	@method sortWires
 	@param wires {array} List of wires to sort
 	@return {array} Sorted list
 	**/
 
-	var connected, i, wire, wires2, x0, x1, x2, y0, y1, y2;
+	var connected, duplicated, i, j, wire, wires2, x0, x1, x2, y0, y1, y2;
 
 	// Copy original array for destructive operations
 	wires = wires.slice();
 	wires2 = [];
 
+
+	// Eliminate duplicate wires
+	for ( i = 0; i < wires.length; i++ ) {
+
+		x1 = wires[ i ].getAttribute( "x1" );
+		x2 = wires[ i ].getAttribute( "x2" );
+		y1 = wires[ i ].getAttribute( "y1" );
+		y2 = wires[ i ].getAttribute( "y2" );
+
+		duplicated = false;
+
+		for ( j = i + 1; j < wires.length; j++ ) {
+
+			if (
+				(
+
+					// Test for direct duplicates
+					x1 === wires[ j ].getAttribute( "x1" ) &&
+					x2 === wires[ j ].getAttribute( "x2" ) &&
+					y1 === wires[ j ].getAttribute( "y1" ) &&
+					y2 === wires[ j ].getAttribute( "y2" )
+				) ||
+				(
+
+					// Test for reversed duplicates
+					x1 === wires[ j ].getAttribute( "x2" ) &&
+					x2 === wires[ j ].getAttribute( "x1" ) &&
+					y1 === wires[ j ].getAttribute( "y2" ) &&
+					y2 === wires[ j ].getAttribute( "y1" )
+				) ) {
+
+				duplicated = true;
+			break;
+			}
+		}
+
+		if ( !duplicated ) {
+			wires2.push( wires[ i ] );
+		} else {
+			// console.log( "DEBUG: Removed duplicate wire" );
+		}
+	}
+	wires = wires2;
+	wires2 = [];
+
+
+
+
+	// Order wires
 	while ( wires.length ) {
+
+		// console.log( "DEBUG: Starting wire loop" );
 
 		// Seed arbitrary loop member
 		wire = wires.shift();
@@ -2969,6 +3025,8 @@ EagleBrdRenderer.prototype.sortWires = function( wires ) {
 
 				if ( x1 === x2 && y1 === y2 ) {
 
+					// console.log( "DEBUG: Wire to end" );
+
 					// Wire K connects
 					wire = wires.splice( i, 1 )[ 0 ];
 					wires2.push( wire );
@@ -2978,6 +3036,8 @@ EagleBrdRenderer.prototype.sortWires = function( wires ) {
 				}
 
 				if ( x1 === x0 && y1 === y0 ) {
+
+					// console.log( "DEBUG: Wire to start, inverted" );
 
 					// Wire K connects to start of queue when inverted
 					wires2.unshift( wires.splice( i, 1 )[ 0 ] );
@@ -3009,6 +3069,8 @@ EagleBrdRenderer.prototype.sortWires = function( wires ) {
 
 				if ( x1 === x2 && y1 === y2 ) {
 
+					// console.log( "DEBUG: Wire to end, inverted" );
+
 					// Wire K connects when inverted
 					wire = wires.splice( i, 1 )[ 0 ];
 					wires2.push( wire );
@@ -3030,6 +3092,8 @@ EagleBrdRenderer.prototype.sortWires = function( wires ) {
 				}
 
 				if ( x1 === x0 && y1 === y0 ) {
+
+					// console.log( "DEBUG: Wire to start" );
 
 					// Wire K connects to start of queue
 					wires2.unshift( wires.splice( i, 1 )[ 0 ] );
