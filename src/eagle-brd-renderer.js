@@ -339,14 +339,18 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 	/**
 	Construct THREE.js geometry representing depth edges.
 
+	This uses `THREE.Shape` to define the edge paths.
+	As `THREE.ExtrudeGeometry` does not properly skip `Shape.moveTo`
+	adjustments, we generate an individual mesh for each continuous loop.
+
 	@method _buildDepthHoles
 	@param [add=true] {boolean} Whether to add geometry to the board root
 	@private
 	**/
 
-	var angleData, chordData, ctx, firstX, firstY, geo,
-		i, j, k, lastX, lastY,
-		mat, mesh, parent, shape, sumAngles, wire,
+	var chordData, ctx, firstX, firstY,
+		i, j, lastX, lastY,
+		mat, mesh, shape, sumAngles, wire,
 		x, x1, x2, y, y1, y2,
 		bevel = 8,
 		wireGrp = [],
@@ -453,6 +457,7 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 		}
 
 		for ( j = 0; j < wireGrps[ i ].length; j++ ) {
+
 			wire = wireGrps[ i ][ j ];
 			x1 = this.parseCoord( wire.getAttribute( "x1" ) );
 			y1 = this.parseCoord( wire.getAttribute( "y1" ) );
@@ -461,7 +466,21 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 
 			// Path discontinuities
 			if ( x1 !== lastX || y1 !== lastY ) {
+
 				shape.lineTo( firstX, firstY );
+
+				// Generate edge unit
+				mesh = this._buildDepthEdge(
+					shape,
+					mat,
+					wireGrps[ i ][ 0 ].elementParent );
+				if ( add ) {
+					this.depthElements.add( mesh );
+				}
+
+				// Begin new shape
+				shape = new THREE.Shape();
+
 				shape.moveTo( x1, y1 );
 				firstX = x1;
 				firstY = y1;
@@ -486,73 +505,98 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 			lastY = y2;
 		}
 
-		// Extrude from path
-		geo = new THREE.ExtrudeGeometry( shape, {
-			amount: this.thickness,
-			bevelEnabled: false,
-			curveSegments: 32,
-			// steps: 3
-		} );
-
-		// Cull top and bottom faces
-		for ( j = geo.faces.length - 1; j >= 0; j-- ) {
-			if ( Math.abs( geo.faces[ j ].normal.z ) > 0.5 ) {
-				geo.faces.splice( j, 1 );
-			}
-		}
-
-		// Perform Z-reliant UV mapping
-		for ( j = 0; j < geo.faces.length; j++ ) {
-
-			// Vertex A
-			geo.faceVertexUvs[ 0 ][ j ][ 0 ].x = 0;
-			geo.faceVertexUvs[ 0 ][ j ][ 0 ].y =
-				geo.vertices[ geo.faces[ j ].a ].z / this.thickness;
-
-			// Vertex B
-			geo.faceVertexUvs[ 0 ][ j ][ 1 ].x = 0;
-			geo.faceVertexUvs[ 0 ][ j ][ 1 ].y =
-				geo.vertices[ geo.faces[ j ].b ].z / this.thickness;
-
-			// Vertex C
-			geo.faceVertexUvs[ 0 ][ j ][ 2 ].x = 0;
-			geo.faceVertexUvs[ 0 ][ j ][ 2 ].y =
-				geo.vertices[ geo.faces[ j ].c ].z / this.thickness;
-		}
-
-
-		mesh = new THREE.Mesh( geo, mat );
-		mesh.position.z -= this.thickness;
-
-		// Reorient per parent transforms
-		wire = wireGrps[ i ][ 0 ];
-		if ( wire.elementParent ) {
-			parent = new THREE.Object3D();
-			parent.position.x = this.parseCoord(
-				wire.elementParent.getAttribute( "x" ) );
-			parent.position.y = this.parseCoord(
-				wire.elementParent.getAttribute( "y" ) );
-			if ( wire.elementParent.hasAttribute( "rot" ) ) {
-				angleData = new EagleBrdRenderer.AngleData(
-					wire.elementParent.getAttribute( "rot" ) );
-				parent.rotation.z = angleData.angle;
-				parent.scale.x = angleData.spin ? -1 : 1;
-				parent.scale.y = angleData.mirror ? -1 : 1;
-			}
-
-			// Extract
-			this.depthElements.add( parent );
-			parent.add( mesh );
-			parent.updateMatrixWorld();
-			THREE.SceneUtils.detach( mesh, parent, this.depthElements );
-			this.depthElements.remove( mesh );
-			this.depthElements.remove( parent );
-		}
+		// Generate edge unit
+		mesh = this._buildDepthEdge(
+			shape,
+			mat,
+			wireGrps[ i ][ 0 ].elementParent );
 
 		if ( add ) {
 			this.depthElements.add( mesh );
 		}
 	}
+};
+
+
+EagleBrdRenderer.prototype._buildDepthEdge = function(
+	shape, material, parentElement ) {
+
+	/**
+	Assemble a single continuous extruded edge from a shape.
+
+	@method _buildDepthEdge
+	@param shape {THREE.Shape} Shape path to use for extrusion
+	@param material {THREE.Material} Material to use for mesh
+	@param [parentElement] {Element} Parent space used to align edge mesh
+	@private
+	@return {THREE.Mesh} 
+	**/
+
+	var angleData, geo, i, mesh, parent;
+
+	// Extrude from path
+	geo = new THREE.ExtrudeGeometry( shape, {
+		amount: this.thickness,
+		bevelEnabled: false,
+		curveSegments: 32,
+		// steps: 3
+	} );
+
+	// Cull top and bottom faces
+	for ( i = geo.faces.length - 1; i >= 0; i-- ) {
+		if ( Math.abs( geo.faces[ i ].normal.z ) > 0.5 ) {
+			geo.faces.splice( i, 1 );
+		}
+	}
+
+	// Perform Z-reliant UV mapping
+	for ( i = 0; i < geo.faces.length; i++ ) {
+
+		// Vertex A
+		geo.faceVertexUvs[ 0 ][ i ][ 0 ].x = 0;
+		geo.faceVertexUvs[ 0 ][ i ][ 0 ].y =
+			geo.vertices[ geo.faces[ i ].a ].z / this.thickness;
+
+		// Vertex B
+		geo.faceVertexUvs[ 0 ][ i ][ 1 ].x = 0;
+		geo.faceVertexUvs[ 0 ][ i ][ 1 ].y =
+			geo.vertices[ geo.faces[ i ].b ].z / this.thickness;
+
+		// Vertex C
+		geo.faceVertexUvs[ 0 ][ i ][ 2 ].x = 0;
+		geo.faceVertexUvs[ 0 ][ i ][ 2 ].y =
+			geo.vertices[ geo.faces[ i ].c ].z / this.thickness;
+	}
+
+
+	mesh = new THREE.Mesh( geo, material );
+	mesh.position.z -= this.thickness;
+
+	// Reorient per parent transforms
+	if ( parentElement ) {
+		parent = new THREE.Object3D();
+		parent.position.x = this.parseCoord(
+			parentElement.getAttribute( "x" ) );
+		parent.position.y = this.parseCoord(
+			parentElement.getAttribute( "y" ) );
+		if ( parentElement.hasAttribute( "rot" ) ) {
+			angleData = new EagleBrdRenderer.AngleData(
+				parentElement.getAttribute( "rot" ) );
+			parent.rotation.z = angleData.angle;
+			parent.scale.x = angleData.spin ? -1 : 1;
+			parent.scale.y = angleData.mirror ? -1 : 1;
+		}
+
+		// Extract
+		this.depthElements.add( parent );
+		parent.add( mesh );
+		parent.updateMatrixWorld();
+		THREE.SceneUtils.detach( mesh, parent, this.depthElements );
+		this.depthElements.remove( mesh );
+		this.depthElements.remove( parent );
+	}
+
+	return mesh;
 };
 
 
