@@ -343,7 +343,7 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 	As `THREE.ExtrudeGeometry` does not properly skip `Shape.moveTo`
 	adjustments, we generate an individual mesh for each continuous loop.
 
-	@method _buildDepthHoles
+	@method _buildDepthEdges
 	@param [add=true] {boolean} Whether to add geometry to the board root
 	@private
 	**/
@@ -618,7 +618,7 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 	**/
 
 	var angData, connector, drill, drills, geo, i, j,
-		mat, mesh, parent, parent2, vec2,
+		mat, mesh, parent, parent2,
 		x1, x2, y1, y2,
 		cylDetail = 16;
 
@@ -673,27 +673,8 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 	for ( i = 0; i < drills.length; i++ ) {
 		drill = this.parseCoord( drills[ i ].getAttribute( "drill" ) ) / 2;
 		geo = new THREE.CylinderGeometry(
-			drill, drill, this.thickness, cylDetail, 3, true );
+			drill, drill, this.thickness, cylDetail, 1, true );
 		mesh = new THREE.Mesh( geo, mat );
-
-		// Bevel drills
-		for ( j = 0; j < cylDetail + 1; j++ ) {
-			vec2 = new THREE.Vector2(
-				geo.vertices[ j ].x, geo.vertices[ j ].z );
-			vec2.multiplyScalar( 0.8 );
-			geo.vertices[ j + ( cylDetail + 1 ) * 1 ].x = vec2.x;
-			geo.vertices[ j + ( cylDetail + 1 ) * 1 ].z = vec2.y;
-
-			// Other end
-			geo.vertices[ j + ( cylDetail + 1 ) * 2 ].x = vec2.x;
-			geo.vertices[ j + ( cylDetail + 1 ) * 2 ].z = vec2.y;
-
-			// Elongate straight faces to exaggerate lip.
-			geo.vertices[ j + ( cylDetail + 1 ) * 1 ].y +=
-				this.thickness * 0.2;
-			geo.vertices[ j + ( cylDetail + 1 ) * 2 ].y -=
-				this.thickness * 0.2;
-		}
 
 		// Orient drillmesh
 		mesh.rotation.x = Math.PI / 2;
@@ -720,6 +701,10 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 				parent.rotation.z = angData.angle;
 				parent.scale.x = angData.mirror ? -1 : 1;
 				parent.scale.y = angData.spin ? -1 : 1;
+
+				// Scaling can break THREE's backside detection, so invert
+				mesh.scale.x = angData.mirror ? -1 : 1;
+				mesh.scale.y = angData.spin ? -1 : 1;
 			}
 
 			parent.add( mesh );
