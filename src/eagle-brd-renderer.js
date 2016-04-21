@@ -664,12 +664,21 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 
 
 	// Create drills
+
+	// Create material; this should only run once, so it's OK here.
+	// If we were calling "_buildDepthHoles()" more than once,
+	// we'd want to make this a property of the `EagleBrdRenderer` itself.
+	//
+	// Note also that we use `textureEdge`, which should have been generated
+	// moments ago during edge creation.
 	mat = new this.material( {
 		color: new THREE.Color( this.colors.copper ),
 		side: THREE.BackSide,
 		specular: new THREE.Color( this.colors.copper ),
 		shininess: this._shininess,
+		bumpMap: this.textureEdge,
 	} );
+
 	for ( i = 0; i < drills.length; i++ ) {
 		drill = this.parseCoord( drills[ i ].getAttribute( "drill" ) ) / 2;
 		geo = new THREE.CylinderGeometry(
@@ -702,7 +711,7 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 				parent.scale.x = angData.mirror ? -1 : 1;
 				parent.scale.y = angData.spin ? -1 : 1;
 
-				// Scaling can break THREE's backside detection, so invert
+				// Scaling can break THREE's backside detection, so re-invert
 				mesh.scale.x = angData.mirror ? -1 : 1;
 				mesh.scale.y = angData.spin ? -1 : 1;
 			}
@@ -714,8 +723,6 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 			THREE.SceneUtils.detach( mesh, parent, this.depthElements );
 			this.depthElements.remove( parent );
 		}
-
-		// TODO: Merge geometries. This will render more efficiently.
 
 		// Register connectors for holes and pads
 		if ( drills[ i ].tagName === "hole" ||
@@ -745,6 +752,8 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 
 			this.visualizeConnector( connector );
 		}
+
+		// TODO: Merge geometries. This will render more efficiently.
 	}
 };
 
