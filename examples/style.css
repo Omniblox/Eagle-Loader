@@ -1,0 +1,11 @@
+body {
+  background-color: #000;
+  font-family: Helvetica, arial, sans-serif;
+  color: #fff;
+}
+a, a:visited {
+  color: #fff;
+}
+#board canvas {
+  z-index: 0;
+}
