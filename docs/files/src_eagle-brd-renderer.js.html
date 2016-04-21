@@ -425,14 +425,18 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 	/**
 	Construct THREE.js geometry representing depth edges.
 
-	@method _buildDepthHoles
+	This uses &#x60;THREE.Shape&#x60; to define the edge paths.
+	As &#x60;THREE.ExtrudeGeometry&#x60; does not properly skip &#x60;Shape.moveTo&#x60;
+	adjustments, we generate an individual mesh for each continuous loop.
+
+	@method _buildDepthEdges
 	@param [add=true] {boolean} Whether to add geometry to the board root
 	@private
 	**/
 
-	var angleData, chordData, ctx, firstX, firstY, geo,
-		i, j, k, lastX, lastY,
-		mat, mesh, parent, shape, sumAngles, wire,
+	var chordData, ctx, firstX, firstY,
+		i, j, lastX, lastY,
+		mat, mesh, shape, sumAngles, wire,
 		x, x1, x2, y, y1, y2,
 		bevel = 8,
 		wireGrp = [],
@@ -539,6 +543,7 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 		}
 
 		for ( j = 0; j &lt; wireGrps[ i ].length; j++ ) {
+
 			wire = wireGrps[ i ][ j ];
 			x1 = this.parseCoord( wire.getAttribute( &quot;x1&quot; ) );
 			y1 = this.parseCoord( wire.getAttribute( &quot;y1&quot; ) );
@@ -547,7 +552,21 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 
 			// Path discontinuities
 			if ( x1 !== lastX || y1 !== lastY ) {
+
 				shape.lineTo( firstX, firstY );
+
+				// Generate edge unit
+				mesh = this._buildDepthEdge(
+					shape,
+					mat,
+					wireGrps[ i ][ 0 ].elementParent );
+				if ( add ) {
+					this.depthElements.add( mesh );
+				}
+
+				// Begin new shape
+				shape = new THREE.Shape();
+
 				shape.moveTo( x1, y1 );
 				firstX = x1;
 				firstY = y1;
@@ -572,73 +591,98 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 			lastY = y2;
 		}
 
-		// Extrude from path
-		geo = new THREE.ExtrudeGeometry( shape, {
-			amount: this.thickness,
-			bevelEnabled: false,
-			curveSegments: 32,
-			// steps: 3
-		} );
-
-		// Cull top and bottom faces
-		for ( j = geo.faces.length - 1; j &gt;= 0; j-- ) {
-			if ( Math.abs( geo.faces[ j ].normal.z ) &gt; 0.5 ) {
-				geo.faces.splice( j, 1 );
-			}
-		}
-
-		// Perform Z-reliant UV mapping
-		for ( j = 0; j &lt; geo.faces.length; j++ ) {
-
-			// Vertex A
-			geo.faceVertexUvs[ 0 ][ j ][ 0 ].x = 0;
-			geo.faceVertexUvs[ 0 ][ j ][ 0 ].y =
-				geo.vertices[ geo.faces[ j ].a ].z / this.thickness;
-
-			// Vertex B
-			geo.faceVertexUvs[ 0 ][ j ][ 1 ].x = 0;
-			geo.faceVertexUvs[ 0 ][ j ][ 1 ].y =
-				geo.vertices[ geo.faces[ j ].b ].z / this.thickness;
-
-			// Vertex C
-			geo.faceVertexUvs[ 0 ][ j ][ 2 ].x = 0;
-			geo.faceVertexUvs[ 0 ][ j ][ 2 ].y =
-				geo.vertices[ geo.faces[ j ].c ].z / this.thickness;
-		}
-
-
-		mesh = new THREE.Mesh( geo, mat );
-		mesh.position.z -= this.thickness;
-
-		// Reorient per parent transforms
-		wire = wireGrps[ i ][ 0 ];
-		if ( wire.elementParent ) {
-			parent = new THREE.Object3D();
-			parent.position.x = this.parseCoord(
-				wire.elementParent.getAttribute( &quot;x&quot; ) );
-			parent.position.y = this.parseCoord(
-				wire.elementParent.getAttribute( &quot;y&quot; ) );
-			if ( wire.elementParent.hasAttribute( &quot;rot&quot; ) ) {
-				angleData = new EagleBrdRenderer.AngleData(
-					wire.elementParent.getAttribute( &quot;rot&quot; ) );
-				parent.rotation.z = angleData.angle;
-				parent.scale.x = angleData.spin ? -1 : 1;
-				parent.scale.y = angleData.mirror ? -1 : 1;
-			}
-
-			// Extract
-			this.depthElements.add( parent );
-			parent.add( mesh );
-			parent.updateMatrixWorld();
-			THREE.SceneUtils.detach( mesh, parent, this.depthElements );
-			this.depthElements.remove( mesh );
-			this.depthElements.remove( parent );
-		}
+		// Generate edge unit
+		mesh = this._buildDepthEdge(
+			shape,
+			mat,
+			wireGrps[ i ][ 0 ].elementParent );
 
 		if ( add ) {
 			this.depthElements.add( mesh );
 		}
 	}
+};
+
+
+EagleBrdRenderer.prototype._buildDepthEdge = function(
+	shape, material, parentElement ) {
+
+	/**
+	Assemble a single continuous extruded edge from a shape.
+
+	@method _buildDepthEdge
+	@param shape {THREE.Shape} Shape path to use for extrusion
+	@param material {THREE.Material} Material to use for mesh
+	@param [parentElement] {Element} Parent space used to align edge mesh
+	@private
+	@return {THREE.Mesh} 
+	**/
+
+	var angleData, geo, i, mesh, parent;
+
+	// Extrude from path
+	geo = new THREE.ExtrudeGeometry( shape, {
+		amount: this.thickness,
+		bevelEnabled: false,
+		curveSegments: 32,
+		// steps: 3
+	} );
+
+	// Cull top and bottom faces
+	for ( i = geo.faces.length - 1; i &gt;= 0; i-- ) {
+		if ( Math.abs( geo.faces[ i ].normal.z ) &gt; 0.5 ) {
+			geo.faces.splice( i, 1 );
+		}
+	}
+
+	// Perform Z-reliant UV mapping
+	for ( i = 0; i &lt; geo.faces.length; i++ ) {
+
+		// Vertex A
+		geo.faceVertexUvs[ 0 ][ i ][ 0 ].x = 0;
+		geo.faceVertexUvs[ 0 ][ i ][ 0 ].y =
+			geo.vertices[ geo.faces[ i ].a ].z / this.thickness;
+
+		// Vertex B
+		geo.faceVertexUvs[ 0 ][ i ][ 1 ].x = 0;
+		geo.faceVertexUvs[ 0 ][ i ][ 1 ].y =
+			geo.vertices[ geo.faces[ i ].b ].z / this.thickness;
+
+		// Vertex C
+		geo.faceVertexUvs[ 0 ][ i ][ 2 ].x = 0;
+		geo.faceVertexUvs[ 0 ][ i ][ 2 ].y =
+			geo.vertices[ geo.faces[ i ].c ].z / this.thickness;
+	}
+
+
+	mesh = new THREE.Mesh( geo, material );
+	mesh.position.z -= this.thickness;
+
+	// Reorient per parent transforms
+	if ( parentElement ) {
+		parent = new THREE.Object3D();
+		parent.position.x = this.parseCoord(
+			parentElement.getAttribute( &quot;x&quot; ) );
+		parent.position.y = this.parseCoord(
+			parentElement.getAttribute( &quot;y&quot; ) );
+		if ( parentElement.hasAttribute( &quot;rot&quot; ) ) {
+			angleData = new EagleBrdRenderer.AngleData(
+				parentElement.getAttribute( &quot;rot&quot; ) );
+			parent.rotation.z = angleData.angle;
+			parent.scale.x = angleData.spin ? -1 : 1;
+			parent.scale.y = angleData.mirror ? -1 : 1;
+		}
+
+		// Extract
+		this.depthElements.add( parent );
+		parent.add( mesh );
+		parent.updateMatrixWorld();
+		THREE.SceneUtils.detach( mesh, parent, this.depthElements );
+		this.depthElements.remove( mesh );
+		this.depthElements.remove( parent );
+	}
+
+	return mesh;
 };
 
 
@@ -660,7 +704,7 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 	**/
 
 	var angData, connector, drill, drills, geo, i, j,
-		mat, mesh, parent, parent2, vec2,
+		mat, mesh, parent, parent2,
 		x1, x2, y1, y2,
 		cylDetail = 16;
 
@@ -706,36 +750,26 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 
 
 	// Create drills
+
+	// Create material; this should only run once, so it&#x27;s OK here.
+	// If we were calling &quot;_buildDepthHoles()&quot; more than once,
+	// we&#x27;d want to make this a property of the &#x60;EagleBrdRenderer&#x60; itself.
+	//
+	// Note also that we use &#x60;textureEdge&#x60;, which should have been generated
+	// moments ago during edge creation.
 	mat = new this.material( {
 		color: new THREE.Color( this.colors.copper ),
 		side: THREE.BackSide,
 		specular: new THREE.Color( this.colors.copper ),
 		shininess: this._shininess,
+		bumpMap: this.textureEdge,
 	} );
+
 	for ( i = 0; i &lt; drills.length; i++ ) {
 		drill = this.parseCoord( drills[ i ].getAttribute( &quot;drill&quot; ) ) / 2;
 		geo = new THREE.CylinderGeometry(
-			drill, drill, this.thickness, cylDetail, 3, true );
+			drill, drill, this.thickness, cylDetail, 1, true );
 		mesh = new THREE.Mesh( geo, mat );
-
-		// Bevel drills
-		for ( j = 0; j &lt; cylDetail + 1; j++ ) {
-			vec2 = new THREE.Vector2(
-				geo.vertices[ j ].x, geo.vertices[ j ].z );
-			vec2.multiplyScalar( 0.8 );
-			geo.vertices[ j + ( cylDetail + 1 ) * 1 ].x = vec2.x;
-			geo.vertices[ j + ( cylDetail + 1 ) * 1 ].z = vec2.y;
-
-			// Other end
-			geo.vertices[ j + ( cylDetail + 1 ) * 2 ].x = vec2.x;
-			geo.vertices[ j + ( cylDetail + 1 ) * 2 ].z = vec2.y;
-
-			// Elongate straight faces to exaggerate lip.
-			geo.vertices[ j + ( cylDetail + 1 ) * 1 ].y +=
-				this.thickness * 0.2;
-			geo.vertices[ j + ( cylDetail + 1 ) * 2 ].y -=
-				this.thickness * 0.2;
-		}
 
 		// Orient drillmesh
 		mesh.rotation.x = Math.PI / 2;
@@ -762,6 +796,10 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 				parent.rotation.z = angData.angle;
 				parent.scale.x = angData.mirror ? -1 : 1;
 				parent.scale.y = angData.spin ? -1 : 1;
+
+				// Scaling can break THREE&#x27;s backside detection, so re-invert
+				mesh.scale.x = angData.mirror ? -1 : 1;
+				mesh.scale.y = angData.spin ? -1 : 1;
 			}
 
 			parent.add( mesh );
@@ -771,8 +809,6 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 			THREE.SceneUtils.detach( mesh, parent, this.depthElements );
 			this.depthElements.remove( parent );
 		}
-
-		// TODO: Merge geometries. This will render more efficiently.
 
 		// Register connectors for holes and pads
 		if ( drills[ i ].tagName === &quot;hole&quot; ||
@@ -802,6 +838,8 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 
 			this.visualizeConnector( connector );
 		}
+
+		// TODO: Merge geometries. This will render more efficiently.
 	}
 };
 
@@ -1802,13 +1840,6 @@ EagleBrdRenderer.prototype.drawPolygons = function( params ) {
 			continue;
 		}
 
-		// Debug
-		// console.log( &quot;Polygon&quot;,
-		// 	&quot;layer&quot;, polys[ i ].getAttribute( &quot;layer&quot; ),
-		// 	polys[ i ].elementParent ?
-		// 		polys[ i ].elementParent.getAttribute( &quot;package&quot; ) :
-		// 		&quot;&quot; );
-
 		ctx.save();
 
 		// Account for objects created by elements
@@ -1821,32 +1852,36 @@ EagleBrdRenderer.prototype.drawPolygons = function( params ) {
 		x = this.parseCoord( verts[ 0 ].getAttribute( &quot;x&quot; ) );
 		y = this.parseCoord( verts[ 0 ].getAttribute( &quot;y&quot; ) );
 		ctx.moveTo( x, y );
-		// console.log( x, y );
 
 		for ( j = 0; j &lt; verts.length; j++ ) {
 			x = this.parseCoord( verts[ j ].getAttribute( &quot;x&quot; ) );
 			y = this.parseCoord( verts[ j ].getAttribute( &quot;y&quot; ) );
 			if ( verts[ j ].hasAttribute( &quot;curve&quot; ) ) {
+
+				// Analyse arc
 				chordData = new EagleBrdRenderer.ChordData( {
 					curve: parseFloat( verts[ j ].getAttribute( &quot;curve&quot; ) ),
-					x1: parseFloat( verts[ j ].getAttribute( &quot;x&quot; ) ),
-					y1: parseFloat( verts[ j ].getAttribute( &quot;y&quot; ) ),
-					x2: parseFloat(
+					x1: this.parseCoord( verts[ j ].getAttribute( &quot;x&quot; ) ),
+					y1: this.parseCoord( verts[ j ].getAttribute( &quot;y&quot; ) ),
+					x2: this.parseCoord(
 						verts[ ( j &lt; verts.length - 1 ) ? j + 1 : 0 ]
 						.getAttribute( &quot;x&quot; ) ),
-					y2: parseFloat(
+					y2: this.parseCoord(
 						verts[ ( j &lt; verts.length - 1 ) ? j + 1 : 0 ]
 						.getAttribute( &quot;y&quot; ) )
 				} );
+
+				// Draw arc
 				ctx.arc(
-					chordData.x * this.coordScale,
-					chordData.y * this.coordScale,
-					chordData.radius * this.coordScale,
-					chordData.bearing1, chordData.bearing2 );
+					chordData.x,
+					chordData.y,
+					chordData.radius,
+					chordData.bearing1,
+					chordData.bearing2,
+					chordData.curve &lt; 0 );
 			} else {
 				ctx.lineTo( x, y );
 			}
-			// console.log( x, y );
 		}
 
 		ctx.closePath();
@@ -3015,20 +3050,76 @@ EagleBrdRenderer.prototype.sortWires = function( wires ) {
 
 	/**
 	Sort the wires in a list so that they connect end-to-end
-	whenever possible. Wires may be reversed to fit into sequence.
+	whenever possible.
+
+	Wires may be reversed to fit into sequence.
+
+	Duplicate wires will be discarded. Note that duplication only considers
+	endpoints, not curvature.
 
 	@method sortWires
 	@param wires {array} List of wires to sort
 	@return {array} Sorted list
 	**/
 
-	var i, wire, wires2, x1, x2, y1, y2;
+	var connected, duplicated, i, j, wire, wires2, x0, x1, x2, y0, y1, y2;
 
 	// Copy original array for destructive operations
 	wires = wires.slice();
 	wires2 = [];
 
+
+	// Eliminate duplicate wires
+	for ( i = 0; i &lt; wires.length; i++ ) {
+
+		x1 = wires[ i ].getAttribute( &quot;x1&quot; );
+		x2 = wires[ i ].getAttribute( &quot;x2&quot; );
+		y1 = wires[ i ].getAttribute( &quot;y1&quot; );
+		y2 = wires[ i ].getAttribute( &quot;y2&quot; );
+
+		duplicated = false;
+
+		for ( j = i + 1; j &lt; wires.length; j++ ) {
+
+			if (
+				(
+
+					// Test for direct duplicates
+					x1 === wires[ j ].getAttribute( &quot;x1&quot; ) &amp;&amp;
+					x2 === wires[ j ].getAttribute( &quot;x2&quot; ) &amp;&amp;
+					y1 === wires[ j ].getAttribute( &quot;y1&quot; ) &amp;&amp;
+					y2 === wires[ j ].getAttribute( &quot;y2&quot; )
+				) ||
+				(
+
+					// Test for reversed duplicates
+					x1 === wires[ j ].getAttribute( &quot;x2&quot; ) &amp;&amp;
+					x2 === wires[ j ].getAttribute( &quot;x1&quot; ) &amp;&amp;
+					y1 === wires[ j ].getAttribute( &quot;y2&quot; ) &amp;&amp;
+					y2 === wires[ j ].getAttribute( &quot;y1&quot; )
+				) ) {
+
+				duplicated = true;
+			break;
+			}
+		}
+
+		if ( !duplicated ) {
+			wires2.push( wires[ i ] );
+		} else {
+			// console.log( &quot;DEBUG: Removed duplicate wire&quot; );
+		}
+	}
+	wires = wires2;
+	wires2 = [];
+
+
+
+
+	// Order wires
 	while ( wires.length ) {
+
+		// console.log( &quot;DEBUG: Starting wire loop&quot; );
 
 		// Seed arbitrary loop member
 		wire = wires.shift();
@@ -3041,6 +3132,12 @@ EagleBrdRenderer.prototype.sortWires = function( wires ) {
 			x2 = wire.getAttribute( &quot;x2&quot; );
 			y2 = wire.getAttribute( &quot;y2&quot; );
 
+			// Update wire origin
+			x0 = wires2[ 0 ].getAttribute( &quot;x1&quot; );
+			y0 = wires2[ 0 ].getAttribute( &quot;y1&quot; );
+
+			connected = false;
+
 			for ( i = 0; i &lt; wires.length; i++ ) {
 
 				// Check near end of wire
@@ -3049,9 +3146,40 @@ EagleBrdRenderer.prototype.sortWires = function( wires ) {
 
 				if ( x1 === x2 &amp;&amp; y1 === y2 ) {
 
+					// console.log( &quot;DEBUG: Wire to end&quot; );
+
 					// Wire K connects
 					wire = wires.splice( i, 1 )[ 0 ];
 					wires2.push( wire );
+					connected = true;
+
+					break;
+				}
+
+				if ( x1 === x0 &amp;&amp; y1 === y0 ) {
+
+					// console.log( &quot;DEBUG: Wire to start, inverted&quot; );
+
+					// Wire K connects to start of queue when inverted
+					wires2.unshift( wires.splice( i, 1 )[ 0 ] );
+					connected = true;
+
+					// Swap ends
+					wires2[ 0 ].setAttribute(
+						&quot;x1&quot;, wires2[ 0 ].getAttribute( &quot;x2&quot; ) );
+					wires2[ 0 ].setAttribute(
+						&quot;y1&quot;, wires2[ 0 ].getAttribute( &quot;y2&quot; ) );
+					wires2[ 0 ].setAttribute(
+						&quot;x2&quot;, x1 );
+					wires2[ 0 ].setAttribute(
+						&quot;y2&quot;, y1 );
+					if ( wires2[ 0 ].hasAttribute( &quot;curve&quot; ) ) {
+						wires2[ 0 ].setAttribute(
+							&quot;curve&quot;,
+							&quot;&quot; +
+							-parseFloat( wires2[ 0 ].getAttribute( &quot;curve&quot; ) )
+						);
+					}
 
 					break;
 				}
@@ -3062,9 +3190,12 @@ EagleBrdRenderer.prototype.sortWires = function( wires ) {
 
 				if ( x1 === x2 &amp;&amp; y1 === y2 ) {
 
+					// console.log( &quot;DEBUG: Wire to end, inverted&quot; );
+
 					// Wire K connects when inverted
 					wire = wires.splice( i, 1 )[ 0 ];
 					wires2.push( wire );
+					connected = true;
 
 					// Swap ends
 					wire.setAttribute( &quot;x2&quot;, wire.getAttribute( &quot;x1&quot; ) );
@@ -3080,10 +3211,21 @@ EagleBrdRenderer.prototype.sortWires = function( wires ) {
 
 					break;
 				}
+
+				if ( x1 === x0 &amp;&amp; y1 === y0 ) {
+
+					// console.log( &quot;DEBUG: Wire to start&quot; );
+
+					// Wire K connects to start of queue
+					wires2.unshift( wires.splice( i, 1 )[ 0 ] );
+					connected = true;
+
+					break;
+				}
 			}
 
 			// Break if nothing could be connected
-			if ( i === wires.length ) {
+			if ( connected === false ) {
 				break;
 			}
 		}
@@ -3322,6 +3464,8 @@ EagleBrdRenderer.ChordData = function( chord ) {
 	**/
 	this.bearing = Math.atan2( this.dy, this.dx );
 
+	ang = this.bearing + Math.PI / 2 - this.curve / 2;
+
 	/**
 	Radius of chord arc. Per chord identity,
 	chord = 2 * radius * sin( angle / 2 ), rearranged to acquire radius.
@@ -3329,8 +3473,6 @@ EagleBrdRenderer.ChordData = function( chord ) {
 	@property radius {number}
 	**/
 	this.radius = this.chord / ( 2 * Math.sin( this.curve / 2 ) );
-
-	ang = this.bearing + Math.PI / 2 - this.curve / 2;
 
 	/**
 	Horizontal position of arc origin
