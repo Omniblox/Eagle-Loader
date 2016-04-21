@@ -344,8 +344,8 @@
         },
         {
             "file": "src/BRDLoader.js",
-            "line": 71,
-            "description": "Construct THREE.js geometry, bearing composited textures from all layers.",
+            "line": 69,
+            "description": "Construct the EagleBrdRenderer object THREE.js geometry (brd.root), bearing composited textures from all layers.",
             "itemtype": "method",
             "name": "THREE.BRDLoader.parse",
             "params": [
