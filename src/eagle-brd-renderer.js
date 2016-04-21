@@ -1760,13 +1760,6 @@ EagleBrdRenderer.prototype.drawPolygons = function( params ) {
 			continue;
 		}
 
-		// Debug
-		// console.log( "Polygon",
-		// 	"layer", polys[ i ].getAttribute( "layer" ),
-		// 	polys[ i ].elementParent ?
-		// 		polys[ i ].elementParent.getAttribute( "package" ) :
-		// 		"" );
-
 		ctx.save();
 
 		// Account for objects created by elements
@@ -1779,32 +1772,36 @@ EagleBrdRenderer.prototype.drawPolygons = function( params ) {
 		x = this.parseCoord( verts[ 0 ].getAttribute( "x" ) );
 		y = this.parseCoord( verts[ 0 ].getAttribute( "y" ) );
 		ctx.moveTo( x, y );
-		// console.log( x, y );
 
 		for ( j = 0; j < verts.length; j++ ) {
 			x = this.parseCoord( verts[ j ].getAttribute( "x" ) );
 			y = this.parseCoord( verts[ j ].getAttribute( "y" ) );
 			if ( verts[ j ].hasAttribute( "curve" ) ) {
+
+				// Analyse arc
 				chordData = new EagleBrdRenderer.ChordData( {
 					curve: parseFloat( verts[ j ].getAttribute( "curve" ) ),
-					x1: parseFloat( verts[ j ].getAttribute( "x" ) ),
-					y1: parseFloat( verts[ j ].getAttribute( "y" ) ),
-					x2: parseFloat(
+					x1: this.parseCoord( verts[ j ].getAttribute( "x" ) ),
+					y1: this.parseCoord( verts[ j ].getAttribute( "y" ) ),
+					x2: this.parseCoord(
 						verts[ ( j < verts.length - 1 ) ? j + 1 : 0 ]
 						.getAttribute( "x" ) ),
-					y2: parseFloat(
+					y2: this.parseCoord(
 						verts[ ( j < verts.length - 1 ) ? j + 1 : 0 ]
 						.getAttribute( "y" ) )
 				} );
+
+				// Draw arc
 				ctx.arc(
-					chordData.x * this.coordScale,
-					chordData.y * this.coordScale,
-					chordData.radius * this.coordScale,
-					chordData.bearing1, chordData.bearing2 );
+					chordData.x,
+					chordData.y,
+					chordData.radius,
+					chordData.bearing1,
+					chordData.bearing2,
+					chordData.curve < 0 );
 			} else {
 				ctx.lineTo( x, y );
 			}
-			// console.log( x, y );
 		}
 
 		ctx.closePath();
@@ -3387,6 +3384,8 @@ EagleBrdRenderer.ChordData = function( chord ) {
 	**/
 	this.bearing = Math.atan2( this.dy, this.dx );
 
+	ang = this.bearing + Math.PI / 2 - this.curve / 2;
+
 	/**
 	Radius of chord arc. Per chord identity,
 	chord = 2 * radius * sin( angle / 2 ), rearranged to acquire radius.
@@ -3394,8 +3393,6 @@ EagleBrdRenderer.ChordData = function( chord ) {
 	@property radius {number}
 	**/
 	this.radius = this.chord / ( 2 * Math.sin( this.curve / 2 ) );
-
-	ang = this.bearing + Math.PI / 2 - this.curve / 2;
 
 	/**
 	Horizontal position of arc origin
