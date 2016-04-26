@@ -1,0 +1,2 @@
+github: https://github.com/sparkfun/picobuck
+webpage: https://www.sparkfun.com/products/13705

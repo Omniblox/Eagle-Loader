@@ -1,0 +1,2 @@
+github: https://github.com/sparkfun/Photon_Wearable_Shield
+webpage: https://www.sparkfun.com/products/13328

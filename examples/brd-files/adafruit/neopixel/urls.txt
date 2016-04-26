@@ -1,0 +1,2 @@
+github: https://github.com/adafruit/Adafruit-NeoPixel-Ring
+webpage: https://www.adafruit.com/products/1643

@@ -1,0 +1,2 @@
+github: https://github.com/sparkfun/RedStick/tree/V_1.0
+webpage: https://www.sparkfun.com/products/13741

@@ -1,0 +1,2 @@
+github: https://github.com/adafruit/Adafruit-Flora-Mainboard
+webpage: http://adafruit.com/products/659

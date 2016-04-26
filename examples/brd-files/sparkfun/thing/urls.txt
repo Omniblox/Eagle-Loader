@@ -1,0 +1,2 @@
+github: https://github.com/sparkfun/ESP8266_Thing
+webpage: https://www.sparkfun.com/products/13231

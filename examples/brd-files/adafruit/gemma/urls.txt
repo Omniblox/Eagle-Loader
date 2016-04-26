@@ -1,0 +1,2 @@
+github: https://github.com/adafruit/Adafruit-Gemma-PCB
+webpage: https://www.adafruit.com/products/1222
