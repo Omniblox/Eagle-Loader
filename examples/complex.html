@@ -14,75 +14,93 @@
     <script>
     var boards = {
       feather: {
-        src: "brd-files/feather/feather.brd",
+        src: "brd-files/adafruit/feather/feather.brd",
         manufacturer: "adafruit",
-        url: "foo",
+        url: "https://www.adafruit.com/product/2771",
         name: "Feather",
         brdParams: {
           colors: {solderMask: "rgb( 0, 0, 0 )"}
         }
       },
       flora: {
-          src: "brd-files/flora/adafruit_flora_mainboard_2.brd",
+          src: "brd-files/adafruit/flora/adafruit_flora_mainboard_2.brd",
           manufacturer: "adafruit",
-          url: "foo",
+          url: "http://adafruit.com/products/659",
           name: "Flora",
           brdParams: {
             colors: {solderMask: "rgb( 0, 0, 0 )"}
           }
       },
       gemma: {
-        src: "brd-files/gemma/gemma.brd",
+        src: "brd-files/adafruit/gemma/gemma.brd",
         manufacturer: "adafruit",
-        url: "foo",
+        url: "https://www.adafruit.com/products/1222",
         name: "Gemma",
         brdParams: {
           colors: {solderMask: "rgb( 0, 0, 0 )"}
         }
       },
       neopixel: {
-        src: "brd-files/neopixel/neopixel_ring_12.brd",
+        src: "brd-files/adafruit/neopixel/neopixel_ring_12.brd",
         manufacturer: "adafruit",
-        url: "foo",
+        url: "https://www.adafruit.com/products/1643",
         name: "Neopixel (12)",
         brdParams: {
           colors: {solderMask: "rgb( 0, 0, 0 )"}
         }
       },
-      trinket: {
-        src: "brd-files/trinket/trinket.brd",
-        manufacturer: "adafruit",
-        url: "foo",
-        name: "Trinket (3V)",
+      photon: {
+        src: "brd-files/sparkfun/photon/photon.brd",
+        manufacturer: "Sparkfun",
+        url: "https://www.sparkfun.com/products/13328",
+        name: "Photon",
         brdParams: {
-          colors: {solderMask: "rgb( 0, 0, 255 )"}
+          colors: {solderMask: "rgb( 255, 0, 0 )"}
+        }
+      },
+      picobuck: {
+        src: "brd-files/sparkfun/picobuck/picobuck.brd",
+        manufacturer: "Sparkfun",
+        url: "https://www.sparkfun.com/products/13705",
+        name: "PicoBuck",
+        brdParams: {
+          colors: {solderMask: "rgb( 255, 0, 0 )"}
         }
       },
       redstick: {
-        src: "brd-files/redstick/sparkfun_redstick.brd",
+        src: "brd-files/sparkfun/redstick/sparkfun_redstick.brd",
         manufacturer: "SparkFun",
-        url: "foo",
+        url: "https://www.sparkfun.com/products/13741",
         name: "RedStick",
         brdParams: {
           colors: {solderMask: "rgb( 255, 0, 0 )"}
         }
       },
       sparkpunk: {
-        src: "brd-files/sparkpunk/sparkpunk.brd",
+        src: "brd-files/sparkfun/sparkpunk/sparkpunk.brd",
         manufacturer: "SparkFun",
-        url: "foo",
-        name: "Sparkpunk",
+        url: "https://www.sparkfun.com/products/11177",
+        name: "SparkPunk",
         brdParams: {
           colors: {solderMask: "rgb( 255, 0, 0 )"}
         }
       },
       thing: {
-        src: "brd-files/thing/thing.brd",
+        src: "brd-files/sparkfun/thing/thing.brd",
         manufacturer: "SparkFun",
-        url: "foo",
+        url: "https://www.sparkfun.com/products/13231",
         name: "Thing",
         brdParams: {
           colors: {solderMask: "rgb( 255, 0, 0 )"}
+        }
+      },
+      trinket: {
+        src: "brd-files/adafruit/trinket/trinket.brd",
+        manufacturer: "adafruit",
+        url: "https://www.adafruit.com/products/1500",
+        name: "Trinket (3.3V)",
+        brdParams: {
+          colors: {solderMask: "rgb( 0, 0, 255 )"}
         }
       }
     }
@@ -138,7 +156,7 @@
       <div id="info">
         <div id="product-data" class="">
           <span id="product-manufacturer"></span><br/>
-          <a href="" id="link-to-site" target="_blank"></a>
+          <a href="" id="link-to-site" target="_blank"></a><br/>
         </div>
       </div>
 
