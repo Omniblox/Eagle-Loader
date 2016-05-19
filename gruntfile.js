@@ -16,6 +16,9 @@ module.exports = function( grunt ) {
 		clean: {
 			docs: {
 				src: [ "docs" ]
+			},
+			code: {
+				src: [ "dist" ]
 			}
 		},
 
@@ -66,9 +69,15 @@ module.exports = function( grunt ) {
 			"yuidoc:compile"
 		] );
 	grunt.registerTask(
+		"compile",
+		[
+			"clean:code",
+			"concat"
+		] );
+	grunt.registerTask(
 		"all",
 		[
 			"docs",
-			"concat"
+			"compile"
 		] );
 };

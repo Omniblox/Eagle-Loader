@@ -1,5 +1,5 @@
 {
-  "name": "EagleBrdViz",
+  "name": "EagleLoader",
   "version": "1.0.0",
   "description": "Visualize EAGLE .brd files in the browser.",
   "contributors": [
@@ -11,7 +11,7 @@
     }
   ],
   "homepage": "http://omniblox.io/three-brdloader",
-  "repository": "https://github.com/Omniblox/Eagle-BRD-Viz",
+  "repository": "https://github.com/Omniblox/Eagle-Loader",
   "license": "MIT",
   "devDependencies": {
     "grunt": "^0.4.5",
