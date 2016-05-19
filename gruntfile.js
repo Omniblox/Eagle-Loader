@@ -4,6 +4,15 @@ module.exports = function( grunt ) {
 
 		pkg: grunt.file.readJSON( "package.json" ),
 
+		concat: {
+			options: {
+				separator: ';'
+			},
+			dist: {
+				src: ['lib/connector.js', 'src/eagle-brd-renderer.js', 'src/BrdLoader.js'],
+				dest: 'dist/<%= pkg.name %>.js'
+			}
+		},
 		clean: {
 			docs: {
 				src: [ "docs" ]
@@ -43,7 +52,7 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( "grunt-contrib-clean" );
 	grunt.loadNpmTasks( "grunt-contrib-copy" );
 	grunt.loadNpmTasks( "grunt-contrib-yuidoc" );
-
+	grunt.loadNpmTasks('grunt-contrib-concat');
 
 	grunt.registerTask(
 		"default",
@@ -59,6 +68,7 @@ module.exports = function( grunt ) {
 	grunt.registerTask(
 		"all",
 		[
-			"docs"
+			"docs",
+			"concat"
 		] );
 };

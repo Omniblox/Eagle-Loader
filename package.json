@@ -2,8 +2,14 @@
   "name": "EagleBrdViz",
   "version": "1.0.0",
   "description": "Visualize EAGLE .brd files in the browser.",
-  "contributors": [{"name": "St. Zeno Exploration Ltd"},
-                   {"name": "Gamelab"}],
+  "contributors": [
+    {
+      "name": "St. Zeno Exploration Ltd"
+    },
+    {
+      "name": "Gamelab"
+    }
+  ],
   "homepage": "http://omniblox.io/three-brdloader",
   "repository": "https://github.com/Omniblox/Eagle-BRD-Viz",
   "license": "MIT",
@@ -12,5 +18,8 @@
     "grunt-contrib-clean": "^0.7.0",
     "grunt-contrib-copy": "^0.8.2",
     "grunt-contrib-yuidoc": "^0.10.0"
+  },
+  "dependencies": {
+    "grunt-contrib-concat": "^1.0.1"
   }
 }
