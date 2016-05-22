@@ -18,7 +18,7 @@ We’re still working on this, so the script isn’t 100% accurate. With that in
 
 This script assumes **one circuit board per .brd file**.
 
-This script works best with versions of THREE.js greater than 76.
+This script works best with THREE.js r76 or later.
 
 ## Files and Folders
 
