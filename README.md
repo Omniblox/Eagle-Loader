@@ -10,31 +10,34 @@ Copyright (c) 2016, St. Zeno Exploration Ltd.
 
 ## About Script
 
-Looking to create printed circuit boards (PCBs)? Look no further. This script loads and renders them visually using a .brd file: created by CadSoft EAGLE (version 6.0 or later).
+Looking to render printed circuit boards (PCBs)? Look no further. This script loads and renders them visually using a .brd file created by CadSoft EAGLE (version 6.0 or later).
 
-There are a number of ways to create PCBs, but this script visualizes them as THREE.js models -- which incorporates Connector objects; allowing PCBs to sync with other geometric objects. Board details are stored as XML.
+There are a number of ways to create PCBs, but this script visualizes them as [THREE.js](http://threejs.org/) models -- which incorporates Connector objects; allowing PCBs to sync with other geometric objects. Board details are stored as XML.
 
 We’re still working on this, so the script isn’t 100% accurate. With that in mind, it’s probably best to use this as a visualization aid only -- so don’t use it for to build anything ‘mission critical’ (for now...). And we’ve done our best to flag stuff that needs sorting.
 
+This script assumes **one circuit board per .brd file**.
+
+This script works best with versions of THREE.js greater than 76.
 
 ## Files and Folders
 
-	dist/EagleLoader.js          This is the file you're looking for
-	docs/						Auto-generated API documentation
-	eagle/					   Example `.brd` files
-		eagle.dtd				Explanation of EAGLE XML format
-		eagle-xml-notes.md	   Notes on the structure of EAGLE XML format
-	examples/				    Examples
-	lib/						 Files necessary for the script to run
-	src/						 The script
-	gruntfile.js		         Build systems
-	package.json				 Build systems
-	README.md					This file
-
+File| Description
+----|------------
+`dist/EagleLoader.js` | This is the file you're looking for
+`docs/` | Auto-generated API documentation
+`eagle/`|Notes on the structure of EAGLE XML format
+`examples/`|Examples
+`examples/brd-files`| Example files from [adafruit](http://adafru.it) and [SparkFun](http://sparkfun.com)
+`lib/`|Files necessary for the script to run
+`src/`|The source code
+`gruntfile.js`|Build systems
+`package.json`|Build systems
+`README.md`	| This file
 
 ## Using Script
 
-Start by copying the `THREE.js` library `lib/` -- then load the `EagleLoader.js` script from `dist/`.
+Start by copying the `THREE.js` library from `lib/` then load the `EagleLoader.js` script from `dist/`.
 
 Here’s how to load the .brd file into an existing THREE.js scene:
 
