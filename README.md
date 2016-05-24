@@ -12,7 +12,7 @@ Copyright (c) 2016, St. Zeno Exploration Ltd.
 
 Looking to render printed circuit boards (PCBs)? Look no further. This script loads and renders them visually using a .brd file created by CadSoft EAGLE (version 6.0 or later).
 
-There are a number of ways to create PCBs, but this script visualizes them as [THREE.js](http://threejs.org/) models -- which incorporates Connector objects; allowing PCBs to sync with other geometric objects. Board details are stored as XML.
+There are a number of ways to render PCBs, but this script visualizes them as [THREE.js](http://threejs.org/) models.
 
 We’re still working on this, so the script isn’t 100% accurate. With that in mind, it’s probably best to use this as a visualization aid only -- so don’t use it for to build anything ‘mission critical’ (for now...). And we’ve done our best to flag stuff that needs sorting.
 
@@ -48,8 +48,7 @@ var brdParams = {
         solderMask: "rgb( 32, 168, 64 )"
     },
     pixelMicrons: 70,
-    material: "basic",
-    viewConnectors: true
+    material: "basic"
 }
 
 var loader = new THREE.BRDLoader();
@@ -71,4 +70,5 @@ We know these features would be great; so we’re working on them:
 * Investigate how thermals are generated. Does it involve <pin> elements?
 * The current board edges are defined by wire cuts. If these are not present, no bounds will be generated. A `<polygon>` element tagged as OUTLINES may be a valid alternative, but this has not been implemented or tested yet.
 * Text orientation is sometimes different to physical board samples.
+* Fonts need tweaking
 * Gold coating can’t be interpreted.
