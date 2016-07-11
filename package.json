@@ -1,6 +1,6 @@
 {
   "name": "EagleLoader",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Visualize EAGLE .brd files in the browser.",
   "contributors": [
     {
@@ -10,7 +10,7 @@
       "name": "Gamelab"
     }
   ],
-  "homepage": "http://omniblox.io/three-brdloader",
+  "homepage": "http://omniblox.io/eagleloader",
   "repository": "https://github.com/Omniblox/Eagle-Loader",
   "license": "MIT",
   "devDependencies": {

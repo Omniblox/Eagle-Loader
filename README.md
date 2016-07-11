@@ -64,6 +64,7 @@ For more details and examples, take a closer look at the API documentation in `d
 ## Future Development
 
 We know these features would be great; so we’re working on them:
+* Sort out board thicknesses
 * Generate full bump and specular map passes -- as well as color.
 * Generate texture maps using `<signal>` elements, rather than collections of components. This will allow the script to correctly layer copper traces, connect to ground planes, and process orphans.
 * Ensure that copper polygons fuse properly with pads according to EAGLE rules.
