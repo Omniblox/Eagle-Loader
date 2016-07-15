@@ -1,7 +1,7 @@
 # EAGLE .brd Loader
 
 Benjamin D. Richards,
-Gamelab
+[Gamelab](http://gamefroot.com/)
 
 David ten Have,
 St. Zeno Exploration Ltd
