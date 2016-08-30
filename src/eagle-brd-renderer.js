@@ -46,6 +46,9 @@ var EagleBrdRenderer = function( xml, params ) {
 		@param [params.material="phong"] {string} Material shader to use.
 			Options include `"phong"` for realistic lighting,
 			`"lambert"` for flat lighting, and `"basic"` for no lighting.
+		@param [params.thickness] {number} Override computed thickness
+			of board. Measured in millimeters. Note that this value will be
+			converted to pixels for use within the board.
 		@param [params.viewConnectors=false] {boolean} Whether to visualize
 			Connector objects
 		@param [params.viewGhosts=false] {boolean} Whether to draw
@@ -147,6 +150,22 @@ var EagleBrdRenderer = function( xml, params ) {
 	@property root {THREE.Object3D}
 	**/
 	this.root = new THREE.Object3D();
+
+	/**
+	Total board thickness, including solderpaste and mask layers.
+	Does not actually check for presence of solderpaste or mask.
+
+	This figure is measured in pixels relative to the board.
+	To find the distance in microns, multiply by `this.pixelMicrons`.
+
+	By default, this is computed from BRD data. If specified in
+	the params, it will override that value.
+
+	@property thickness {number}
+	**/
+	this.thickness = params.thickness ?
+		params.thickness * 1000 / this.pixelMicrons :
+		undefined;
 
 	/**
 	XML document that contains the board data
@@ -1365,13 +1384,7 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 		visible: false
 	} ) );
 
-	/**
-	Total thickness, including solderpaste and mask layers.
-	Does not actually check for presence of solderpaste or mask.
-
-	@property thickness {number}
-	**/
-	this.thickness = offset;
+	this.thickness = this.thickness || offset;
 
 	for ( i = 0; i < this.layers.length; i++ ) {
 		console.log( "Layer generated:", this.layers[ i ].tags[ 0 ],
