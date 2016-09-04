@@ -6,13 +6,19 @@ module.exports = function( grunt ) {
 
 		concat: {
 			options: {
-				separator: ';'
+				separator: ";"
 			},
 			dist: {
-				src: ['lib/connector.js', 'src/eagle-brd-renderer.js', 'src/BrdLoader.js'],
-				dest: 'dist/<%= pkg.name %>.js'
+				src: [
+					"lib/connector.js",
+					"lib/fontfaceobserver.js",
+					"src/eagle-brd-renderer.js",
+					"src/BrdLoader.js"
+				],
+				dest: "dist/<%= pkg.name %>.js"
 			}
 		},
+
 		clean: {
 			docs: {
 				src: [ "docs" ]
@@ -23,6 +29,12 @@ module.exports = function( grunt ) {
 		},
 
 		copy: {
+			fonts: {
+				expand: true,
+				cwd: "assets/fonts/ocr-0.2/",
+				src: [ "OCRA.otf", "OCRA.woff" ],
+				dest: "dist/"
+			},
 			temp: {
 				expand: true,
 				cwd: "src/",
@@ -55,7 +67,7 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( "grunt-contrib-clean" );
 	grunt.loadNpmTasks( "grunt-contrib-copy" );
 	grunt.loadNpmTasks( "grunt-contrib-yuidoc" );
-	grunt.loadNpmTasks('grunt-contrib-concat');
+	grunt.loadNpmTasks( "grunt-contrib-concat" );
 
 	grunt.registerTask(
 		"default",
@@ -72,7 +84,8 @@ module.exports = function( grunt ) {
 		"compile",
 		[
 			"clean:code",
-			"concat"
+			"concat",
+			"copy:fonts"
 		] );
 	grunt.registerTask(
 		"all",

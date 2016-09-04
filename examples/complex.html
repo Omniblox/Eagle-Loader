@@ -261,11 +261,20 @@
       var loadBoard = function( board ){
         showLoading();
         var loader = new THREE.BRDLoader();
-        loader.load( board.src, board.brdParams, function ( brd ) {
-          board.boardData = brd;
-          addToScene(board);
-          showScene(board);
-        } );
+        loader.load(
+          board.src,
+          board.brdParams,
+          function ( brd ) {
+            board.boardData = brd;
+            addToScene(board);
+            showScene(board);
+          },
+          undefined,
+          undefined,
+          [
+            "../dist/OCRA.woff",
+            "../dist/OCRA.otf"
+          ] );
       }
 
       // populate and wire up examples selector

@@ -1,95 +1,102 @@
 <html>
-  <head>
+	<head>
+		<script src="../lib/three.js"></script>
+		<script src="js/OrbitControls.js"></script>
+		<script src="../dist/EagleLoader.js"></script>
 
-    <script src="../lib/three.js"></script>
-    <script src="js/OrbitControls.js"></script>
-    <script src="../dist/EagleLoader.js"></script>
+		<link rel="stylesheet" type="text/css" href="style.css">
 
-    <link rel="stylesheet" type="text/css" href="style.css">
+	</head>
+	<body>
 
-  </head>
-  <body>
+		<h2>Simple Example</h2>
 
-    <h2>Simple Example</h2>
+		<div id="board">
+		</div>
+		<p>
+			<a href="complex.html">Click here</a> for a more complex example.
+		</p>
 
-    <div id="board">
-    </div>
-    <p>
-      <a href="complex.html">Click here</a> for a more complex example.
-    </p>
+		<script>
+			var addToScene, brdParams, camera, controls, light, lightRig, loader,
+				renderer, scene, url;
 
-    <script>
+			// Init view
+			scene = new THREE.Scene();
+			camera = new THREE.PerspectiveCamera( 75, 640 / 480, 100, 10000 );
 
-      // Init view
-      var scene = new THREE.Scene();
-      var camera = new THREE.PerspectiveCamera(75, 640 / 480, 100, 10000 );
+			renderer = new THREE.WebGLRenderer();
+			renderer.setSize( 640, 480 );
+			renderer.setClearColor( 0x000000, 1 );
+			document.getElementById( "board" ).appendChild( renderer.domElement )
 
-      var renderer = new THREE.WebGLRenderer();
-      renderer.setSize( 640, 480 );
-      renderer.setClearColor( 0x000000, 1);
-      document.getElementById('board').appendChild(renderer.domElement)
+			// set up controls
+			controls = new THREE.OrbitControls( camera, renderer.domElement );
+			controls.enableDamping = true;
+			controls.dampingFactor = 0.25;
 
-      // set up controls
-      var controls = new THREE.OrbitControls( camera, renderer.domElement );
-      controls.enableDamping = true;
-      controls.dampingFactor = 0.25;
+			// add lighting
+			lightRig = new THREE.Object3D();
+			lightRig.name = "light-rig";
+			scene.add( lightRig );
+			light = new THREE.PointLight( 0xddeeff, 0.5, 0 );
+			light.position.set( 400, -800, 1600 );
+			lightRig.add( light );
+			light = new THREE.PointLight( 0xffeedd, 0.5, 0 );
+			light.position.set( -400, 800, 1600 );
+			lightRig.add( light );
+			light = new THREE.PointLight( 0x8888dd, 0.5, 0 );
+			light.position.set( -800, 0, -400 );
+			lightRig.add( light );
+			light = new THREE.PointLight( 0xdd8888, 0.5, 0 );
+			light.position.set( 800, 0, -400 );
+			lightRig.add( light );
 
-      // add lighting
-      var light, lightRig,
-      lightRig = new THREE.Object3D();
-      lightRig.name = "light-rig"
-      scene.add( lightRig );
-      light = new THREE.PointLight( 0xddeeff, 0.5, 0 );
-      light.position.set( 400, -800, 1600 );
-      lightRig.add( light );
-      light = new THREE.PointLight( 0xffeedd, 0.5, 0 );
-      light.position.set( -400, 800, 1600 );
-      lightRig.add( light );
-      light = new THREE.PointLight( 0x8888dd, 0.5, 0 );
-      light.position.set( -800, 0, -400 );
-      lightRig.add( light );
-      light = new THREE.PointLight( 0xdd8888, 0.5, 0 );
-      light.position.set( 800, 0, -400 );
-      lightRig.add( light );
+			addToScene = function( board ) {
 
-    	var addToScene = function( board ) {
+					var animate = function() {
+							var now = Date.now();
 
-    			var zoom = 1.5;
+							requestAnimationFrame( animate );
 
-    			camera.position.z = ( brd.width + brd.height ) / zoom;
+							board.root.rotation.x =	0.2 * Math.sin( now * 0.00013 );
+							board.root.rotation.z =	0.2 * Math.sin( now * 0.00031 );
+							board.root.rotation.y = now * 0.00037;
 
-    			// add board to scene
-    			scene.add( board.root );
+							controls.update();
+							renderer.render( scene, camera );
+						},
+						zoom = 1.5;
 
-    			var animate = function() {
-    				var now = Date.now();
+					camera.position.z = ( brd.width + brd.height ) / zoom;
 
-    				requestAnimationFrame( animate );
+					// add board to scene
+					scene.add( board.root );
 
-    				board.root.rotation.x =	0.2 * Math.sin( now * 0.00013 );
-    				board.root.rotation.z =	0.2 * Math.sin( now * 0.00031 );
-    				board.root.rotation.y = now * 0.00037;
+					// Commence rendering
+					animate();
+				};
 
-            controls.update();
-    				renderer.render( scene, camera );
-    			}
+			url = "brd-files/sparkfun/photon/photon.brd";
+			brdParams = {
+				colors: {
+					solderMask: "rgb( 255, 0, 0 )"
+				}
+			}
 
-    			// Commence rendering
-    			animate();
-    		};
-
-      var url = 'brd-files/sparkfun/photon/photon.brd';
-      var brdParams = {
-      	colors: {
-      		solderMask: "rgb( 255, 0, 0 )"
-      	}
-      }
-
-      var loader = new THREE.BRDLoader();
-      loader.load( url, brdParams, function ( board ) {
-        addToScene(board);
-      } );
-
-    </script>
-  </body>
+			loader = new THREE.BRDLoader();
+			loader.load(
+				url,
+				brdParams,
+				function ( board ) {
+					addToScene( board );
+				},
+				undefined,
+				undefined,
+				[
+					"../dist/OCRA.woff",
+					"../dist/OCRA.otf"
+				] );
+		</script>
+	</body>
 </html>

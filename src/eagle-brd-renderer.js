@@ -39,13 +39,13 @@ var EagleBrdRenderer = function( xml, params ) {
 			layers are very slow.
 		@param [params.maskOpacity=0.8] {number} Opacity of solder mask;
 			opacity is halved over copper traces
+		@param [params.material="phong"] {string} Material shader to use.
+			Options include `"phong"` for realistic lighting,
+			`"lambert"` for flat lighting, and `"basic"` for no lighting.
 		@param [params.pixelMicrons=35] {number} Resolution of texture maps.
 			By default, this is 35 microns, equal to the thickness
 			of a default copper layer. Note that this will affect the
 			size of the board geometry.
-		@param [params.material="phong"] {string} Material shader to use.
-			Options include `"phong"` for realistic lighting,
-			`"lambert"` for flat lighting, and `"basic"` for no lighting.
 		@param [params.thickness] {number} Override computed thickness
 			of board. Measured in millimeters. Note that this value will be
 			converted to pixels for use within the board.
@@ -2019,11 +2019,11 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 
 		// Set font
 		// Note: Other fonts may be set.
-		// Default/vector is OCR A (available on OSX as OCR A Std).
+		// Default/vector is OCR A.
 		// "Proportional" is said to be generally Helvetica.
 		// "Fixed" is said to be generally Courier.
 		ctx.font = Math.round( this.parseCoord(
-			text.getAttribute( "size" ) ) ) + "px " + "OCR A Std";
+			text.getAttribute( "size" ) ) ) + "px " + "OCRA";
 
 		// Set alignment
 		textAlign = text.getAttribute( "align" ) || "bottom-left";

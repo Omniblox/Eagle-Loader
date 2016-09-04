@@ -17,7 +17,7 @@
                 <h1><img src="../assets/css/logo.png" title="EagleLoader" width="117" height="52"></h1>
         </div>
         <div class="yui3-u-1-4 version">
-            <em>API Docs for: 1.0.0</em>
+            <em>API Docs for: 0.1.0</em>
         </div>
     </div>
     <div id="bd" class="yui3-g">
@@ -126,13 +126,16 @@ var EagleBrdRenderer = function( xml, params ) {
 			layers are very slow.
 		@param [params.maskOpacity=0.8] {number} Opacity of solder mask;
 			opacity is halved over copper traces
+		@param [params.material=&quot;phong&quot;] {string} Material shader to use.
+			Options include &#x60;&quot;phong&quot;&#x60; for realistic lighting,
+			&#x60;&quot;lambert&quot;&#x60; for flat lighting, and &#x60;&quot;basic&quot;&#x60; for no lighting.
 		@param [params.pixelMicrons=35] {number} Resolution of texture maps.
 			By default, this is 35 microns, equal to the thickness
 			of a default copper layer. Note that this will affect the
 			size of the board geometry.
-		@param [params.material=&quot;phong&quot;] {string} Material shader to use.
-			Options include &#x60;&quot;phong&quot;&#x60; for realistic lighting,
-			&#x60;&quot;lambert&quot;&#x60; for flat lighting, and &#x60;&quot;basic&quot;&#x60; for no lighting.
+		@param [params.thickness] {number} Override computed thickness
+			of board. Measured in millimeters. Note that this value will be
+			converted to pixels for use within the board.
 		@param [params.viewConnectors=false] {boolean} Whether to visualize
 			Connector objects
 		@param [params.viewGhosts=false] {boolean} Whether to draw
@@ -234,6 +237,22 @@ var EagleBrdRenderer = function( xml, params ) {
 	@property root {THREE.Object3D}
 	**/
 	this.root = new THREE.Object3D();
+
+	/**
+	Total board thickness, including solderpaste and mask layers.
+	Does not actually check for presence of solderpaste or mask.
+
+	This figure is measured in pixels relative to the board.
+	To find the distance in microns, multiply by &#x60;this.pixelMicrons&#x60;.
+
+	By default, this is computed from BRD data. If specified in
+	the params, it will override that value.
+
+	@property thickness {number}
+	**/
+	this.thickness = params.thickness ?
+		params.thickness * 1000 / this.pixelMicrons :
+		undefined;
 
 	/**
 	XML document that contains the board data
@@ -1452,13 +1471,7 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 		visible: false
 	} ) );
 
-	/**
-	Total thickness, including solderpaste and mask layers.
-	Does not actually check for presence of solderpaste or mask.
-
-	@property thickness {number}
-	**/
-	this.thickness = offset;
+	this.thickness = this.thickness || offset;
 
 	for ( i = 0; i &lt; this.layers.length; i++ ) {
 		console.log( &quot;Layer generated:&quot;, this.layers[ i ].tags[ 0 ],
@@ -2093,11 +2106,11 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 
 		// Set font
 		// Note: Other fonts may be set.
-		// Default/vector is OCR A (available on OSX as OCR A Std).
+		// Default/vector is OCR A.
 		// &quot;Proportional&quot; is said to be generally Helvetica.
 		// &quot;Fixed&quot; is said to be generally Courier.
 		ctx.font = Math.round( this.parseCoord(
-			text.getAttribute( &quot;size&quot; ) ) ) + &quot;px &quot; + &quot;OCR A Std&quot;;
+			text.getAttribute( &quot;size&quot; ) ) ) + &quot;px &quot; + &quot;OCRA&quot;;
 
 		// Set alignment
 		textAlign = text.getAttribute( &quot;align&quot; ) || &quot;bottom-left&quot;;

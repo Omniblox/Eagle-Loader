@@ -52,14 +52,30 @@ var brdParams = {
 }
 
 var loader = new THREE.BRDLoader();
-loader.load( url, brdParams, function ( brd ) {
-    scene.add(brd.root);
-} );
+loader.load(
+    url,
+    brdParams,
+    function ( brd ) {
+        scene.add(brd.root);
+    },
+    undefined,
+    undefined,
+    [ "./OCRA.woff", "./OCRA.otf" ] );
 ```
 
 This will create a PCB with green masking -- at half the standard resolution (of 35 microns per pixel) -- using a basic flat material instead of Phong lighting, displayed with auto-generated connector handles.
 
 For more details and examples, take a closer look at the API documentation in `docs/` and the `examples/` folders.
+
+### Using Fonts
+
+For correct board display, you must include the OCR-A font. Find `OCRA.woff` and `OCRA.otf` in the `dist/` folder, alongside the main script.
+
+You may place these files in any folder, but ensure that you call `load()` with the `fontPath` parameter set.
+
+This version of the OCR-A font was created by Matthew Skala and is public domain. See `assets/fonts/ocr-0.2/` for more information.
+
+If you do not want to load the font files, you must specify `fontPath` as `null`. Otherwise the loader will wait forever, trying to validate nonexistent files.
 
 ## Future Development
 

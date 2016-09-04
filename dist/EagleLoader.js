@@ -5,6 +5,15 @@
  *
  * Creates connector that allows for the arbitary connection of scene elements
  *
+ * Connector.js library license:
+ *
+ * Copyright (C)2016 David ten Have
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 THREE.Connector = function() {
@@ -297,6 +306,17 @@ THREE.ConnectorHelper = ( function () {
 
 THREE.ConnectorHelper.prototype = Object.create( THREE.Object3D.prototype );
 THREE.ConnectorHelper.prototype.constructor = THREE.ConnectorHelper;
+;(function(){'use strict';var f,g=[];function l(a){g.push(a);1==g.length&&f()}function m(){for(;g.length;)g[0](),g.shift()}f=function(){setTimeout(m)};function n(a){this.a=p;this.b=void 0;this.f=[];var b=this;try{a(function(a){q(b,a)},function(a){r(b,a)})}catch(c){r(b,c)}}var p=2;function t(a){return new n(function(b,c){c(a)})}function u(a){return new n(function(b){b(a)})}function q(a,b){if(a.a==p){if(b==a)throw new TypeError;var c=!1;try{var d=b&&b.then;if(null!=b&&"object"==typeof b&&"function"==typeof d){d.call(b,function(b){c||q(a,b);c=!0},function(b){c||r(a,b);c=!0});return}}catch(e){c||r(a,e);return}a.a=0;a.b=b;v(a)}}
+function r(a,b){if(a.a==p){if(b==a)throw new TypeError;a.a=1;a.b=b;v(a)}}function v(a){l(function(){if(a.a!=p)for(;a.f.length;){var b=a.f.shift(),c=b[0],d=b[1],e=b[2],b=b[3];try{0==a.a?"function"==typeof c?e(c.call(void 0,a.b)):e(a.b):1==a.a&&("function"==typeof d?e(d.call(void 0,a.b)):b(a.b))}catch(h){b(h)}}})}n.prototype.g=function(a){return this.c(void 0,a)};n.prototype.c=function(a,b){var c=this;return new n(function(d,e){c.f.push([a,b,d,e]);v(c)})};
+function w(a){return new n(function(b,c){function d(c){return function(d){h[c]=d;e+=1;e==a.length&&b(h)}}var e=0,h=[];0==a.length&&b(h);for(var k=0;k<a.length;k+=1)u(a[k]).c(d(k),c)})}function x(a){return new n(function(b,c){for(var d=0;d<a.length;d+=1)u(a[d]).c(b,c)})};window.Promise||(window.Promise=n,window.Promise.resolve=u,window.Promise.reject=t,window.Promise.race=x,window.Promise.all=w,window.Promise.prototype.then=n.prototype.c,window.Promise.prototype["catch"]=n.prototype.g);}());
+
+(function(){function l(a,b){document.addEventListener?a.addEventListener("scroll",b,!1):a.attachEvent("scroll",b)}function m(a){document.body?a():document.addEventListener?document.addEventListener("DOMContentLoaded",function c(){document.removeEventListener("DOMContentLoaded",c);a()}):document.attachEvent("onreadystatechange",function k(){if("interactive"==document.readyState||"complete"==document.readyState)document.detachEvent("onreadystatechange",k),a()})};function q(a){this.a=document.createElement("div");this.a.setAttribute("aria-hidden","true");this.a.appendChild(document.createTextNode(a));this.b=document.createElement("span");this.c=document.createElement("span");this.h=document.createElement("span");this.f=document.createElement("span");this.g=-1;this.b.style.cssText="max-width:none;display:inline-block;position:absolute;height:100%;width:100%;overflow:scroll;font-size:16px;";this.c.style.cssText="max-width:none;display:inline-block;position:absolute;height:100%;width:100%;overflow:scroll;font-size:16px;";
+this.f.style.cssText="max-width:none;display:inline-block;position:absolute;height:100%;width:100%;overflow:scroll;font-size:16px;";this.h.style.cssText="display:inline-block;width:200%;height:200%;font-size:16px;max-width:none;";this.b.appendChild(this.h);this.c.appendChild(this.f);this.a.appendChild(this.b);this.a.appendChild(this.c)}
+function w(a,b){a.a.style.cssText="max-width:none;min-width:20px;min-height:20px;display:inline-block;overflow:hidden;position:absolute;width:auto;margin:0;padding:0;top:-999px;left:-999px;white-space:nowrap;font:"+b+";"}function x(a){var b=a.a.offsetWidth,c=b+100;a.f.style.width=c+"px";a.c.scrollLeft=c;a.b.scrollLeft=a.b.scrollWidth+100;return a.g!==b?(a.g=b,!0):!1}function z(a,b){function c(){var a=k;x(a)&&null!==a.a.parentNode&&b(a.g)}var k=a;l(a.b,c);l(a.c,c);x(a)};function A(a,b){var c=b||{};this.family=a;this.style=c.style||"normal";this.weight=c.weight||"normal";this.stretch=c.stretch||"normal"}var B=null,C=null,D=null;function H(){if(null===C){var a=document.createElement("div");try{a.style.font="condensed 100px sans-serif"}catch(b){}C=""!==a.style.font}return C}function I(a,b){return[a.style,a.weight,H()?a.stretch:"","100px",b].join(" ")}
+A.prototype.load=function(a,b){var c=this,k=a||"BESbswy",y=b||3E3,E=(new Date).getTime();return new Promise(function(a,b){null===D&&(D=!!document.fonts);if(D){var J=new Promise(function(a,b){function e(){(new Date).getTime()-E>=y?b():document.fonts.load(I(c,'"'+c.family+'"'),k).then(function(c){1<=c.length?a():setTimeout(e,25)},function(){b()})}e()}),K=new Promise(function(a,c){setTimeout(c,y)});Promise.race([K,J]).then(function(){a(c)},function(){b(c)})}else m(function(){function r(){var b;if(b=
+-1!=f&&-1!=g||-1!=f&&-1!=h||-1!=g&&-1!=h)(b=f!=g&&f!=h&&g!=h)||(null===B&&(b=/AppleWebKit\/([0-9]+)(?:\.([0-9]+))/.exec(window.navigator.userAgent),B=!!b&&(536>parseInt(b[1],10)||536===parseInt(b[1],10)&&11>=parseInt(b[2],10))),b=B&&(f==t&&g==t&&h==t||f==u&&g==u&&h==u||f==v&&g==v&&h==v)),b=!b;b&&(null!==d.parentNode&&d.parentNode.removeChild(d),clearTimeout(G),a(c))}function F(){if((new Date).getTime()-E>=y)null!==d.parentNode&&d.parentNode.removeChild(d),b(c);else{var a=document.hidden;if(!0===a||
+void 0===a)f=e.a.offsetWidth,g=n.a.offsetWidth,h=p.a.offsetWidth,r();G=setTimeout(F,50)}}var e=new q(k),n=new q(k),p=new q(k),f=-1,g=-1,h=-1,t=-1,u=-1,v=-1,d=document.createElement("div"),G=0;d.dir="ltr";w(e,I(c,"sans-serif"));w(n,I(c,"serif"));w(p,I(c,"monospace"));d.appendChild(e.a);d.appendChild(n.a);d.appendChild(p.a);document.body.appendChild(d);t=e.a.offsetWidth;u=n.a.offsetWidth;v=p.a.offsetWidth;F();z(e,function(a){f=a;r()});w(e,I(c,'"'+c.family+'",sans-serif'));z(n,function(a){g=a;r()});
+w(n,I(c,'"'+c.family+'",serif'));z(p,function(a){h=a;r()});w(p,I(c,'"'+c.family+'",monospace'))})})};"undefined"!==typeof module?module.exports=A:(window.FontFaceObserver=A,window.FontFaceObserver.prototype.load=A.prototype.load);}());
 ;/*
 
 EAGLE .BRD Renderer
@@ -338,13 +358,16 @@ var EagleBrdRenderer = function( xml, params ) {
 			layers are very slow.
 		@param [params.maskOpacity=0.8] {number} Opacity of solder mask;
 			opacity is halved over copper traces
+		@param [params.material="phong"] {string} Material shader to use.
+			Options include `"phong"` for realistic lighting,
+			`"lambert"` for flat lighting, and `"basic"` for no lighting.
 		@param [params.pixelMicrons=35] {number} Resolution of texture maps.
 			By default, this is 35 microns, equal to the thickness
 			of a default copper layer. Note that this will affect the
 			size of the board geometry.
-		@param [params.material="phong"] {string} Material shader to use.
-			Options include `"phong"` for realistic lighting,
-			`"lambert"` for flat lighting, and `"basic"` for no lighting.
+		@param [params.thickness] {number} Override computed thickness
+			of board. Measured in millimeters. Note that this value will be
+			converted to pixels for use within the board.
 		@param [params.viewConnectors=false] {boolean} Whether to visualize
 			Connector objects
 		@param [params.viewGhosts=false] {boolean} Whether to draw
@@ -446,6 +469,22 @@ var EagleBrdRenderer = function( xml, params ) {
 	@property root {THREE.Object3D}
 	**/
 	this.root = new THREE.Object3D();
+
+	/**
+	Total board thickness, including solderpaste and mask layers.
+	Does not actually check for presence of solderpaste or mask.
+
+	This figure is measured in pixels relative to the board.
+	To find the distance in microns, multiply by `this.pixelMicrons`.
+
+	By default, this is computed from BRD data. If specified in
+	the params, it will override that value.
+
+	@property thickness {number}
+	**/
+	this.thickness = params.thickness ?
+		params.thickness * 1000 / this.pixelMicrons :
+		undefined;
 
 	/**
 	XML document that contains the board data
@@ -1664,13 +1703,7 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 		visible: false
 	} ) );
 
-	/**
-	Total thickness, including solderpaste and mask layers.
-	Does not actually check for presence of solderpaste or mask.
-
-	@property thickness {number}
-	**/
-	this.thickness = offset;
+	this.thickness = this.thickness || offset;
 
 	for ( i = 0; i < this.layers.length; i++ ) {
 		console.log( "Layer generated:", this.layers[ i ].tags[ 0 ],
@@ -2305,11 +2338,11 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 
 		// Set font
 		// Note: Other fonts may be set.
-		// Default/vector is OCR A (available on OSX as OCR A Std).
+		// Default/vector is OCR A.
 		// "Proportional" is said to be generally Helvetica.
 		// "Fixed" is said to be generally Courier.
 		ctx.font = Math.round( this.parseCoord(
-			text.getAttribute( "size" ) ) ) + "px " + "OCR A Std";
+			text.getAttribute( "size" ) ) ) + "px " + "OCRA";
 
 		// Set alignment
 		textAlign = text.getAttribute( "align" ) || "bottom-left";
@@ -4134,37 +4167,34 @@ EagleBrdRenderer.Layer.prototype.orientContext = function( el, scale ) {
 
 	this.ctx.rotate( ang.angle );
 };
-;/*
+;THREE.BRDLoader = function ( manager ) {
 
-EAGLE .BRD Loader for THREE.js
+	/**
+	EAGLE .BRD Loader for THREE.js
 
-David ten Have, St. Zeno Exploration Ltd.
+	David ten Have, St. Zeno Exploration Ltd.
 
-This script is a helper for loading the output of EagleBrdRenderer into a THREE.js environment
+	This script is a helper for loading the output of EagleBrdRenderer
+	into a THREE.js environment
 
-*/
-
-
-
-THREE.BRDLoader = function ( manager ) {
+	@class THREE.BRDLoader
+	@constructor
+	@param [manager] {THREE.LoadingManager} Loading manager to use
+	**/
 
 	this.manager = ( manager !== undefined ) ? manager : THREE.DefaultLoadingManager;
 
 };
 
-/**
-@class THREE.BRDLoader
-**/
-
 THREE.BRDLoader.prototype = {
 
 	constructor: THREE.BRDLoader,
 
-  /**
-  The load call for the .brd loader
+	/**
+	Start loading the BRD and associated fonts.
 
-  @method THREE.BRDLoader.load
-	@param url {String} .brd file URL
+	@method load
+	@param url {string} .brd file URL
 	@param brdParams {object} Composite parameter object describing params for rendering the .brd file
 		@param [brdParams.color] {object} Define custom colors; see `this.colors`
 		@param [brdParams.composite=true] {boolean} Whether to composite layers,
@@ -4183,55 +4213,96 @@ THREE.BRDLoader.prototype = {
 			Connector objects
 		@param [brdParams.viewGhosts=false] {boolean} Whether to draw
 			approximate ghosts of on-board devices
-  @param onLoad {function} Will be called when load completes. The argument will be the loaded Object3D.
-  @param [onProgress] {function} Will be called while load progresses. The argument will be the XmlHttpRequest instance, that contain .total and .loaded bytes.
-  @param [onError] {function} Will be called when load errors.
+	@param onLoad {function} Will be called when load completes. The argument will be the loaded Object3D.
+	@param [onProgress] {function} Will be called while load progresses. The argument will be the XmlHttpRequest instance, that contain .total and .loaded bytes.
+	@param [onError] {function} Will be called when load errors.
+	@param [fontPath] {array} Paths to font files.
+		Defaults to the array `"./OCRA.woff", "./OCRA.otf"`.
+		You may specify any number of files as fallbacks,
+		but a WOFF and OTF should cover all your bases.
+		If you specify `null`, the loader will skip font loading.
 	**/
 
-	load: function ( url, brdParams, onLoad, onProgress, onError ) {
+	load: function ( url, brdParams, onLoad, onProgress, onError, fontPath ) {
 
-		var scope = this;
+		var i, style, urls,
+			loadBrd = function() {
+				var scope = this;
 
-		var loader = new THREE.XHRLoader( scope.manager );
-		//loader.setCrossOrigin( this.crossOrigin );
-		loader.load( url, function ( text ) {
+				var loader = new THREE.XHRLoader( scope.manager );
+				//loader.setCrossOrigin( this.crossOrigin );
+				loader.load( url, function ( text ) {
 
-			onLoad( scope.parse( text, brdParams ) );
+					onLoad( scope._parse( text, brdParams ) );
 
-		}, onProgress, onError );
+				}, onProgress, onError );
+			}.bind( this ),
+			observe = function() {
+				var observer = new FontFaceObserver( "OCRA" );
+				console.log( "Validating fonts..." );
+				observer.load().then(
+					loadBrd,
+					observe );
+			};
 
+		// Null fontpath means skip font validation
+		if ( fontPath === null ) {
+			loadBrd();
+			return;
+		}
+
+		// Set up fonts before rendering board
+		observe();
+
+		urls = "";
+		fontPath = fontPath || [ "./OCRA.woff", "./OCRA.otf" ];
+		for ( i = 0; i < fontPath.length; i++ ) {
+			urls += "url( " + fontPath[ i ] + " ),";
+		}
+		urls = urls.slice( 0, -1 );
+
+		style = document.createElement( "style" );
+		style.appendChild( document.createTextNode(
+			"@font-face { " +
+			"  font-family: \"OCRA\";" +
+			"  src: " +
+			urls +
+			";" +
+			"}" ) );
+		document.head.appendChild( style );
 	},
 
-  /**
+	/**
 	Construct the EagleBrdRenderer object THREE.js geometry (brd.root), bearing composited textures from all layers.
 
-  @method THREE.BRDLoader.parse
-  @param data {String} The contents of the .brd file as a string
-  @param brdParams {object} Composite parameter object describing params for rendering the .brd file
-    @param [brdParams.color] {object} Define custom colors; see `this.colors`
-    @param [brdParams.composite=true] {boolean} Whether to composite layers,
-      or render them as individual geometries. Warning: individual
-      layers are very slow.
-    @param [brdParams.maskOpacity=0.8] {number} Opacity of solder mask;
-      opacity is halved over copper traces
-    @param [brdParams.pixelMicrons=35] {number} Resolution of texture maps.
-      By default, this is 35 microns, equal to the thickness
-      of a default copper layer. Note that this will affect the
-      size of the board geometry.
-    @param [brdParams.material="phong"] {string} Material shader to use.
-      Options include `"phong"` for realistic lighting, `"lambert"` for flat lighting, and `"basic"` for no lighting.
-    @param [brdParams.viewConnectors=false] {boolean} Whether to visualize Connector objects
-    @param [brdParams.viewGhosts=false] {boolean} Whether to draw approximate ghosts of on-board devices
-  @private
+	@method _parse
+	@param data {String} The contents of the .brd file as a string
+	@param brdParams {object} Composite parameter object describing params for rendering the .brd file
+	@param [brdParams.color] {object} Define custom colors; see `this.colors`
+	@param [brdParams.composite=true] {boolean} Whether to composite layers,
+		or render them as individual geometries. Warning: individual
+		layers are very slow.
+	@param [brdParams.maskOpacity=0.8] {number} Opacity of solder mask;
+		opacity is halved over copper traces
+	@param [brdParams.pixelMicrons=35] {number} Resolution of texture maps.
+		By default, this is 35 microns, equal to the thickness
+		of a default copper layer. Note that this will affect the
+		size of the board geometry.
+	@param [brdParams.material="phong"] {string} Material shader to use.
+		Options include `"phong"` for realistic lighting,
+		`"lambert"` for flat lighting, and `"basic"` for no lighting.
+	@param [brdParams.viewConnectors=false] {boolean} Whether to visualize Connector objects
+	@param [brdParams.viewGhosts=false] {boolean} Whether to draw approximate ghosts of on-board devices
+	@private
 	**/
 
-	parse: function ( data, brdParams ) {
+	_parse: function ( data, brdParams ) {
 
-    var parser = new DOMParser();
-    var xmlBrd = parser.parseFromString(data, "text/xml");
-    brd = new EagleBrdRenderer( xmlBrd, brdParams );
+		var parser = new DOMParser();
+		var xmlBrd = parser.parseFromString( data, "text/xml" );
+		brd = new EagleBrdRenderer( xmlBrd, brdParams );
 
-    return brd;
-  }
+		return brd;
+	}
 
-}
+};
