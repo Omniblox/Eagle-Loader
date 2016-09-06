@@ -50,7 +50,7 @@
             },
             "tag": "module",
             "file": "src/eagle-brd-renderer.js",
-            "line": 3449
+            "line": 3469
         }
     },
     "classes": {
@@ -171,7 +171,7 @@
             "module": "EagleBrdRenderer",
             "namespace": "EagleBrdRenderer",
             "file": "src/eagle-brd-renderer.js",
-            "line": 3246,
+            "line": 3266,
             "description": "Holds data about a BRD angle.",
             "is_constructor": 1,
             "params": [
@@ -193,7 +193,7 @@
             "module": "EagleBrdRenderer",
             "namespace": "EagleBrdRenderer",
             "file": "src/eagle-brd-renderer.js",
-            "line": 3288,
+            "line": 3308,
             "description": "Analysis of the chord and circular segment described\nby a curving wire element.",
             "is_constructor": 1,
             "params": [
@@ -215,7 +215,7 @@
             "module": "EagleBrdRenderer",
             "namespace": "EagleBrdRenderer",
             "file": "src/eagle-brd-renderer.js",
-            "line": 3449,
+            "line": 3469,
             "description": "Define a layer of a PCB board. This contains a list of elements,\nand the render of these elements.\n\nLayer objects do not correspond directly to BRD layers.\nThey may combine many BRD layers into one target,\nsuch as for rendering silkscreen;\nshare an element across multiple targets,\nsuch as with vias and holes;\nor ignore a BRD layer entirely,\nsuch as with Symbol layers.",
             "is_constructor": 1,
             "params": [
@@ -273,7 +273,7 @@
     "classitems": [
         {
             "file": "src/BRDLoader.js",
-            "line": 24,
+            "line": 26,
             "description": "Start loading the BRD and associated fonts.",
             "itemtype": "method",
             "name": "load",
@@ -285,18 +285,18 @@
                 },
                 {
                     "name": "brdParams",
-                    "description": "Composite parameter object describing params for rendering the .brd file",
+                    "description": "Composite parameter object\n\tdescribing params for rendering the .brd file",
                     "type": "Object",
                     "props": [
                         {
                             "name": "color",
-                            "description": "Define custom colors; see `this.colors`",
+                            "description": "Define custom colors;\n\t\tsee `this.colors`",
                             "type": "Object",
                             "optional": true
                         },
                         {
                             "name": "composite",
-                            "description": "Whether to composite layers,\n\t\tor render them as individual geometries. Warning: individual\n\t\tlayers are very slow.",
+                            "description": "Whether to\n\t\tcomposite layers, or render them as individual geometries.\n\t\tWarning: individual layers are very slow.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "true"
@@ -340,12 +340,12 @@
                 },
                 {
                     "name": "onLoad",
-                    "description": "Will be called when load completes. The argument will be the loaded Object3D.",
+                    "description": "Will be called when load completes.\n\tThe argument will be the loaded Object3D.",
                     "type": "Function"
                 },
                 {
                     "name": "onProgress",
-                    "description": "Will be called while load progresses. The argument will be the XmlHttpRequest instance, that contain .total and .loaded bytes.",
+                    "description": "Will be called while load progresses.\n\tThe argument will be the XmlHttpRequest instance,\n\tthat contain .total and .loaded bytes.",
                     "type": "Function",
                     "optional": true
                 },
@@ -366,65 +366,65 @@
         },
         {
             "file": "src/BRDLoader.js",
-            "line": 106,
-            "description": "Construct the EagleBrdRenderer object THREE.js geometry (brd.root), bearing composited textures from all layers.",
+            "line": 117,
+            "description": "Construct the EagleBrdRenderer object THREE.js geometry (brd.root),\nbearing composited textures from all layers.",
             "itemtype": "method",
             "name": "_parse",
             "params": [
                 {
                     "name": "data",
-                    "description": "The contents of the .brd file as a string",
+                    "description": "Contents of the .brd file as a string",
                     "type": "String"
                 },
                 {
                     "name": "brdParams",
-                    "description": "Composite parameter object describing params for rendering the .brd file",
+                    "description": "Composite parameter object describing params\n\tfor rendering the .brd file",
                     "type": "Object",
                     "props": [
                         {
                             "name": "color",
-                            "description": "Define custom colors; see `this.colors`",
+                            "description": "Define custom colors;\n\t\tsee `this.colors`",
                             "type": "Object",
                             "optional": true
                         },
                         {
                             "name": "composite",
-                            "description": "Whether to composite layers,\n\tor render them as individual geometries. Warning: individual\n\tlayers are very slow.",
+                            "description": "Whether to\n\t\tcomposite layers, or render them as individual geometries.\n\t\tWarning: individual layers are very slow.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "true"
                         },
                         {
                             "name": "maskOpacity",
-                            "description": "Opacity of solder mask;\n\topacity is halved over copper traces",
+                            "description": "Opacity of solder mask;\n\t\topacity is halved over copper traces",
                             "type": "Number",
                             "optional": true,
                             "optdefault": "0.8"
                         },
                         {
                             "name": "pixelMicrons",
-                            "description": "Resolution of texture maps.\n\tBy default, this is 35 microns, equal to the thickness\n\tof a default copper layer. Note that this will affect the\n\tsize of the board geometry.",
+                            "description": "Resolution of texture maps.\n\t\tBy default, this is 35 microns, equal to the thickness\n\t\tof a default copper layer. Note that this will affect the\n\t\tsize of the board geometry.",
                             "type": "Number",
                             "optional": true,
                             "optdefault": "35"
                         },
                         {
                             "name": "material",
-                            "description": "Material shader to use.\n\tOptions include `\"phong\"` for realistic lighting,\n\t`\"lambert\"` for flat lighting, and `\"basic\"` for no lighting.",
+                            "description": "Material shader to use.\n\t\tOptions include `\"phong\"` for realistic lighting,\n\t\t`\"lambert\"` for flat lighting, and `\"basic\"` for no lighting.",
                             "type": "String",
                             "optional": true,
                             "optdefault": "\"phong\""
                         },
                         {
                             "name": "viewConnectors",
-                            "description": "Whether to visualize Connector objects",
+                            "description": "Whether to\n\t\tvisualize Connector objects",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
                         },
                         {
                             "name": "viewGhosts",
-                            "description": "Whether to draw approximate ghosts of on-board devices",
+                            "description": "Whether to\n\t\tdraw approximate ghosts of on-board devices",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
@@ -1277,7 +1277,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 2069,
+            "line": 2089,
             "description": "Draw a series of via rings, using current drawing styles.",
             "itemtype": "method",
             "name": "drawViaRings",
@@ -1312,7 +1312,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 2140,
+            "line": 2160,
             "description": "Draw a series of paths from an array of wires.\nThese paths are not continuous. Each has its own stroke width.\n\nStroke style, other than width, does not change.",
             "itemtype": "method",
             "name": "drawWirePaths",
@@ -1353,7 +1353,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 2207,
+            "line": 2227,
             "description": "Return a list of `[ x, y ]` coordinate pairs\nrepresenting the cardinal points of a circle described by the\ncurvature of the parameter.\n\nThe parameter may be a wire or polygon vertex element.\n\nThis list may be length 0.",
             "itemtype": "method",
             "name": "getChordPoints",
@@ -1372,7 +1372,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 2264,
+            "line": 2284,
             "description": "Return a layer of the specified name.",
             "itemtype": "method",
             "name": "getLayer",
@@ -1391,7 +1391,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 2284,
+            "line": 2304,
             "description": "Convert a string coord into a pixel number.",
             "itemtype": "method",
             "name": "parseCoord",
@@ -1411,7 +1411,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 2298,
+            "line": 2318,
             "description": "Return the distance measured by a BRD string, e.g. \"0.035mm\".\nThis distance is measured in mm.",
             "itemtype": "method",
             "name": "parseDistanceMm",
@@ -1431,7 +1431,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 2336,
+            "line": 2356,
             "description": "Render the bounds to a buffer.",
             "itemtype": "method",
             "name": "renderBounds",
@@ -1440,7 +1440,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 2482,
+            "line": 2502,
             "description": "Render all copper textures.",
             "itemtype": "method",
             "name": "renderCopper",
@@ -1449,7 +1449,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 2500,
+            "line": 2520,
             "description": "Render a copper layer.",
             "itemtype": "method",
             "name": "renderCopperLayer",
@@ -1465,7 +1465,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 2634,
+            "line": 2654,
             "description": "Render all isolate textures, including prepreg and core.",
             "itemtype": "method",
             "name": "renderIsolate",
@@ -1474,7 +1474,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 2652,
+            "line": 2672,
             "description": "Render an isolate layer, either prepreg or core.",
             "itemtype": "method",
             "name": "renderIsolateLayer",
@@ -1495,7 +1495,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 2702,
+            "line": 2722,
             "description": "Render all solder mask textures. These bear silkscreen.",
             "itemtype": "method",
             "name": "renderSolderMask",
@@ -1504,7 +1504,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 2720,
+            "line": 2740,
             "description": "Render a solder mask layer. This bears silkscreen legends.",
             "itemtype": "method",
             "name": "renderSolderMaskLayer",
@@ -1520,7 +1520,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 2909,
+            "line": 2929,
             "description": "Render all solder paste textures.",
             "itemtype": "method",
             "name": "renderSolderpaste",
@@ -1529,7 +1529,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 2927,
+            "line": 2947,
             "description": "Render a solderpaste layer, also known as a cream layer.",
             "itemtype": "method",
             "name": "renderSolderpasteLayer",
@@ -1545,7 +1545,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 2978,
+            "line": 2998,
             "description": "Sort the wires in a list so that they connect end-to-end\nwhenever possible.\n\nWires may be reversed to fit into sequence.\n\nDuplicate wires will be discarded. Note that duplication only considers\nendpoints, not curvature.",
             "itemtype": "method",
             "name": "sortWires",
@@ -1565,7 +1565,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3167,
+            "line": 3187,
             "description": "Set connector handle visibility.",
             "itemtype": "method",
             "name": "viewConnectors",
@@ -1583,7 +1583,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3186,
+            "line": 3206,
             "description": "Set ghost device visibility. These are just an approximation of\npossible devices, inferred from pad positions.",
             "itemtype": "method",
             "name": "viewGhosts",
@@ -1601,7 +1601,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3202,
+            "line": 3222,
             "description": "Put a wireframe dome over a `Connector` object to indicate its position.\nThis method will not create geometry unless `params.visualize` was set\nto `true`.",
             "itemtype": "method",
             "name": "visualizeConnector",
@@ -1628,14 +1628,14 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3236,
+            "line": 3256,
             "class": "EagleBrdRenderer",
             "module": "EagleBrdRenderer",
             "namespace": "EagleBrdRenderer"
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3258,
+            "line": 3278,
             "description": "Angle measurement in radians",
             "itemtype": "property",
             "name": "angle",
@@ -1646,7 +1646,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3265,
+            "line": 3285,
             "description": "Whether the angle includes a horizontal mirror",
             "itemtype": "property",
             "name": "mirror",
@@ -1658,7 +1658,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3273,
+            "line": 3293,
             "description": "Whether the angle includes a vertical spin",
             "itemtype": "property",
             "name": "spin",
@@ -1670,7 +1670,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3331,
+            "line": 3351,
             "description": "Curvature of wire segment",
             "itemtype": "property",
             "name": "curve",
@@ -1681,7 +1681,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3338,
+            "line": 3358,
             "description": "Horizontal coodinate of wire start",
             "itemtype": "property",
             "name": "x1",
@@ -1692,7 +1692,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3345,
+            "line": 3365,
             "description": "Vertical coodinate of wire start",
             "itemtype": "property",
             "name": "y1",
@@ -1703,7 +1703,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3352,
+            "line": 3372,
             "description": "Horizontal coodinate of wire end",
             "itemtype": "property",
             "name": "x2",
@@ -1714,7 +1714,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3359,
+            "line": 3379,
             "description": "Vertical coodinate of wire end",
             "itemtype": "property",
             "name": "y2",
@@ -1725,7 +1725,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3366,
+            "line": 3386,
             "description": "Horizontal wire displacement",
             "itemtype": "property",
             "name": "dx",
@@ -1736,7 +1736,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3373,
+            "line": 3393,
             "description": "Vertical wire displacement",
             "itemtype": "property",
             "name": "dy",
@@ -1747,7 +1747,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3380,
+            "line": 3400,
             "description": "Distance between start and end points of wire.",
             "itemtype": "property",
             "name": "chord",
@@ -1758,7 +1758,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3387,
+            "line": 3407,
             "description": "Angle from start to end points of wire.",
             "itemtype": "property",
             "name": "bearing",
@@ -1769,7 +1769,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3396,
+            "line": 3416,
             "description": "Radius of chord arc. Per chord identity,\nchord = 2 * radius * sin( angle / 2 ), rearranged to acquire radius.",
             "itemtype": "property",
             "name": "radius",
@@ -1780,7 +1780,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3404,
+            "line": 3424,
             "description": "Horizontal position of arc origin",
             "itemtype": "property",
             "name": "x",
@@ -1791,7 +1791,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3411,
+            "line": 3431,
             "description": "Vertical position of arc origin",
             "itemtype": "property",
             "name": "y",
@@ -1802,7 +1802,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3418,
+            "line": 3438,
             "description": "Angle from origin to wire start",
             "itemtype": "property",
             "name": "bearing1",
@@ -1813,7 +1813,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3425,
+            "line": 3445,
             "description": "Angle from origin to wire end",
             "itemtype": "property",
             "name": "bearing2",
@@ -1824,7 +1824,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3474,
+            "line": 3494,
             "description": "Master board to which this layer belongs",
             "itemtype": "property",
             "name": "board",
@@ -1835,7 +1835,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3481,
+            "line": 3501,
             "description": "Unordered list of elements to be drawn to this layer",
             "itemtype": "property",
             "name": "elements",
@@ -1846,7 +1846,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3488,
+            "line": 3508,
             "description": "Depth displacement of layer relative to board origin.\nNote that greater height will position the layer further from the camera.",
             "itemtype": "property",
             "name": "height",
@@ -1858,7 +1858,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3497,
+            "line": 3517,
             "description": "List of BRD layer numbers to follow",
             "itemtype": "property",
             "name": "layers",
@@ -1869,7 +1869,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3504,
+            "line": 3524,
             "description": "Unique layer identifier",
             "itemtype": "property",
             "name": "name",
@@ -1880,7 +1880,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3511,
+            "line": 3531,
             "description": "Tags on this layer. List of strings.",
             "itemtype": "property",
             "name": "tags",
@@ -1891,7 +1891,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3518,
+            "line": 3538,
             "description": "Thickness of this layer. Measured in pixels, but they may be fractional.",
             "itemtype": "property",
             "name": "thickness",
@@ -1902,7 +1902,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3525,
+            "line": 3545,
             "description": "Whether this layer is part of the physical board",
             "itemtype": "property",
             "name": "visible",
@@ -1913,7 +1913,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3537,
+            "line": 3557,
             "description": "Add an element (cloned) to this layer.\nThe element will not be checked for layer information.",
             "itemtype": "method",
             "name": "add",
@@ -1934,7 +1934,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3570,
+            "line": 3590,
             "description": "Assess an element for inclusion in this layer.\nIf the element contains or spans this layer, it is included.",
             "itemtype": "method",
             "name": "assessElementCandidate",
@@ -1955,7 +1955,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3669,
+            "line": 3689,
             "description": "Construct layer geometry. Paste the texture onto a rectangle.",
             "itemtype": "method",
             "name": "buildGeometry",
@@ -1965,7 +1965,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3682,
+            "line": 3702,
             "description": "Geometry for layer, consisting of two flat planes",
             "itemtype": "property",
             "name": "geometry",
@@ -1976,7 +1976,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3706,
+            "line": 3726,
             "description": "Texture for layer",
             "itemtype": "property",
             "name": "texture",
@@ -1987,7 +1987,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3721,
+            "line": 3741,
             "description": "Material for layer",
             "itemtype": "property",
             "name": "material",
@@ -1998,7 +1998,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3728,
+            "line": 3748,
             "description": "Mesh for layer; THREE scene component",
             "itemtype": "property",
             "name": "mesh",
@@ -2009,7 +2009,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3741,
+            "line": 3761,
             "description": "Return a list of elements. If no tags are passed as parameters,\nall elements will be returned. Otherwise, only elements that match\none of the specified tags are returned.",
             "itemtype": "method",
             "name": "getElements",
@@ -2028,7 +2028,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3767,
+            "line": 3787,
             "description": "Return whether this layer has the specified tag.",
             "itemtype": "method",
             "name": "hasTag",
@@ -2048,7 +2048,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3784,
+            "line": 3804,
             "description": "Initialise the buffer for this layer.",
             "itemtype": "method",
             "name": "initBuffer",
@@ -2058,7 +2058,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3790,
+            "line": 3810,
             "description": "Texture buffer to which layer elements are rendered",
             "itemtype": "property",
             "name": "buffer",
@@ -2069,7 +2069,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3799,
+            "line": 3819,
             "description": "Texture drawing context for this layer",
             "itemtype": "property",
             "name": "ctx",
@@ -2080,7 +2080,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 3817,
+            "line": 3837,
             "description": "Transform the drawing context according to properties on BRD elements.\n\nNote: this method does not save or restore context transform.",
             "itemtype": "method",
             "name": "orientContext",
@@ -2106,7 +2106,7 @@
     "warnings": [
         {
             "message": "Missing item type",
-            "line": " src/eagle-brd-renderer.js:3236"
+            "line": " src/eagle-brd-renderer.js:3256"
         }
     ]
 }

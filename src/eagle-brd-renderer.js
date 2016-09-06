@@ -1946,13 +1946,12 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 			only elements with a matching `layer` attribute will draw
 	**/
 
-	var angData, flip, fontSize, i, j, text,
+	var angData, flip, fontSize, i, j, spin, text,
 		textAlign, textAlignX, textAlignY, textText,
 		ctx = params.layer.ctx,
 		fontScale = Math.sqrt( 2 ),
 		layer = params.layer,
 		localRot = 0,
-		spin = false,
 		texts = params.texts;
 
 	for ( i = 0; i < texts.length; i++ ) {
@@ -1994,23 +1993,21 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 		angData = null;
 		localRot = 0;
 		flip = false;
+		spin = false;
 		if ( text.hasAttribute( "rot" ) ) {
 			angData = new EagleBrdRenderer.AngleData(
 				text.getAttribute( "rot" ) );
 			spin = angData.spin;
+			localRot = angData.angle;
 
-			// Rotation is inversed due to coordinates
-			ctx.rotate( -angData.angle );
-			ctx.scale(
-				angData.mirror ? -1 : 1,
-				spin ? -1 : 1 );
+			// Perform X-mirror
+			if ( angData.mirror ) {
+				ctx.scale( -1, 1 );
+			}
 		}
 
 		// Face top
 		// EAGLE text is never upside-down, unless `spin` is true.
-		if ( angData ) {
-			localRot = angData.angle;
-		}
 		if ( text.elementParent ) {
 			localRot += ( new EagleBrdRenderer.AngleData(
 				text.elementParent ) ).angle;
@@ -2020,7 +2017,7 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 			( localRot < -Math.PI / 2 && localRot >= -Math.PI * 3 / 2 ) ||
 			( localRot > Math.PI / 2 && localRot <= Math.PI * 3 / 2 ) ) {
 
-			flip = true;
+			flip = !spin;
 		}
 
 		// Derive apparent size
@@ -2043,7 +2040,7 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 		textAlignX = textAlign.replace( /\w*-(\w*)/, "$1" );
 		textAlignY = textAlign.replace( /(\w*)-\w*/, "$1" );
 		if ( flip ) {
-			ctx.rotate( Math.PI );
+			ctx.scale( -1, -1 );
 			if ( textAlignY === "bottom" ) {
 				textAlignY = "top";
 			} else if ( textAlignY === "top" ) {
@@ -2055,14 +2052,15 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 				textAlignX = "left";
 			}
 		}
-		if ( spin ) {
-			ctx.scale( 1, - 1 );
-		}
 		if ( textAlignY === "center" ) {
 			textAlignY = "middle";
 		}
 		ctx.textAlign = textAlignX;
 		ctx.textBaseline = textAlignY;
+
+
+		// Rotate text
+		ctx.rotate( -localRot );
 
 
 		// Render text into multiple lines if necessary
