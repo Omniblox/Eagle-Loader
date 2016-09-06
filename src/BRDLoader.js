@@ -13,7 +13,9 @@ THREE.BRDLoader = function ( manager ) {
 	@param [manager] {THREE.LoadingManager} Loading manager to use
 	**/
 
-	this.manager = ( manager !== undefined ) ? manager : THREE.DefaultLoadingManager;
+	this.manager = ( manager !== undefined ) ?
+		manager :
+		THREE.DefaultLoadingManager;
 
 };
 
@@ -26,11 +28,13 @@ THREE.BRDLoader.prototype = {
 
 	@method load
 	@param url {string} .brd file URL
-	@param brdParams {object} Composite parameter object describing params for rendering the .brd file
-		@param [brdParams.color] {object} Define custom colors; see `this.colors`
-		@param [brdParams.composite=true] {boolean} Whether to composite layers,
-			or render them as individual geometries. Warning: individual
-			layers are very slow.
+	@param brdParams {object} Composite parameter object
+		describing params for rendering the .brd file
+		@param [brdParams.color] {object} Define custom colors;
+			see `this.colors`
+		@param [brdParams.composite=true] {boolean} Whether to
+			composite layers, or render them as individual geometries.
+			Warning: individual layers are very slow.
 		@param [brdParams.maskOpacity=0.8] {number} Opacity of solder mask;
 			opacity is halved over copper traces
 		@param [brdParams.pixelMicrons=35] {number} Resolution of texture maps.
@@ -44,8 +48,11 @@ THREE.BRDLoader.prototype = {
 			Connector objects
 		@param [brdParams.viewGhosts=false] {boolean} Whether to draw
 			approximate ghosts of on-board devices
-	@param onLoad {function} Will be called when load completes. The argument will be the loaded Object3D.
-	@param [onProgress] {function} Will be called while load progresses. The argument will be the XmlHttpRequest instance, that contain .total and .loaded bytes.
+	@param onLoad {function} Will be called when load completes.
+		The argument will be the loaded Object3D.
+	@param [onProgress] {function} Will be called while load progresses.
+		The argument will be the XmlHttpRequest instance,
+		that contain .total and .loaded bytes.
 	@param [onError] {function} Will be called when load errors.
 	@param [fontPath] {array} Paths to font files.
 		Defaults to the array `"./OCRA.woff", "./OCRA.otf"`.
@@ -69,11 +76,15 @@ THREE.BRDLoader.prototype = {
 				}, onProgress, onError );
 			}.bind( this ),
 			observe = function() {
-				var observer = new FontFaceObserver( "OCRA" );
+				var observer = new FontFaceObserver( "Vector" );
 				console.log( "Validating fonts..." );
 				observer.load().then(
 					loadBrd,
-					observe );
+					processFontError );
+			},
+			processFontError = function() {
+				console.log( "Fonts invalid, using system fonts" );
+				loadBrd();
 			};
 
 		// Null fontpath means skip font validation
@@ -95,7 +106,7 @@ THREE.BRDLoader.prototype = {
 		style = document.createElement( "style" );
 		style.appendChild( document.createTextNode(
 			"@font-face { " +
-			"  font-family: \"OCRA\";" +
+			"  font-family: \"Vector\";" +
 			"  src: " +
 			urls +
 			";" +
@@ -104,26 +115,31 @@ THREE.BRDLoader.prototype = {
 	},
 
 	/**
-	Construct the EagleBrdRenderer object THREE.js geometry (brd.root), bearing composited textures from all layers.
+	Construct the EagleBrdRenderer object THREE.js geometry (brd.root),
+	bearing composited textures from all layers.
 
 	@method _parse
-	@param data {String} The contents of the .brd file as a string
-	@param brdParams {object} Composite parameter object describing params for rendering the .brd file
-	@param [brdParams.color] {object} Define custom colors; see `this.colors`
-	@param [brdParams.composite=true] {boolean} Whether to composite layers,
-		or render them as individual geometries. Warning: individual
-		layers are very slow.
-	@param [brdParams.maskOpacity=0.8] {number} Opacity of solder mask;
-		opacity is halved over copper traces
-	@param [brdParams.pixelMicrons=35] {number} Resolution of texture maps.
-		By default, this is 35 microns, equal to the thickness
-		of a default copper layer. Note that this will affect the
-		size of the board geometry.
-	@param [brdParams.material="phong"] {string} Material shader to use.
-		Options include `"phong"` for realistic lighting,
-		`"lambert"` for flat lighting, and `"basic"` for no lighting.
-	@param [brdParams.viewConnectors=false] {boolean} Whether to visualize Connector objects
-	@param [brdParams.viewGhosts=false] {boolean} Whether to draw approximate ghosts of on-board devices
+	@param data {String} Contents of the .brd file as a string
+	@param brdParams {object} Composite parameter object describing params
+		for rendering the .brd file
+		@param [brdParams.color] {object} Define custom colors;
+			see `this.colors`
+		@param [brdParams.composite=true] {boolean} Whether to
+			composite layers, or render them as individual geometries.
+			Warning: individual layers are very slow.
+		@param [brdParams.maskOpacity=0.8] {number} Opacity of solder mask;
+			opacity is halved over copper traces
+		@param [brdParams.pixelMicrons=35] {number} Resolution of texture maps.
+			By default, this is 35 microns, equal to the thickness
+			of a default copper layer. Note that this will affect the
+			size of the board geometry.
+		@param [brdParams.material="phong"] {string} Material shader to use.
+			Options include `"phong"` for realistic lighting,
+			`"lambert"` for flat lighting, and `"basic"` for no lighting.
+		@param [brdParams.viewConnectors=false] {boolean} Whether to
+			visualize Connector objects
+		@param [brdParams.viewGhosts=false] {boolean} Whether to
+			draw approximate ghosts of on-board devices
 	@private
 	**/
 

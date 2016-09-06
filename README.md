@@ -25,14 +25,16 @@ This script works best with THREE.js r76 or later.
 File| Description
 ----|------------
 `dist/EagleLoader.js` | This is the file you're looking for
+`dist/OCRA.otf`, `dist/OCRA.woff` | Required font files
+`assets/` | Source files for fonts and other assets required to run this script
 `docs/` | Auto-generated API documentation
-`eagle/`|Notes on the structure of EAGLE XML format
-`examples/`|Examples
-`examples/brd-files`| Example files from [adafruit](http://adafru.it) and [SparkFun](http://sparkfun.com)
-`lib/`|Files necessary for the script to run
-`src/`|The source code
-`gruntfile.js`|Build systems
-`package.json`|Build systems
+`eagle/`| Notes on the structure of EAGLE XML format
+`examples/`| Examples
+`examples/brd-files/`| Example files from [adafruit](http://adafru.it) and [SparkFun](http://sparkfun.com)
+`lib/`| Files necessary for the script to run
+`src/`| The source code
+`gruntfile.js`| Build systems
+`package.json`| Build systems
 `README.md`	| This file
 
 ## Using Script
@@ -69,13 +71,11 @@ For more details and examples, take a closer look at the API documentation in `d
 
 ### Using Fonts
 
-For correct board display, you must include the OCR-A font. Find `OCRA.woff` and `OCRA.otf` in the `dist/` folder, alongside the main script.
+Currently, we do not have access to the vector font used by EAGLE software. We allow you to specify your own font for text elements on the board, or default to a system monospace font.
 
-You may place these files in any folder, but ensure that you call `load()` with the `fontPath` parameter set.
+For an approximate board display, you may include the OCR-A font. Find `OCRA.woff` and `OCRA.otf` in the `dist/` folder, alongside the main script. You may place these files in any folder, but ensure that you call `load()` with the `fontPath` parameter set.
 
 This version of the OCR-A font was created by Matthew Skala and is public domain. See `assets/fonts/ocr-0.2/` for more information.
-
-If you do not want to load the font files, you must specify `fontPath` as `null`. Otherwise the loader will wait forever, trying to validate nonexistent files.
 
 ## Future Development
 
@@ -87,5 +87,5 @@ We know these features would be great; so we’re working on them:
 * Investigate how thermals are generated. Does it involve <pin> elements?
 * The current board edges are defined by wire cuts. If these are not present, no bounds will be generated. A `<polygon>` element tagged as OUTLINES may be a valid alternative, but this has not been implemented or tested yet.
 * Text orientation is sometimes different to physical board samples.
-* Fonts need tweaking
+* Fonts need tweaking: we can't use the built-in vector font from EAGLE.
 * Gold coating can’t be interpreted.

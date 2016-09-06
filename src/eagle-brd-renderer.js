@@ -2016,14 +2016,18 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 			flip = true;
 		}
 
+		// Derive apparent size
+		fontSize = Math.round(
+			this.parseCoord( text.getAttribute( "size" ) * fontScale ) );
+
 
 		// Set font
 		// Note: Other fonts may be set.
 		// Default/vector is OCR A.
 		// "Proportional" is said to be generally Helvetica.
 		// "Fixed" is said to be generally Courier.
-		ctx.font = Math.round( this.parseCoord(
-			text.getAttribute( "size" ) ) ) + "px " + "OCRA";
+		// TODO: Discern other fonts from BRD data, and ensure they are loaded.
+		ctx.font = fontSize + "px " + "Vector, monospace";
 
 		// Set alignment
 		textAlign = text.getAttribute( "align" ) || "bottom-left";
