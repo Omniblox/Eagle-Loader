@@ -369,7 +369,7 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 
 	var chordData, ctx, firstX, firstY,
 		i, j, lastX, lastY,
-		mat, mesh, shape, sumAngles, wire,
+		mat, mesh, shape, wire,
 		x, x1, x2, y, y1, y2,
 		bevel = 8,
 		wireGrp = [],
@@ -442,26 +442,6 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 
 	for ( i = 0; i < wireGrps.length; i++ ) {
 
-		sumAngles = 0;
-		for ( j = 1; j < wireGrps[ i ].length; j++ ) {
-			x1 = Math.atan2(
-				parseFloat( wireGrps[ i ][ j ].getAttribute( "y2" ) ) -
-				parseFloat( wireGrps[ i ][ j ].getAttribute( "y1" ) ),
-				parseFloat( wireGrps[ i ][ j ].getAttribute( "x2" ) ) -
-				parseFloat( wireGrps[ i ][ j ].getAttribute( "x1" ) ) );
-			x2 = Math.atan2(
-				parseFloat( wireGrps[ i ][ j - 1 ].getAttribute( "y2" ) ) -
-				parseFloat( wireGrps[ i ][ j - 1 ].getAttribute( "y1" ) ),
-				parseFloat( wireGrps[ i ][ j - 1 ].getAttribute( "x2" ) ) -
-				parseFloat( wireGrps[ i ][ j - 1 ].getAttribute( "x1" ) ) );
-			if ( x1 > x2 + Math.PI ) {
-				x1 -= Math.PI * 2;
-			} else if ( x2 > x1 + Math.PI ) {
-				x2 -= Math.PI * 2;
-			}
-			sumAngles += x1 - x2;
-		}
-
 		shape = new THREE.Shape();
 
 		// Begin path
@@ -513,9 +493,7 @@ EagleBrdRenderer.prototype._buildDepthEdges = function( add ) {
 					chordData.radius * this.coordScale,
 					chordData.bearing1,
 					chordData.bearing2,
-					sumAngles > 0 ?
-						chordData.curve > 0 :
-						chordData.curve < 0 );
+					chordData.curve < 0 );
 			} else {
 				shape.lineTo( x2, y2 );
 			}
