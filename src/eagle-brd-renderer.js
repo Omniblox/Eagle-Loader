@@ -1946,17 +1946,19 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 			only elements with a matching `layer` attribute will draw
 	**/
 
-	var angData, flip, i, j, text, textAlign, textAlignX, textAlignY, textText,
+	var angData, flip, fontSize, i, j, text,
+		textAlign, textAlignX, textAlignY, textText,
 		ctx = params.layer.ctx,
+		fontScale = Math.sqrt( 2 ),
 		layer = params.layer,
 		localRot = 0,
+		spin = false,
 		texts = params.texts;
 
 	for ( i = 0; i < texts.length; i++ ) {
 		text = texts[ i ];
 
-		textText = text.innerHTML;
-		textText = textText.replace( /&gt;\w*/, "" );
+		textText = "" + text.innerHTML;
 
 		if ( params.layerMatch &&
 				parseInt( text.getAttribute( "layer" ), 10 ) !==
@@ -1965,8 +1967,10 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 			continue;
 		}
 
-		// Debug
-		// console.log( "Rendering text", textText );
+		// Sanitize text
+		textText = textText.replace( /&gt;\w*/, "" );
+		textText = textText.replace( /&lt;\w*/, "" );
+		textText = textText.replace( /&amp;\w*/, "&" );
 
 		x = this.parseCoord( text.getAttribute( "x" ) );
 		y = this.parseCoord( text.getAttribute( "y" ) );
@@ -1993,16 +1997,17 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 		if ( text.hasAttribute( "rot" ) ) {
 			angData = new EagleBrdRenderer.AngleData(
 				text.getAttribute( "rot" ) );
+			spin = angData.spin;
 
 			// Rotation is inversed due to coordinates
 			ctx.rotate( -angData.angle );
 			ctx.scale(
 				angData.mirror ? -1 : 1,
-				angData.spin ? -1 : 1 );
+				spin ? -1 : 1 );
 		}
 
 		// Face top
-		// EAGLE text is never upside-down
+		// EAGLE text is never upside-down, unless `spin` is true.
 		if ( angData ) {
 			localRot = angData.angle;
 		}
@@ -2011,8 +2016,10 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 				text.elementParent ) ).angle;
 		}
 		localRot %= Math.PI * 2;
-		if ( localRot < -Math.PI / 2 && localRot > -Math.PI * 3 / 2 ||
-				localRot > Math.PI / 2 && localRot < Math.PI * 3 / 2 ) {
+		if (
+			( localRot < -Math.PI / 2 && localRot >= -Math.PI * 3 / 2 ) ||
+			( localRot > Math.PI / 2 && localRot <= Math.PI * 3 / 2 ) ) {
+
 			flip = true;
 		}
 
@@ -2023,10 +2030,12 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 
 		// Set font
 		// Note: Other fonts may be set.
-		// Default/vector is OCR A.
+		// Default/vector is a monospace font, currently an approximation
+		// of a font unique to EAGLE.
 		// "Proportional" is said to be generally Helvetica.
 		// "Fixed" is said to be generally Courier.
 		// TODO: Discern other fonts from BRD data, and ensure they are loaded.
+		// TODO: Get the EAGLE font, if it can be identified and exists.
 		ctx.font = fontSize + "px " + "Vector, monospace";
 
 		// Set alignment
@@ -2045,9 +2054,9 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 			} else if ( textAlignX === "right" ) {
 				textAlignX = "left";
 			}
-			if ( angData && angData.spin ) {
-				ctx.scale( 1, - 1 );
-			}
+		}
+		if ( spin ) {
+			ctx.scale( 1, - 1 );
 		}
 		if ( textAlignY === "center" ) {
 			textAlignY = "middle";
@@ -2058,9 +2067,10 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 
 		// Render text into multiple lines if necessary
 		textText = textText.split( "\n" );
+		ctx.translate( 0, ( textText.length - 1 ) * fontSize * -0.5 );
 		for ( j = 0; j < textText.length; j++ ) {
 			ctx.fillText( textText[ j ], 0, 0 );
-			ctx.translate( 0, this.parseCoord( text.getAttribute( "size" ) ) );
+			ctx.translate( 0, fontSize );
 		}
 
 		ctx.restore();
