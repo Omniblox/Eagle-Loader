@@ -526,7 +526,7 @@ EagleBrdRenderer.prototype._buildDepthEdge = function(
 	@param material {THREE.Material} Material to use for mesh
 	@param [parentElement] {Element} Parent space used to align edge mesh
 	@private
-	@return {THREE.Mesh} 
+	@return {THREE.Mesh}
 	**/
 
 	var angleData, geo, i, mesh, parent;
@@ -1927,7 +1927,7 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 	var angData, flip, fontSize, i, j, spin, text,
 		textAlign, textAlignX, textAlignY, textText,
 		ctx = params.layer.ctx,
-		fontScale = Math.sqrt( 2 ),
+		fontScale = 1,
 		layer = params.layer,
 		localRot = 0,
 		texts = params.texts;

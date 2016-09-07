@@ -17,7 +17,7 @@
                 <h1><img src="../assets/css/logo.png" title="EagleLoader" width="117" height="52"></h1>
         </div>
         <div class="yui3-u-1-4 version">
-            <em>API Docs for: 0.1.0</em>
+            <em>API Docs for: 0.1.1</em>
         </div>
     </div>
     <div id="bd" class="yui3-g">
@@ -613,7 +613,7 @@ EagleBrdRenderer.prototype._buildDepthEdge = function(
 	@param material {THREE.Material} Material to use for mesh
 	@param [parentElement] {Element} Parent space used to align edge mesh
 	@private
-	@return {THREE.Mesh} 
+	@return {THREE.Mesh}
 	**/
 
 	var angleData, geo, i, mesh, parent;
@@ -2014,7 +2014,7 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 	var angData, flip, fontSize, i, j, spin, text,
 		textAlign, textAlignX, textAlignY, textText,
 		ctx = params.layer.ctx,
-		fontScale = Math.sqrt( 2 ),
+		fontScale = 1,
 		layer = params.layer,
 		localRot = 0,
 		texts = params.texts;

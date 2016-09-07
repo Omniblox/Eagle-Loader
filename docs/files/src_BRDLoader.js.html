@@ -17,7 +17,7 @@
                 <h1><img src="../assets/css/logo.png" title="EagleLoader" width="117" height="52"></h1>
         </div>
         <div class="yui3-u-1-4 version">
-            <em>API Docs for: 0.1.0</em>
+            <em>API Docs for: 0.1.1</em>
         </div>
     </div>
     <div id="bd" class="yui3-g">
@@ -115,25 +115,26 @@ THREE.BRDLoader.prototype = {
 
 	@method load
 	@param url {string} .brd file URL
-	@param brdParams {object} Composite parameter object
-		describing params for rendering the .brd file
-		@param [brdParams.color] {object} Define custom colors;
-			see &#x60;this.colors&#x60;
-		@param [brdParams.composite=true] {boolean} Whether to
-			composite layers, or render them as individual geometries.
-			Warning: individual layers are very slow.
-		@param [brdParams.maskOpacity=0.8] {number} Opacity of solder mask;
+	@param [params] {object} Composite parameter object
+		@param [params.colors] {object} Define custom colors; see &#x60;this.colors&#x60;
+		@param [params.composite=true] {boolean} Whether to composite layers,
+			or render them as individual geometries. Warning: individual
+			layers are very slow.
+		@param [params.maskOpacity=0.8] {number} Opacity of solder mask;
 			opacity is halved over copper traces
-		@param [brdParams.pixelMicrons=35] {number} Resolution of texture maps.
+		@param [params.material=&quot;phong&quot;] {string} Material shader to use.
+			Options include &#x60;&quot;phong&quot;&#x60; for realistic lighting,
+			&#x60;&quot;lambert&quot;&#x60; for flat lighting, and &#x60;&quot;basic&quot;&#x60; for no lighting.
+		@param [params.pixelMicrons=35] {number} Resolution of texture maps.
 			By default, this is 35 microns, equal to the thickness
 			of a default copper layer. Note that this will affect the
 			size of the board geometry.
-		@param [brdParams.material=&quot;phong&quot;] {string} Material shader to use.
-			Options include &#x60;&quot;phong&quot;&#x60; for realistic lighting,
-			&#x60;&quot;lambert&quot;&#x60; for flat lighting, and &#x60;&quot;basic&quot;&#x60; for no lighting.
-		@param [brdParams.viewConnectors=false] {boolean} Whether to visualize
+		@param [params.thickness] {number} Override computed thickness
+			of board. Measured in millimeters. Note that this value will be
+			converted to pixels for use within the board.
+		@param [params.viewConnectors=false] {boolean} Whether to visualize
 			Connector objects
-		@param [brdParams.viewGhosts=false] {boolean} Whether to draw
+		@param [params.viewGhosts=false] {boolean} Whether to draw
 			approximate ghosts of on-board devices
 	@param onLoad {function} Will be called when load completes.
 		The argument will be the loaded Object3D.
