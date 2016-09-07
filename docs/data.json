@@ -103,7 +103,7 @@
                     "optional": true,
                     "props": [
                         {
-                            "name": "color",
+                            "name": "colors",
                             "description": "Define custom colors; see `this.colors`",
                             "type": "Object",
                             "optional": true

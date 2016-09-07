@@ -352,7 +352,7 @@ var EagleBrdRenderer = function( xml, params ) {
 	@constructor
 	@param xml {Document} XML document to parse
 	@param [params] {object} Composite parameter object
-		@param [params.color] {object} Define custom colors; see `this.colors`
+		@param [params.colors] {object} Define custom colors; see `this.colors`
 		@param [params.composite=true] {boolean} Whether to composite layers,
 			or render them as individual geometries. Warning: individual
 			layers are very slow.
