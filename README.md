@@ -80,12 +80,11 @@ This version of the OCR-A font was created by Matthew Skala and is public domain
 ## Future Development
 
 We know these features would be great; so we’re working on them:
-* Sort out board thicknesses
+
 * Generate full bump and specular map passes -- as well as color.
 * Generate texture maps using `<signal>` elements, rather than collections of components. This will allow the script to correctly layer copper traces, connect to ground planes, and process orphans.
 * Ensure that copper polygons fuse properly with pads according to EAGLE rules.
 * Investigate how thermals are generated. Does it involve <pin> elements?
 * The current board edges are defined by wire cuts. If these are not present, no bounds will be generated. A `<polygon>` element tagged as OUTLINES may be a valid alternative, but this has not been implemented or tested yet.
-* Text orientation is sometimes different to physical board samples.
 * Fonts need tweaking: we can't use the built-in vector font from EAGLE.
 * Gold coating can’t be interpreted.
