@@ -13,6 +13,9 @@ THREE.BRDLoader = function ( manager ) {
 	@param [manager] {THREE.LoadingManager} Loading manager to use
 	**/
 
+	this.revision = "Welcome to New York by Ryan Adams";
+	this.version = "0.1.2";
+
 	this.manager = ( manager !== undefined ) ?
 		manager :
 		THREE.DefaultLoadingManager;
@@ -63,6 +66,8 @@ THREE.BRDLoader.prototype = {
 	**/
 
 	load: function ( url, brdParams, onLoad, onProgress, onError, fontPath ) {
+
+		console.log("THREE.BRDLoader " + this.version + " (" + this.revision + ")");
 
 		var i, style, urls,
 			loadBrd = function() {

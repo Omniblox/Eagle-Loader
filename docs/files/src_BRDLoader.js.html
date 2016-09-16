@@ -17,7 +17,7 @@
                 <h1><img src="../assets/css/logo.png" title="EagleLoader" width="117" height="52"></h1>
         </div>
         <div class="yui3-u-1-4 version">
-            <em>API Docs for: 0.1.1</em>
+            <em>API Docs for: 0.1.2</em>
         </div>
     </div>
     <div id="bd" class="yui3-g">
@@ -100,6 +100,9 @@ THREE.BRDLoader = function ( manager ) {
 	@param [manager] {THREE.LoadingManager} Loading manager to use
 	**/
 
+	this.revision = &quot;Welcome to New York by Ryan Adams&quot;;
+	this.version = &quot;0.1.2&quot;;
+
 	this.manager = ( manager !== undefined ) ?
 		manager :
 		THREE.DefaultLoadingManager;
@@ -150,6 +153,8 @@ THREE.BRDLoader.prototype = {
 	**/
 
 	load: function ( url, brdParams, onLoad, onProgress, onError, fontPath ) {
+
+		console.log(&quot;THREE.BRDLoader &quot; + this.version + &quot; (&quot; + this.revision + &quot;)&quot;);
 
 		var i, style, urls,
 			loadBrd = function() {

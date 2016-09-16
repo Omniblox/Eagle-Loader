@@ -2,7 +2,7 @@
     "project": {
         "name": "EagleLoader",
         "description": "Visualize EAGLE .brd files in the browser.",
-        "version": "0.1.1",
+        "version": "0.1.2",
         "url": "http://omniblox.io/eagleloader"
     },
     "files": {
@@ -273,7 +273,7 @@
     "classitems": [
         {
             "file": "src/BRDLoader.js",
-            "line": 26,
+            "line": 29,
             "description": "Start loading the BRD and associated fonts.",
             "itemtype": "method",
             "name": "load",
@@ -373,7 +373,7 @@
         },
         {
             "file": "src/BRDLoader.js",
-            "line": 118,
+            "line": 123,
             "description": "Construct the EagleBrdRenderer object THREE.js geometry (brd.root),\nbearing composited textures from all layers.",
             "itemtype": "method",
             "name": "_parse",
