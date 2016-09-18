@@ -8,8 +8,6 @@ St. Zeno Exploration Ltd
 
 Copyright (c) 2016, St. Zeno Exploration Ltd.
 
-
-
 ## About Script
 
 Looking to render printed circuit boards (PCBs)? Look no further. This script loads and renders them visually using a .brd file created by CadSoft EAGLE (version 6.0 or later).
