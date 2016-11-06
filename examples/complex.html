@@ -331,6 +331,7 @@
             board.boardData = brd;
             addToScene(board);
             showScene(board);
+            populateComponentFootprints(board);
           },
           undefined,
           undefined,
@@ -353,6 +354,88 @@
 
       loadBoard( boards.feather );
 
+      var populateComponentFootprints = function (board) {
+
+        var brd = board.boardData;
+        var stlloader = new THREE.STLLoader();
+        var material_component = new THREE.MeshPhongMaterial( { color: 0xAAAAAA,
+                                                                specular: 0x111111,
+                                                                shininess: 200 } );
+
+        brd.components = new THREE.Object3D();
+        brd.root.add(brd.components);
+
+        // Force footprints to be populated by removing cached models.
+        // TODO: Handle model loading and footprint populating separately.
+        for (packageName in packageToModelMap) {
+          delete packageToModelMap[packageName]._cache;
+        }
+
+        function loadComponentModel(packageName, modelInfo) {
+          /*
+
+             The first time a component package type is encountered
+             loading of the associated model occurs. When the model is
+             successfully loaded all component footprints using that
+             package are populated.
+
+           */
+
+          function modelLoadedHandler(geometry) {
+            //console.log(packageName);
+
+            // "Normalise" scale, orientation and position of model
+            // TODO: Implement other properties.
+            if (modelInfo.rotation) {
+              geometry.rotateX(modelInfo.rotation.x || 0);
+              geometry.rotateY(modelInfo.rotation.y || 0);
+              geometry.rotateZ(modelInfo.rotation.z || 0);
+            }
+
+            // TODO: Document required scale in models for this to work.
+            geometry.scale(brd.coordScale, brd.coordScale, brd.coordScale);
+            geometry.computeBoundingBox();
+
+            var mesh =  new THREE.Mesh(geometry, material_component);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+
+            modelInfo._cache = mesh;
+
+            // Now that model is loaded, actually populate the footprints.
+            brd.connectElements.forEach(function (footprint_connector) {
+              if (footprint_connector.userData.package.getAttribute("name") == packageName) {
+                var component = modelInfo._cache.clone();
+                brd.components.add(component);
+
+                component.connector = new THREE.Connector();
+                component.connector.master = component;
+
+                component.connector.rotation.x = Math.PI / 2; // Horizontal
+                component.connector.position.x = component.geometry.boundingBox.center().x;
+                component.connector.position.y = component.geometry.boundingBox.center().y;
+
+                component.add(component.connector);
+                component.connector.connectTo(footprint_connector);
+              }
+            });
+
+          };
+
+          if (!modelInfo.hasOwnProperty("_cache")) {
+            modelInfo._cache = null; // Indicates model is in process of being loaded.
+            stlloader.load(modelInfo.filename, modelLoadedHandler);
+          }
+        };
+
+        brd.connectElements.forEach(function (connector) {
+          var packageName = connector.userData.package.getAttribute("name");
+          if (modelInfo = packageToModelMap[packageName]) {
+            loadComponentModel(packageName, modelInfo); // TODO: Make packageName part of the modelInfo?
+          };
+        });
+
+      }
 
     </script>
   </body>
