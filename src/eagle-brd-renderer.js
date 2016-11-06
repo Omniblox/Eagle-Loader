@@ -1177,6 +1177,7 @@ EagleBrdRenderer.prototype._parseElement = function( el ) {
 	connector.rotation.x += Math.PI / 2;
 	if ( el.hasAttribute( "rot" ) ) {
 		angle = new EagleBrdRenderer.AngleData( el.getAttribute( "rot" ) );
+		connector.rotation.y = angle.angle;
 		if ( angle.mirror ) {
 			connector.rotation.x += Math.PI;
 			connector.position.z = -this.thickness;
