@@ -405,6 +405,9 @@
             // Now that model is loaded, actually populate the footprints.
             brd.connectElements.forEach(function (footprint_connector) {
               if (footprint_connector.userData.package.getAttribute("name") == packageName) {
+                var cachedRotation = brd.root.rotation; // Workaround due to Connector not
+                brd.root.rotation.set(0,0,0);           // handling rotation of PCB correctly.
+
                 var component = modelInfo._cache.clone();
                 brd.components.add(component);
 
@@ -417,6 +420,8 @@
 
                 component.add(component.connector);
                 component.connector.connectTo(footprint_connector);
+
+                brd.root.rotation.copy(cachedRotation); // Second part of workaround.
               }
             });
 
