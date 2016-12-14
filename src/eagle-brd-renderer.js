@@ -53,6 +53,8 @@ var EagleBrdRenderer = function( xml, params ) {
 			Connector objects
 		@param [params.viewGhosts=false] {boolean} Whether to draw
 			approximate ghosts of on-board devices
+		@param [params.viewComponents=false] {boolean} Whether to load and
+			display models of the components on the PCB.
 	**/
 
 	console.log( "Beginning BRD parse" );
@@ -223,6 +225,7 @@ var EagleBrdRenderer = function( xml, params ) {
 	this.buildGhostPackages();
 	this.viewConnectors( !!params.viewConnectors );
 	this.viewGhosts( !!params.viewGhosts );
+	this.viewComponents( !!params.viewComponents );
 };
 
 
@@ -3220,6 +3223,26 @@ EagleBrdRenderer.prototype.visualizeConnector = function( connector, color ) {
 	return mesh;
 };
 
+
+EagleBrdRenderer.prototype.viewComponents = function( show ) {
+
+	/**
+	Set electronic components visibility.
+
+	@method viewComponents
+	@param [show=false] {boolean} Whether to load and
+	   display models of the components on the PCB or not.
+	**/
+
+	if (!show) {
+		return;
+	}
+
+	this.components = new THREE.Object3D();
+	this.root.add(this.components);
+
+	this.loadComponentMap("components.json"); // TODO: Load actual standard library component map file here
+};
 
 
 EagleBrdRenderer.prototype.loadComponentMap = function( url ) {
