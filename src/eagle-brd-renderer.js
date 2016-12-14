@@ -3222,6 +3222,103 @@ EagleBrdRenderer.prototype.visualizeConnector = function( connector, color ) {
 
 
 
+EagleBrdRenderer.prototype.loadComponentMap = function( url ) {
+
+	var self = this;
+
+	var loader = new THREE.XHRLoader();
+	loader.responseType = "json";
+	loader.load(url, function (response) {
+		self._componentsMap = response; // TODO: Do some additional validation of the response?
+		self._populateAllFootprints();
+	});
+}
+
+
+EagleBrdRenderer.prototype._populateAllFootprints = function() {
+
+	var self = this;
+
+	var stlloader = new THREE.STLLoader();
+
+	this._componentMaterial = new THREE.MeshPhongMaterial({
+		color: 0xAAAAAA,
+		specular: 0x111111,
+		shininess: 200
+	} );
+
+	// Force footprints to be populated by removing cached models.
+	// TODO: Handle model loading and footprint populating separately.
+	// TODO: Remove this because we now assume this routine is only called once?
+	for (packageName in this._componentsMap) {
+		delete this._componentsMap[packageName]._cache;
+	}
+
+	// The first time a component package type is encountered
+	// loading of the associated model occurs. When the model is
+	// successfully loaded all component footprints using that
+	// package are populated.
+	this.connectElements.forEach(function (connector) {
+		var packageName = connector.userData.package.getAttribute("name");
+		var modelInfo = self._componentsMap[packageName];
+		if (modelInfo && !modelInfo.hasOwnProperty("_cache")) {
+			modelInfo.packageName = packageName;
+			modelInfo._cache = null; // Indicates model is in process of being loaded.
+			stlloader.load(modelInfo.filename, function ( geometry ) {
+				self._populateFootprintsWithModel(geometry, modelInfo);
+			});
+		};
+	});
+};
+
+
+EagleBrdRenderer.prototype._populateFootprintsWithModel = function( geometry, modelInfo ) {
+
+	// "Normalise" scale, orientation and position of model
+	// TODO: Implement other properties.
+	if (modelInfo.rotation) {
+		// Angles in the component map JSON file are expressed in degrees,
+		// so are converted to radians before use.
+		geometry.rotateX(modelInfo.rotation.x * (Math.PI / 180) || 0);
+		geometry.rotateY(modelInfo.rotation.y * (Math.PI / 180) || 0);
+		geometry.rotateZ(modelInfo.rotation.z * (Math.PI / 180) || 0);
+	}
+
+	// TODO: Document required scale in models for this to work.
+	geometry.scale(this.coordScale, this.coordScale, this.coordScale);
+	geometry.computeBoundingBox();
+
+	var mesh =  new THREE.Mesh(geometry, this._componentMaterial);
+	mesh.castShadow = true;
+	mesh.receiveShadow = true;
+
+	modelInfo._cache = mesh;
+
+	var self = this;
+
+	// Now that model is loaded, actually populate the footprints.
+	this.connectElements.forEach(function (footprintConnector) {
+		if (footprintConnector.userData.package.getAttribute("name") == modelInfo.packageName) {
+			var cachedRotation = self.root.rotation; // Workaround due to Connector not
+			self.root.rotation.set(0,0,0);           // handling rotation of PCB correctly.
+
+			var component = modelInfo._cache.clone();
+			self.components.add(component);
+
+			component.connector = new THREE.Connector();
+			component.connector.master = component;
+
+			component.connector.rotation.x = Math.PI / 2; // Horizontal
+			component.connector.position.x = component.geometry.boundingBox.center().x;
+			component.connector.position.y = component.geometry.boundingBox.center().y;
+
+			component.add(component.connector);
+			component.connector.connectTo(footprintConnector);
+
+			self.root.rotation.copy(cachedRotation); // Second part of workaround.
+		}
+	});
+};
 
 
 /**
