@@ -1,0 +1,58 @@
+{
+      "TQFP32-08": {
+	"filename": "./model-files/sparkfun/products/9261/stl/9261.STL",
+        "rotation": {"x": 90}
+      },
+      "SOT323": {
+	"filename": "./model-files/sparkfun/production_parts/semiconductors/IC_SMD/SOT/SOT323.STL",
+        "rotation": {"x": 90, "z": 180}
+      },
+      "SMA-DIODE": {
+	"filename": "./model-files/sparkfun/production_parts/semiconductors/diode/DO-214AC/DO-214AC.STL",
+	"rotation": {"z": 180}
+      },
+      "SOT23-3": {
+	"filename": "./model-files/sparkfun/production_parts/semiconductors/IC_SMD/SOT/SOT23-3.STL",
+        "rotation": {"x": 90, "z": 180}
+      },
+      "RESONATOR-SMD": {
+	"filename": "./model-files/sparkfun/production_parts/passive/resonator/RESONATOR-SMD/stl/RESONATOR_SMD.STL",
+	"note": "Possibly needs to be rotated around Z to be completely accurate."
+      },
+      "CR54": {
+	"filename": "./model-files/sparkfun/production_parts/passive/inductors/CR54/stl/CR54.STL",
+	"note": "Possibly needs to be rotated around Z to be completely accurate?"
+      },
+      "TACTILE-SWITCH-SMD": {
+	"filename": "./model-files/sparkfun/products/8720/stl/8720.STL",
+        "rotation": {"x": 90},
+	"note": "Possibly needs to be rotated around Z to be completely accurate?"
+      },
+      "0603-RES": {
+	"filename": "./model-files/grabcad/alan.bullick-1/0603-resistor-1/AB2_0603_R_WINGS3D.stl"
+      },
+      "0603-CAP": {
+	"filename": "./model-files/grabcad/alan.bullick-1/0603-capacitor-1/AB2_0603_C_80_WINGS3D.stl"
+      },
+      "SSOP20_L": {
+	"filename": "./model-files/3dcontentcentral/contributors/701415/User Library-IPC SOSOP63P600X175-20AN MO-137AD 1461-01.STL",
+        "rotation": {"x": 90, "z": 90}
+      },
+      "LED-0603": {
+	"filename": "./model-files/3dcontentcentral/contributors/908658/User Library-LED 0603.stl",
+        "rotation": {"z": 90},
+	"note": "Possibly needs to be further rotated around Z to be completely accurate?"
+      },
+      "SOT23-5": {
+	"filename": "./model-files/3dcontentcentral/supplier/circuitworks/CircuitWorks-SOT-23-5.stl",
+        "rotation": {"x": 90}
+      },
+      "EIA3216": {
+	"filename": "./model-files/3dcontentcentral/contributors/615648/User Library-CAP_TANT_3216-18_A_case.stl",
+        "rotation": {"x": 90, "z": 180}
+      },
+      "EIA3528": {
+	"filename": "./model-files/3dcontentcentral/contributors/498129/User Library-AVX_BCASE.stl",
+        "rotation": {"z": 180}
+      }
+}
