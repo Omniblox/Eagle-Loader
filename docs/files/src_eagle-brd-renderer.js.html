@@ -3357,12 +3357,7 @@ EagleBrdRenderer.prototype._populateAllFootprints = function() {
 		shininess: 200
 	} );
 
-	// Force footprints to be populated by removing cached models.
-	// TODO: Handle model loading and footprint populating separately.
-	// TODO: Remove this because we now assume this routine is only called once?
-	for (packageName in this._componentsMap) {
-		delete this._componentsMap[packageName]._cache;
-	}
+	// TODO: Handle model loading and footprint populating separately?
 
 	// The first time a component package type is encountered
 	// loading of the associated model occurs. When the model is
