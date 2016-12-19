@@ -3258,6 +3258,15 @@ EagleBrdRenderer.prototype.loadComponentMap = function( url ) {
 }
 
 
+EagleBrdRenderer.prototype._getModelInfo = function( packageName ) {
+	var modelInfo = this._componentsMap[packageName];
+	if (modelInfo && !modelInfo.hasOwnProperty("packageName")) {
+		modelInfo.packageName = packageName;
+	}
+	return modelInfo
+}
+
+
 EagleBrdRenderer.prototype._populateAllFootprints = function() {
 
 	var self = this;
@@ -3278,9 +3287,8 @@ EagleBrdRenderer.prototype._populateAllFootprints = function() {
 	// package are populated.
 	this.connectElements.forEach(function (connector) {
 		var packageName = connector.userData.package.getAttribute("name");
-		var modelInfo = self._componentsMap[packageName];
+		var modelInfo = self._getModelInfo(packageName);
 		if (modelInfo && !modelInfo.hasOwnProperty("_cache")) {
-			modelInfo.packageName = packageName;
 			modelInfo._cache = null; // Indicates model is in process of being loaded.
 			stlloader.load(modelInfo.filename, function ( geometry ) {
 				self._populateFootprintsWithModel(geometry, modelInfo);
