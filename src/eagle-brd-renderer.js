@@ -3280,7 +3280,7 @@ EagleBrdRenderer.prototype._getModelInfo = function( packageName ) {
 			}
 		}
 	}
-	return modelInfo
+	return modelInfo;
 }
 
 
