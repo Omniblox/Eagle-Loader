@@ -225,7 +225,7 @@ var EagleBrdRenderer = function( xml, params ) {
 	this.buildGhostPackages();
 	this.viewConnectors( !!params.viewConnectors );
 	this.viewGhosts( !!params.viewGhosts );
-	this.viewComponents( !!params.viewComponents, params.componentLibCfg );
+	this.viewComponents( !!params.viewComponents, params.componentMapCfg );
 };
 
 
@@ -3224,7 +3224,7 @@ EagleBrdRenderer.prototype.visualizeConnector = function( connector, color ) {
 };
 
 
-EagleBrdRenderer.prototype.viewComponents = function( show, componentLibCfg ) {
+EagleBrdRenderer.prototype.viewComponents = function( show, componentMapCfg ) {
 
 	/**
 	Set electronic components visibility.
