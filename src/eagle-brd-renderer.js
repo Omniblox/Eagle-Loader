@@ -3269,13 +3269,15 @@ EagleBrdRenderer.prototype.loadComponentMap = function( url, modelUrlPrefix ) {
 
 EagleBrdRenderer.prototype._getModelInfo = function( packageName ) {
 	var modelInfo = this._componentsMap.map[packageName];
-	if (modelInfo && !modelInfo.hasOwnProperty("packageName")) {
-		modelInfo.packageName = packageName;
-	}
-	if (modelInfo && !modelInfo.hasOwnProperty("url")) {
-		modelInfo.url = modelInfo.filename;
-		if (this._componentsMap.meta.urlPrefix) {
-			modelInfo.url = this._componentsMap.meta.urlPrefix + modelInfo.url;
+	if (modelInfo) {
+		if (!modelInfo.hasOwnProperty("packageName")) {
+			modelInfo.packageName = packageName;
+		}
+		if (!modelInfo.hasOwnProperty("url")) {
+			modelInfo.url = modelInfo.filename;
+			if (this._componentsMap.meta.urlPrefix) {
+				modelInfo.url = this._componentsMap.meta.urlPrefix + modelInfo.url;
+			}
 		}
 	}
 	return modelInfo
