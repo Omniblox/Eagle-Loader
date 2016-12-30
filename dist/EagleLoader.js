@@ -544,7 +544,7 @@ var EagleBrdRenderer = function( xml, params ) {
 	this.buildGhostPackages();
 	this.viewConnectors( !!params.viewConnectors );
 	this.viewGhosts( !!params.viewGhosts );
-	this.viewComponents( !!params.viewComponents );
+	this.viewComponents( !!params.viewComponents, params.componentMapCfg );
 };
 
 
@@ -3543,7 +3543,7 @@ EagleBrdRenderer.prototype.visualizeConnector = function( connector, color ) {
 };
 
 
-EagleBrdRenderer.prototype.viewComponents = function( show ) {
+EagleBrdRenderer.prototype.viewComponents = function( show, componentMapCfg ) {
 
 	/**
 	Set electronic components visibility.
@@ -3560,20 +3560,46 @@ EagleBrdRenderer.prototype.viewComponents = function( show ) {
 	this.components = new THREE.Object3D();
 	this.root.add(this.components);
 
-	this.loadComponentMap("components.json"); // TODO: Load actual standard library component map file here
+	var componentMapUrl = "components.json";
+	var modelUrlPrefix = undefined;
+
+	if (componentMapCfg) {
+		componentMapUrl = componentMapCfg.mapUrl || componentMapUrl;
+		modelUrlPrefix = componentMapCfg.urlPrefix;
+	}
+
+	this.loadComponentMap(componentMapUrl, modelUrlPrefix); // TODO: Load actual standard library component map file here
 };
 
 
-EagleBrdRenderer.prototype.loadComponentMap = function( url ) {
+EagleBrdRenderer.prototype.loadComponentMap = function( url, modelUrlPrefix ) {
 
 	var self = this;
 
 	var loader = new THREE.XHRLoader();
 	loader.responseType = "json";
 	loader.load(url, function (response) {
-		self._componentsMap = response; // TODO: Do some additional validation of the response?
+		self._componentsMap = {"meta": {"urlPrefix": modelUrlPrefix},
+				       "map": response}; // TODO: Do some additional validation of the response?
 		self._populateAllFootprints();
 	});
+}
+
+
+EagleBrdRenderer.prototype._getModelInfo = function( packageName ) {
+	var modelInfo = this._componentsMap.map[packageName];
+	if (modelInfo) {
+		if (!modelInfo.hasOwnProperty("packageName")) {
+			modelInfo.packageName = packageName;
+		}
+		if (!modelInfo.hasOwnProperty("url")) {
+			modelInfo.url = modelInfo.filename;
+			if (this._componentsMap.meta.urlPrefix) {
+				modelInfo.url = this._componentsMap.meta.urlPrefix + modelInfo.url;
+			}
+		}
+	}
+	return modelInfo;
 }
 
 
@@ -3597,11 +3623,10 @@ EagleBrdRenderer.prototype._populateAllFootprints = function() {
 	// package are populated.
 	this.connectElements.forEach(function (connector) {
 		var packageName = connector.userData.package.getAttribute("name");
-		var modelInfo = self._componentsMap[packageName];
+		var modelInfo = self._getModelInfo(packageName);
 		if (modelInfo && !modelInfo.hasOwnProperty("_cache")) {
-			modelInfo.packageName = packageName;
 			modelInfo._cache = null; // Indicates model is in process of being loaded.
-			stlloader.load(modelInfo.filename, function ( geometry ) {
+			stlloader.load(modelInfo.url, function ( geometry ) {
 				self._populateFootprintsWithModel(geometry, modelInfo);
 			});
 		};
