@@ -225,7 +225,7 @@ var EagleBrdRenderer = function( xml, params ) {
 	this.buildGhostPackages();
 	this.viewConnectors( !!params.viewConnectors );
 	this.viewGhosts( !!params.viewGhosts );
-	this.viewComponents( !!params.viewComponents );
+	this.viewComponents( !!params.viewComponents, params.componentLibCfg );
 };
 
 
@@ -3224,7 +3224,7 @@ EagleBrdRenderer.prototype.visualizeConnector = function( connector, color ) {
 };
 
 
-EagleBrdRenderer.prototype.viewComponents = function( show ) {
+EagleBrdRenderer.prototype.viewComponents = function( show, componentLibCfg ) {
 
 	/**
 	Set electronic components visibility.
@@ -3241,7 +3241,10 @@ EagleBrdRenderer.prototype.viewComponents = function( show ) {
 	this.components = new THREE.Object3D();
 	this.root.add(this.components);
 
-	this.loadComponentMap("components.json"); // TODO: Load actual standard library component map file here
+	var componentLibPath = "components.json";
+	var modelUrlPrefix = undefined;
+
+	this.loadComponentMap(componentLibPath, modelUrlPrefix); // TODO: Load actual standard library component map file here
 };
 
 
