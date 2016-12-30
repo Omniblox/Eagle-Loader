@@ -3272,6 +3272,12 @@ EagleBrdRenderer.prototype._getModelInfo = function( packageName ) {
 	if (modelInfo && !modelInfo.hasOwnProperty("packageName")) {
 		modelInfo.packageName = packageName;
 	}
+	if (modelInfo && !modelInfo.hasOwnProperty("url")) {
+		modelInfo.url = modelInfo.filename;
+		if (this._componentsMap.meta.urlPrefix) {
+			modelInfo.url = this._componentsMap.meta.urlPrefix + modelInfo.url;
+		}
+	}
 	return modelInfo
 }
 
@@ -3299,7 +3305,7 @@ EagleBrdRenderer.prototype._populateAllFootprints = function() {
 		var modelInfo = self._getModelInfo(packageName);
 		if (modelInfo && !modelInfo.hasOwnProperty("_cache")) {
 			modelInfo._cache = null; // Indicates model is in process of being loaded.
-			stlloader.load(modelInfo.filename, function ( geometry ) {
+			stlloader.load(modelInfo.url, function ( geometry ) {
 				self._populateFootprintsWithModel(geometry, modelInfo);
 			});
 		};
