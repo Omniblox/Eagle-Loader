@@ -3252,14 +3252,15 @@ EagleBrdRenderer.prototype.loadComponentMap = function( url ) {
 	var loader = new THREE.XHRLoader();
 	loader.responseType = "json";
 	loader.load(url, function (response) {
-		self._componentsMap = response; // TODO: Do some additional validation of the response?
+		self._componentsMap = {"meta": {},
+				       "map": response}; // TODO: Do some additional validation of the response?
 		self._populateAllFootprints();
 	});
 }
 
 
 EagleBrdRenderer.prototype._getModelInfo = function( packageName ) {
-	var modelInfo = this._componentsMap[packageName];
+	var modelInfo = this._componentsMap.map[packageName];
 	if (modelInfo && !modelInfo.hasOwnProperty("packageName")) {
 		modelInfo.packageName = packageName;
 	}
