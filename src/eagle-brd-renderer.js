@@ -3244,6 +3244,11 @@ EagleBrdRenderer.prototype.viewComponents = function( show, componentMapCfg ) {
 	var componentMapUrl = "components.json";
 	var modelUrlPrefix = undefined;
 
+	if (componentMapCfg) {
+		componentMapUrl = componentMapCfg.mapUrl || componentMapUrl;
+		modelUrlPrefix = componentMapCfg.urlPrefix;
+	}
+
 	this.loadComponentMap(componentMapUrl, modelUrlPrefix); // TODO: Load actual standard library component map file here
 };
 
