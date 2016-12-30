@@ -3260,7 +3260,7 @@ EagleBrdRenderer.prototype.loadComponentMap = function( url, modelUrlPrefix ) {
 	var loader = new THREE.XHRLoader();
 	loader.responseType = "json";
 	loader.load(url, function (response) {
-		self._componentsMap = {"meta": {},
+		self._componentsMap = {"meta": {"urlPrefix": modelUrlPrefix},
 				       "map": response}; // TODO: Do some additional validation of the response?
 		self._populateAllFootprints();
 	});
