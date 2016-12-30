@@ -3248,7 +3248,7 @@ EagleBrdRenderer.prototype.viewComponents = function( show, componentMapCfg ) {
 };
 
 
-EagleBrdRenderer.prototype.loadComponentMap = function( url ) {
+EagleBrdRenderer.prototype.loadComponentMap = function( url, modelUrlPrefix ) {
 
 	var self = this;
 
