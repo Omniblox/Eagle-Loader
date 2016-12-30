@@ -3241,10 +3241,10 @@ EagleBrdRenderer.prototype.viewComponents = function( show, componentMapCfg ) {
 	this.components = new THREE.Object3D();
 	this.root.add(this.components);
 
-	var componentLibPath = "components.json";
+	var componentMapUrl = "components.json";
 	var modelUrlPrefix = undefined;
 
-	this.loadComponentMap(componentLibPath, modelUrlPrefix); // TODO: Load actual standard library component map file here
+	this.loadComponentMap(componentMapUrl, modelUrlPrefix); // TODO: Load actual standard library component map file here
 };
 
 
