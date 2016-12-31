@@ -516,6 +516,8 @@ var EagleBrdRenderer = function( xml, params ) {
 	**/
 	this.coordScale = 1000 / this.pixelMicrons;
 
+	this._componentMaps = [];
+
 	this._parseDesignRules();
 
 	this._populateLayers();
@@ -3564,6 +3566,7 @@ EagleBrdRenderer.prototype.viewComponents = function( show, componentMapCfg ) {
 	var modelUrlPrefix = undefined;
 
 	if (componentMapCfg) {
+		// TODO: Allow multiple maps to be supplied at initialisation?
 		componentMapUrl = componentMapCfg.mapUrl || componentMapUrl;
 		modelUrlPrefix = componentMapCfg.urlPrefix;
 	}
@@ -3579,23 +3582,35 @@ EagleBrdRenderer.prototype.loadComponentMap = function( url, modelUrlPrefix ) {
 	var loader = new THREE.XHRLoader();
 	loader.responseType = "json";
 	loader.load(url, function (response) {
-		self._componentsMap = {"meta": {"urlPrefix": modelUrlPrefix},
-				       "map": response}; // TODO: Do some additional validation of the response?
+		// TODO: Ensure values in more recent maps override older maps?
+		self._componentMaps.push({"meta": {"urlPrefix": modelUrlPrefix},
+				          "map": response}); // TODO: Do some additional validation of the response?
 		self._populateAllFootprints();
 	});
 }
 
 
 EagleBrdRenderer.prototype._getModelInfo = function( packageName ) {
-	var modelInfo = this._componentsMap.map[packageName];
+	var modelInfo = undefined;
+	var activeComponentMapCfg = undefined;
+
+	// Use of `.some()` is ill-advised workaround for lack of
+	// ability to break out of `forEach()`.
+	// See: <http://stackoverflow.com/questions/2641347/how-to-short-circuit-array-foreach-like-calling-break>
+	this._componentMaps.some( function ( componentMapCfg ) {
+		activeComponentMapCfg = componentMapCfg;
+		modelInfo = componentMapCfg.map[packageName];
+		return modelInfo;
+	});
+
 	if (modelInfo) {
 		if (!modelInfo.hasOwnProperty("packageName")) {
 			modelInfo.packageName = packageName;
 		}
 		if (!modelInfo.hasOwnProperty("url")) {
 			modelInfo.url = modelInfo.filename;
-			if (this._componentsMap.meta.urlPrefix) {
-				modelInfo.url = this._componentsMap.meta.urlPrefix + modelInfo.url;
+			if (activeComponentMapCfg.meta.urlPrefix) {
+				modelInfo.url = activeComponentMapCfg.urlPrefix + modelInfo.url;
 			}
 		}
 	}
