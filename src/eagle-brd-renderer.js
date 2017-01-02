@@ -3342,6 +3342,11 @@ EagleBrdRenderer.prototype._populateFootprintsWithModel = function( geometry, mo
 		geometry.rotateZ(modelInfo.rotation.z * (Math.PI / 180) || 0);
 	}
 
+	if (modelInfo.scale) {
+		geometry.scale(modelInfo.scale.x || 1.0, modelInfo.scale.y || 1.0, modelInfo.scale.z || 1.0);
+	}
+
+
 	// TODO: Document required scale in models for this to work.
 	geometry.scale(this.coordScale, this.coordScale, this.coordScale);
 	geometry.computeBoundingBox();
