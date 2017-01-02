@@ -276,6 +276,40 @@ display models of the components on the PCB.</p>
                                 </div>
 
                             </li>
+                            <li class="param">
+                                    <code class="param-name optional">[componentMapCfg]</code>
+                                    <span class="type">Object</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Alternative standard model
+library map configuration to use instead of the default.</p>
+
+                                </div>
+
+                                    <ul class="params-list">
+                                        <li class="param">
+                                                <code class="param-name optional">[mapUrl]</code>
+                                                <span class="type">String</span>
+                                                <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                            <div class="param-description">
+                                                URL for the file that
+		contains the "component package name" to "model file path" mapping.
+                                            </div>
+                                        </li>
+                                        <li class="param">
+                                                <code class="param-name optional">[urlPrefix]</code>
+                                                <span class="type">String</span>
+                                                <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                            <div class="param-description">
+                                                (Optional) URL
+		prefix to prepend to the model file path when loading model file.
+                                            </div>
+                                        </li>
+                                    </ul>
+                            </li>
                         </ul>
                 </li>
             </ul>
@@ -331,6 +365,10 @@ display models of the components on the PCB.</p>
 
                             </li>
                             <li class="index-item method private">
+                                <a href="#method__getModelInfo">_getModelInfo</a>
+
+                            </li>
+                            <li class="index-item method private">
                                 <a href="#method__parseBounds">_parseBounds</a>
 
                             </li>
@@ -344,6 +382,14 @@ display models of the components on the PCB.</p>
                             </li>
                             <li class="index-item method private">
                                 <a href="#method__parseElement">_parseElement</a>
+
+                            </li>
+                            <li class="index-item method private">
+                                <a href="#method__populateAllFootprints">_populateAllFootprints</a>
+
+                            </li>
+                            <li class="index-item method private">
+                                <a href="#method__populateFootprintsWithModel">_populateFootprintsWithModel</a>
 
                             </li>
                             <li class="index-item method private">
@@ -396,6 +442,10 @@ display models of the components on the PCB.</p>
                             </li>
                             <li class="index-item method">
                                 <a href="#method_getLayer">getLayer</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#method_loadComponentMap">loadComponentMap</a>
 
                             </li>
                             <li class="index-item method">
@@ -469,6 +519,10 @@ display models of the components on the PCB.</p>
                     <h3>Properties</h3>
 
                     <ul class="index-list properties">
+                            <li class="index-item property private">
+                                <a href="#property__componentMaps">_componentMaps</a>
+
+                            </li>
                             <li class="index-item property private">
                                 <a href="#property__elementCurrent">_elementCurrent</a>
 
@@ -604,7 +658,7 @@ display models of the components on the PCB.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l236"><code>src&#x2F;eagle-brd-renderer.js:236</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l249"><code>src&#x2F;eagle-brd-renderer.js:249</code></a>
         </p>
 
 
@@ -669,7 +723,7 @@ display models of the components on the PCB.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l526"><code>src&#x2F;eagle-brd-renderer.js:526</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l539"><code>src&#x2F;eagle-brd-renderer.js:539</code></a>
         </p>
 
 
@@ -754,7 +808,7 @@ display models of the components on the PCB.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l363"><code>src&#x2F;eagle-brd-renderer.js:363</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l376"><code>src&#x2F;eagle-brd-renderer.js:376</code></a>
         </p>
 
 
@@ -813,7 +867,7 @@ adjustments, we generate an individual mesh for each continuous loop.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l329"><code>src&#x2F;eagle-brd-renderer.js:329</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l342"><code>src&#x2F;eagle-brd-renderer.js:342</code></a>
         </p>
 
 
@@ -872,7 +926,7 @@ to keep them out of the root child space.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l607"><code>src&#x2F;eagle-brd-renderer.js:607</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l620"><code>src&#x2F;eagle-brd-renderer.js:620</code></a>
         </p>
 
 
@@ -933,7 +987,7 @@ These are listed in <code>connectHoles</code>.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l765"><code>src&#x2F;eagle-brd-renderer.js:765</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l778"><code>src&#x2F;eagle-brd-renderer.js:778</code></a>
         </p>
 
 
@@ -985,7 +1039,7 @@ but might have some utility in generating exploded layer views.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l790"><code>src&#x2F;eagle-brd-renderer.js:790</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l803"><code>src&#x2F;eagle-brd-renderer.js:803</code></a>
         </p>
 
 
@@ -999,6 +1053,80 @@ was available.</p>
     </div>
 
 
+
+
+</div>
+<div id="method__getModelInfo" class="method item private">
+    <h3 class="name"><code>_getModelInfo</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code class="optional">[packageName]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+        <span class="returns-inline">
+            <span class="type">Object</span>
+        </span>
+
+
+        <span class="flag private">private</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3311"><code>src&#x2F;eagle-brd-renderer.js:3311</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Retrieve URL (and related information) of the model file
+mapped to the supplied component package name (if found).</p>
+<p>Searches all the loaded component maps.</p>
+<p>The related information returned is that which is found in
+the component mapping file (e.g. rotation &amp; scale modifications
+required to display the model correctly) and varies with
+each component.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name optional">[packageName]</code>
+                        <span class="type">String</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>Name of the component package to find.</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+        <div class="returns">
+            <h4>Returns:</h4>
+
+            <div class="returns-description">
+                        <span class="type">Object</span>:
+                    <p><code>.url</code> contains the full URL. Also <code>.rotation</code> &amp; <code>.scale</code> etc may be present.</p>
+
+            </div>
+        </div>
 
 
 </div>
@@ -1018,7 +1146,7 @@ was available.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l808"><code>src&#x2F;eagle-brd-renderer.js:808</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l821"><code>src&#x2F;eagle-brd-renderer.js:821</code></a>
         </p>
 
 
@@ -1057,7 +1185,7 @@ This is derived from <code>eagle.drawing.board.plain</code> elements.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l1032"><code>src&#x2F;eagle-brd-renderer.js:1032</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l1045"><code>src&#x2F;eagle-brd-renderer.js:1045</code></a>
         </p>
 
 
@@ -1109,7 +1237,7 @@ depending on which layers want it.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l1076"><code>src&#x2F;eagle-brd-renderer.js:1076</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l1089"><code>src&#x2F;eagle-brd-renderer.js:1089</code></a>
         </p>
 
 
@@ -1147,7 +1275,7 @@ depending on which layers want it.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l1107"><code>src&#x2F;eagle-brd-renderer.js:1107</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l1120"><code>src&#x2F;eagle-brd-renderer.js:1120</code></a>
         </p>
 
 
@@ -1182,6 +1310,115 @@ in <code>connectElements</code>.</p>
 
 
 </div>
+<div id="method__populateAllFootprints" class="method item private">
+    <h3 class="name"><code>_populateAllFootprints</code></h3>
+
+        <span class="paren">()</span>
+
+
+
+        <span class="flag private">private</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3357"><code>src&#x2F;eagle-brd-renderer.js:3357</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Triggered when a component map file is successfully loaded.</p>
+<p>Ensures all the required &amp; available component package model
+files are loaded.</p>
+<p>Then triggers actual placement of component package models
+for matching footprints on the board.</p>
+
+    </div>
+
+
+
+
+</div>
+<div id="method__populateFootprintsWithModel" class="method item private">
+    <h3 class="name"><code>_populateFootprintsWithModel</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code class="optional">[geometry]</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[modelInfo]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+        <span class="flag private">private</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3402"><code>src&#x2F;eagle-brd-renderer.js:3402</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Actually place component package models for all the matching footprints
+on the board (that are not marked &quot;DNP&quot; i.e. &quot;Do Not Place&quot;).</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name optional">[geometry]</code>
+                        <span class="type">THREE.Geometry</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>Loaded geometry of component
+package model specified by <code>modelInfo</code>.</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[modelInfo]</code>
+                        <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>See <code>_getModelInfo</code> for properties.</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
 <div id="method__populateLayers" class="method item private">
     <h3 class="name"><code>_populateLayers</code></h3>
 
@@ -1198,7 +1435,7 @@ in <code>connectElements</code>.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l1201"><code>src&#x2F;eagle-brd-renderer.js:1201</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l1214"><code>src&#x2F;eagle-brd-renderer.js:1214</code></a>
         </p>
 
 
@@ -1249,7 +1486,7 @@ The isolate layer is found in <code>mtIsolate</code> [ 0 ].</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l1395"><code>src&#x2F;eagle-brd-renderer.js:1395</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l1408"><code>src&#x2F;eagle-brd-renderer.js:1408</code></a>
         </p>
 
 
@@ -1288,7 +1525,7 @@ but they'll serve as stand-ins.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l1484"><code>src&#x2F;eagle-brd-renderer.js:1484</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l1497"><code>src&#x2F;eagle-brd-renderer.js:1497</code></a>
         </p>
 
 
@@ -1409,7 +1646,7 @@ only elements with a matching <code>layer</code> attribute will draw</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l1544"><code>src&#x2F;eagle-brd-renderer.js:1544</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l1557"><code>src&#x2F;eagle-brd-renderer.js:1557</code></a>
         </p>
 
 
@@ -1496,7 +1733,7 @@ only elements with a matching <code>layer</code> attribute will draw</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l1595"><code>src&#x2F;eagle-brd-renderer.js:1595</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l1608"><code>src&#x2F;eagle-brd-renderer.js:1608</code></a>
         </p>
 
 
@@ -1583,7 +1820,7 @@ only elements with a matching <code>layer</code> attribute will draw</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l1717"><code>src&#x2F;eagle-brd-renderer.js:1717</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l1730"><code>src&#x2F;eagle-brd-renderer.js:1730</code></a>
         </p>
 
 
@@ -1685,7 +1922,7 @@ only elements with a matching <code>layer</code> attribute will draw</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l1813"><code>src&#x2F;eagle-brd-renderer.js:1813</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l1826"><code>src&#x2F;eagle-brd-renderer.js:1826</code></a>
         </p>
 
 
@@ -1784,7 +2021,7 @@ only elements with a matching <code>layer</code> attribute will draw</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l1868"><code>src&#x2F;eagle-brd-renderer.js:1868</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l1881"><code>src&#x2F;eagle-brd-renderer.js:1881</code></a>
         </p>
 
 
@@ -1871,7 +2108,7 @@ only elements with a matching <code>layer</code> attribute will draw</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l1921"><code>src&#x2F;eagle-brd-renderer.js:1921</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l1934"><code>src&#x2F;eagle-brd-renderer.js:1934</code></a>
         </p>
 
 
@@ -1970,7 +2207,7 @@ only elements with a matching <code>layer</code> attribute will draw</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l2065"><code>src&#x2F;eagle-brd-renderer.js:2065</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l2078"><code>src&#x2F;eagle-brd-renderer.js:2078</code></a>
         </p>
 
 
@@ -2057,7 +2294,7 @@ only elements with a matching <code>layer</code> attribute will draw</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l2136"><code>src&#x2F;eagle-brd-renderer.js:2136</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l2149"><code>src&#x2F;eagle-brd-renderer.js:2149</code></a>
         </p>
 
 
@@ -2161,7 +2398,7 @@ only elements with a matching <code>layer</code> attribute will draw</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l2203"><code>src&#x2F;eagle-brd-renderer.js:2203</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l2216"><code>src&#x2F;eagle-brd-renderer.js:2216</code></a>
         </p>
 
 
@@ -2230,7 +2467,7 @@ curvature of the parameter.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l2260"><code>src&#x2F;eagle-brd-renderer.js:2260</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l2273"><code>src&#x2F;eagle-brd-renderer.js:2273</code></a>
         </p>
 
 
@@ -2271,6 +2508,87 @@ curvature of the parameter.</p>
 
 
 </div>
+<div id="method_loadComponentMap" class="method item">
+    <h3 class="name"><code>loadComponentMap</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code class="optional">[url]</code>
+                </li>
+                <li class="arg">
+                        <code class="optional">[modelUrlPrefix]</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l3274"><code>src&#x2F;eagle-brd-renderer.js:3274</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Load a &quot;Component Map&quot; file from supplied URL and add the
+mapping to the list of mappings we search to locate the
+model file for a component package.</p>
+<p>The &quot;Component Map&quot; file contains the &quot;component package
+name&quot; to &quot;model file path&quot; mapping required to locate the
+model file.</p>
+<p>Loading a component map triggers population of all footprints
+with matching component package names.</p>
+<p>Can be used to supply additional component mappings to
+supplement the &quot;standard library&quot; mapping shipped with Eagle-Loader.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name optional">[url]</code>
+                        <span class="type">String</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>URL for the &quot;Component Map&quot; file
+to load.</p>
+
+                    </div>
+
+                </li>
+                <li class="param">
+                        <code class="param-name optional">[modelUrlPrefix]</code>
+                        <span class="type">String</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+                    <div class="param-description">
+                        <p>(Optional) URL prefix to
+prepend to the model file path when loading model file.</p>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
 <div id="method_parseCoord" class="method item">
     <h3 class="name"><code>parseCoord</code></h3>
 
@@ -2295,7 +2613,7 @@ curvature of the parameter.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l2280"><code>src&#x2F;eagle-brd-renderer.js:2280</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l2293"><code>src&#x2F;eagle-brd-renderer.js:2293</code></a>
         </p>
 
 
@@ -2361,7 +2679,7 @@ curvature of the parameter.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l2294"><code>src&#x2F;eagle-brd-renderer.js:2294</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l2307"><code>src&#x2F;eagle-brd-renderer.js:2307</code></a>
         </p>
 
 
@@ -2419,7 +2737,7 @@ This distance is measured in mm.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l2332"><code>src&#x2F;eagle-brd-renderer.js:2332</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l2345"><code>src&#x2F;eagle-brd-renderer.js:2345</code></a>
         </p>
 
 
@@ -2450,7 +2768,7 @@ This distance is measured in mm.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l2478"><code>src&#x2F;eagle-brd-renderer.js:2478</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l2491"><code>src&#x2F;eagle-brd-renderer.js:2491</code></a>
         </p>
 
 
@@ -2487,7 +2805,7 @@ This distance is measured in mm.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l2496"><code>src&#x2F;eagle-brd-renderer.js:2496</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l2509"><code>src&#x2F;eagle-brd-renderer.js:2509</code></a>
         </p>
 
 
@@ -2535,7 +2853,7 @@ This distance is measured in mm.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l2630"><code>src&#x2F;eagle-brd-renderer.js:2630</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l2643"><code>src&#x2F;eagle-brd-renderer.js:2643</code></a>
         </p>
 
 
@@ -2575,7 +2893,7 @@ This distance is measured in mm.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l2648"><code>src&#x2F;eagle-brd-renderer.js:2648</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l2661"><code>src&#x2F;eagle-brd-renderer.js:2661</code></a>
         </p>
 
 
@@ -2634,7 +2952,7 @@ This distance is measured in mm.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l2698"><code>src&#x2F;eagle-brd-renderer.js:2698</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l2711"><code>src&#x2F;eagle-brd-renderer.js:2711</code></a>
         </p>
 
 
@@ -2671,7 +2989,7 @@ This distance is measured in mm.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l2716"><code>src&#x2F;eagle-brd-renderer.js:2716</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l2729"><code>src&#x2F;eagle-brd-renderer.js:2729</code></a>
         </p>
 
 
@@ -2719,7 +3037,7 @@ This distance is measured in mm.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l2905"><code>src&#x2F;eagle-brd-renderer.js:2905</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l2918"><code>src&#x2F;eagle-brd-renderer.js:2918</code></a>
         </p>
 
 
@@ -2756,7 +3074,7 @@ This distance is measured in mm.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l2923"><code>src&#x2F;eagle-brd-renderer.js:2923</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l2936"><code>src&#x2F;eagle-brd-renderer.js:2936</code></a>
         </p>
 
 
@@ -2813,7 +3131,7 @@ This distance is measured in mm.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l2974"><code>src&#x2F;eagle-brd-renderer.js:2974</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l2987"><code>src&#x2F;eagle-brd-renderer.js:2987</code></a>
         </p>
 
 
@@ -2880,7 +3198,7 @@ endpoints, not curvature.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l3231"><code>src&#x2F;eagle-brd-renderer.js:3231</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l3244"><code>src&#x2F;eagle-brd-renderer.js:3244</code></a>
         </p>
 
 
@@ -2936,7 +3254,7 @@ display models of the components on the PCB or not.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l3163"><code>src&#x2F;eagle-brd-renderer.js:3163</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l3176"><code>src&#x2F;eagle-brd-renderer.js:3176</code></a>
         </p>
 
 
@@ -2991,7 +3309,7 @@ display models of the components on the PCB or not.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l3182"><code>src&#x2F;eagle-brd-renderer.js:3182</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l3195"><code>src&#x2F;eagle-brd-renderer.js:3195</code></a>
         </p>
 
 
@@ -3053,7 +3371,7 @@ possible devices, inferred from pad positions.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l3198"><code>src&#x2F;eagle-brd-renderer.js:3198</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l3211"><code>src&#x2F;eagle-brd-renderer.js:3211</code></a>
         </p>
 
 
@@ -3114,6 +3432,33 @@ to <code>true</code>.</p>
             <div id="properties" class="api-class-tabpanel">
                 <h2 class="off-left">Properties</h2>
 
+<div id="property__componentMaps" class="property item private">
+    <h3 class="name"><code>_componentMaps</code></h3>
+    <span class="type">Array</span>
+
+
+        <span class="flag private">private</span>
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_eagle-brd-renderer.js.html#l206"><code>src&#x2F;eagle-brd-renderer.js:206</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>List of all the &quot;component package name&quot; to &quot;model file path&quot;
+mappings to be searched when locating a component package model.</p>
+
+    </div>
+
+
+
+</div>
 <div id="property__elementCurrent" class="property item private">
     <h3 class="name"><code>_elementCurrent</code></h3>
     <span class="type">Element</span>
@@ -3126,7 +3471,7 @@ to <code>true</code>.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l1155"><code>src&#x2F;eagle-brd-renderer.js:1155</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l1168"><code>src&#x2F;eagle-brd-renderer.js:1168</code></a>
         </p>
 
 
@@ -3153,7 +3498,7 @@ to <code>true</code>.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l108"><code>src&#x2F;eagle-brd-renderer.js:108</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l114"><code>src&#x2F;eagle-brd-renderer.js:114</code></a>
         </p>
 
 
@@ -3180,7 +3525,7 @@ to <code>true</code>.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l131"><code>src&#x2F;eagle-brd-renderer.js:131</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l137"><code>src&#x2F;eagle-brd-renderer.js:137</code></a>
         </p>
 
 
@@ -3206,7 +3551,7 @@ to <code>true</code>.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l974"><code>src&#x2F;eagle-brd-renderer.js:974</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l987"><code>src&#x2F;eagle-brd-renderer.js:987</code></a>
         </p>
 
 
@@ -3289,7 +3634,7 @@ to <code>true</code>.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l384"><code>src&#x2F;eagle-brd-renderer.js:384</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l397"><code>src&#x2F;eagle-brd-renderer.js:397</code></a>
         </p>
 
 
@@ -3314,7 +3659,7 @@ to <code>true</code>.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l64"><code>src&#x2F;eagle-brd-renderer.js:64</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l70"><code>src&#x2F;eagle-brd-renderer.js:70</code></a>
         </p>
 
 
@@ -3403,7 +3748,7 @@ to <code>true</code>.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l85"><code>src&#x2F;eagle-brd-renderer.js:85</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l91"><code>src&#x2F;eagle-brd-renderer.js:91</code></a>
         </p>
 
 
@@ -3430,7 +3775,7 @@ board components</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l94"><code>src&#x2F;eagle-brd-renderer.js:94</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l100"><code>src&#x2F;eagle-brd-renderer.js:100</code></a>
         </p>
 
 
@@ -3455,7 +3800,7 @@ board components</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l101"><code>src&#x2F;eagle-brd-renderer.js:101</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l107"><code>src&#x2F;eagle-brd-renderer.js:107</code></a>
         </p>
 
 
@@ -3480,7 +3825,7 @@ board components</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l191"><code>src&#x2F;eagle-brd-renderer.js:191</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l197"><code>src&#x2F;eagle-brd-renderer.js:197</code></a>
         </p>
 
 
@@ -3507,7 +3852,7 @@ Coords in the XML should be multiplied by this before drawing.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l343"><code>src&#x2F;eagle-brd-renderer.js:343</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l356"><code>src&#x2F;eagle-brd-renderer.js:356</code></a>
         </p>
 
 
@@ -3532,7 +3877,7 @@ Coords in the XML should be multiplied by this before drawing.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l1089"><code>src&#x2F;eagle-brd-renderer.js:1089</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l1102"><code>src&#x2F;eagle-brd-renderer.js:1102</code></a>
         </p>
 
 
@@ -3559,7 +3904,7 @@ various important layout characteristics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l1406"><code>src&#x2F;eagle-brd-renderer.js:1406</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l1419"><code>src&#x2F;eagle-brd-renderer.js:1419</code></a>
         </p>
 
 
@@ -3584,7 +3929,7 @@ various important layout characteristics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l1001"><code>src&#x2F;eagle-brd-renderer.js:1001</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l1014"><code>src&#x2F;eagle-brd-renderer.js:1014</code></a>
         </p>
 
 
@@ -3609,7 +3954,7 @@ various important layout characteristics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l283"><code>src&#x2F;eagle-brd-renderer.js:283</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l296"><code>src&#x2F;eagle-brd-renderer.js:296</code></a>
         </p>
 
 
@@ -3634,7 +3979,7 @@ various important layout characteristics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l250"><code>src&#x2F;eagle-brd-renderer.js:250</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l263"><code>src&#x2F;eagle-brd-renderer.js:263</code></a>
         </p>
 
 
@@ -3659,7 +4004,7 @@ various important layout characteristics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l183"><code>src&#x2F;eagle-brd-renderer.js:183</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l189"><code>src&#x2F;eagle-brd-renderer.js:189</code></a>
         </p>
 
 
@@ -3685,7 +4030,7 @@ various important layout characteristics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l117"><code>src&#x2F;eagle-brd-renderer.js:117</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l123"><code>src&#x2F;eagle-brd-renderer.js:123</code></a>
         </p>
 
 
@@ -3711,7 +4056,7 @@ various important layout characteristics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l1008"><code>src&#x2F;eagle-brd-renderer.js:1008</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l1021"><code>src&#x2F;eagle-brd-renderer.js:1021</code></a>
         </p>
 
 
@@ -3736,7 +4081,7 @@ various important layout characteristics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l1015"><code>src&#x2F;eagle-brd-renderer.js:1015</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l1028"><code>src&#x2F;eagle-brd-renderer.js:1028</code></a>
         </p>
 
 
@@ -3761,7 +4106,7 @@ various important layout characteristics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l140"><code>src&#x2F;eagle-brd-renderer.js:140</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l146"><code>src&#x2F;eagle-brd-renderer.js:146</code></a>
         </p>
 
 
@@ -3787,7 +4132,7 @@ various important layout characteristics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l149"><code>src&#x2F;eagle-brd-renderer.js:149</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l155"><code>src&#x2F;eagle-brd-renderer.js:155</code></a>
         </p>
 
 
@@ -3812,7 +4157,7 @@ various important layout characteristics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l407"><code>src&#x2F;eagle-brd-renderer.js:407</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l420"><code>src&#x2F;eagle-brd-renderer.js:420</code></a>
         </p>
 
 
@@ -3837,7 +4182,7 @@ various important layout characteristics.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l156"><code>src&#x2F;eagle-brd-renderer.js:156</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l162"><code>src&#x2F;eagle-brd-renderer.js:162</code></a>
         </p>
 
 
@@ -3867,7 +4212,7 @@ the params, it will override that value.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l994"><code>src&#x2F;eagle-brd-renderer.js:994</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l1007"><code>src&#x2F;eagle-brd-renderer.js:1007</code></a>
         </p>
 
 
@@ -3892,7 +4237,7 @@ the params, it will override that value.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_eagle-brd-renderer.js.html#l172"><code>src&#x2F;eagle-brd-renderer.js:172</code></a>
+        <a href="../files/src_eagle-brd-renderer.js.html#l178"><code>src&#x2F;eagle-brd-renderer.js:178</code></a>
         </p>
 
 
