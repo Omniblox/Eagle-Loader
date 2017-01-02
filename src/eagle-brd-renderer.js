@@ -3359,9 +3359,10 @@ EagleBrdRenderer.prototype._populateFootprintsWithModel = function( geometry, mo
 
 	var self = this;
 
-	// Now that model is loaded, actually populate the footprints.
+	// Now that model is loaded, actually populate the footprints (except those marked "Do Not Populate").
 	this.connectElements.forEach(function (footprintConnector) {
-		if (footprintConnector.userData.package.getAttribute("name") == modelInfo.packageName) {
+		if ((footprintConnector.userData.package.getAttribute("name") == modelInfo.packageName) &&
+		    (footprintConnector.userData.element.getAttribute("value") != "DNP")) {
 			var cachedRotation = self.root.rotation; // Workaround due to Connector not
 			self.root.rotation.set(0,0,0);           // handling rotation of PCB correctly.
 
