@@ -55,6 +55,12 @@ var EagleBrdRenderer = function( xml, params ) {
 			approximate ghosts of on-board devices
 		@param [params.viewComponents=false] {boolean} Whether to load and
 			display models of the components on the PCB.
+		@param [params.componentMapCfg] {object} Alternative standard model
+			library map configuration to use instead of the default.
+		@param [params.componentMapCfg.mapUrl] {string} URL for the file that
+			contains the "component package name" to "model file path" mapping.
+		@param [params.componentMapCfg.urlPrefix] {string} (Optional) URL
+			prefix to prepend to the model file path when loading model file.
 	**/
 
 	console.log( "Beginning BRD parse" );
@@ -197,6 +203,13 @@ var EagleBrdRenderer = function( xml, params ) {
 	**/
 	this.coordScale = 1000 / this.pixelMicrons;
 
+	/**
+	List of all the "component package name" to "model file path"
+	mappings to be searched when locating a component package model.
+
+	@property _componentMaps {array}
+	@private
+	**/
 	this._componentMaps = [];
 
 	this._parseDesignRules();
@@ -3258,6 +3271,28 @@ EagleBrdRenderer.prototype.viewComponents = function( show, componentMapCfg ) {
 
 EagleBrdRenderer.prototype.loadComponentMap = function( url, modelUrlPrefix ) {
 
+	/**
+	Load a "Component Map" file from supplied URL and add the
+	mapping to the list of mappings we search to locate the
+	model file for a component package.
+
+	The "Component Map" file contains the "component package
+	name" to "model file path" mapping required to locate the
+	model file.
+
+	Loading a component map triggers population of all footprints
+	with matching component package names.
+
+	Can be used to supply additional component mappings to
+	supplement the "standard library" mapping shipped with Eagle-Loader.
+
+	@method loadComponentMap
+	@param [url] {string} URL for the "Component Map" file
+	   to load.
+	@param [modelUrlPrefix] {string} (Optional) URL prefix to
+	   prepend to the model file path when loading model file.
+	**/
+
 	var self = this;
 
 	var loader = new THREE.XHRLoader();
@@ -3272,6 +3307,24 @@ EagleBrdRenderer.prototype.loadComponentMap = function( url, modelUrlPrefix ) {
 
 
 EagleBrdRenderer.prototype._getModelInfo = function( packageName ) {
+
+	/**
+	Retrieve URL (and related information) of the model file
+	mapped to the supplied component package name (if found).
+
+	Searches all the loaded component maps.
+
+	The related information returned is that which is found in
+	the component mapping file (e.g. rotation & scale modifications
+	required to display the model correctly) and varies with
+	each component.
+
+	@method _getModelInfo
+	@param [packageName] {string} Name of the component package to find.
+	@return {object} `.url` contains the full URL. Also `.rotation` & `.scale` etc may be present.
+	@private
+	**/
+
 	var modelInfo = undefined;
 	var activeComponentMapCfg = undefined;
 
@@ -3300,6 +3353,20 @@ EagleBrdRenderer.prototype._getModelInfo = function( packageName ) {
 
 
 EagleBrdRenderer.prototype._populateAllFootprints = function() {
+
+	/**
+	Triggered when a component map file is successfully loaded.
+
+	Ensures all the required & available component package model
+	files are loaded.
+
+	Then triggers actual placement of component package models
+	for matching footprints on the board.
+
+	@method _populateAllFootprints
+	@private
+	**/
+
 
 	var self = this;
 
@@ -3331,6 +3398,17 @@ EagleBrdRenderer.prototype._populateAllFootprints = function() {
 
 
 EagleBrdRenderer.prototype._populateFootprintsWithModel = function( geometry, modelInfo ) {
+
+	/**
+	Actually place component package models for all the matching footprints
+	on the board (that are not marked "DNP" i.e. "Do Not Place").
+
+	@method _populateFootprintsWithModel
+	@param [geometry] {THREE.Geometry} Loaded geometry of component
+	   package model specified by `modelInfo`.
+	@param [modelInfo] {object} See `_getModelInfo` for properties.
+	@private
+	**/
 
 	// "Normalise" scale, orientation and position of model
 	// TODO: Implement other properties.
