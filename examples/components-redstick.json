@@ -26,7 +26,10 @@
    "models-redstick/sparkfun/production_parts/opto/LED_0603/LED-0603.stl"
   ], 
   "filename": "models-redstick/sparkfun/production_parts/passive/resistors/0603/LED-0603.stl", 
-  "note": "The sensibly named duplicate has a missing face."
+  "note": "The sensibly named duplicate has a missing face.",
+  "rotation": {
+   "z": 90
+  }
  }, 
  "RESONATOR_SMD": {
   "filename": "models-redstick/sparkfun/production_parts/passive/resonator/RESONATOR-SMD/stl/RESONATOR_SMD.STL"
