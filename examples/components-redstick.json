@@ -30,16 +30,16 @@
  }, 
  "RESONATOR-SMD": {
   "duplicates": [
-   "models/sparkfun/production_parts/passive/resonator/RESONATOR-SMD/stl/RESONATOR-SMD.stl"
+   "models-redstick/sparkfun/production_parts/passive/resonator/RESONATOR-SMD/stl/RESONATOR-SMD.stl"
   ], 
-  "filename": "models/sparkfun/production_parts/passive/resonator/RESONATOR-SMD/stl/RESONATOR_SMD.STL", 
+  "filename": "models-redstick/sparkfun/production_parts/passive/resonator/RESONATOR-SMD/stl/RESONATOR_SMD.STL", 
   "note": "Possibly needs to be rotated around Z to be completely accurate."
  }, 
  "SMA-DIODE": {
   "duplicates": [
-   "models/sparkfun/production_parts/semiconductors/diode/DO-214AC/stl/SMA-DIODE.stl"
+   "models-redstick/sparkfun/production_parts/semiconductors/diode/DO-214AC/stl/SMA-DIODE.stl"
   ], 
-  "filename": "models/sparkfun/production_parts/semiconductors/diode/DO-214AC/stl/DO-214AC.STL", 
+  "filename": "models-redstick/sparkfun/production_parts/semiconductors/diode/DO-214AC/stl/DO-214AC.STL", 
   "rotation": {
    "z": 180
   }
