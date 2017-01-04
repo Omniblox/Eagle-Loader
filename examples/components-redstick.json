@@ -9,9 +9,6 @@
   "filename": "models-redstick/sparkfun/production_parts/passive/inductors/CR54/stl/CR54.STL", 
   "note": "Possibly needs to be rotated around Z to be completely accurate?"
  }, 
- "DO-214AC": {
-  "filename": "models-redstick/sparkfun/production_parts/semiconductors/diode/DO-214AC/stl/DO-214AC.STL"
- }, 
  "EIA3216": {
   "filename": "models-redstick/sparkfun/production_parts/passive/tantelum_smd/EIA3216.stl"
  }, 
@@ -37,6 +34,15 @@
   ], 
   "filename": "models/sparkfun/production_parts/passive/resonator/RESONATOR-SMD/stl/RESONATOR_SMD.STL", 
   "note": "Possibly needs to be rotated around Z to be completely accurate."
+ }, 
+ "SMA-DIODE": {
+  "duplicates": [
+   "models/sparkfun/production_parts/semiconductors/diode/DO-214AC/stl/SMA-DIODE.stl"
+  ], 
+  "filename": "models/sparkfun/production_parts/semiconductors/diode/DO-214AC/stl/DO-214AC.STL", 
+  "rotation": {
+   "z": 180
+  }
  }, 
  "SOT23-3": {
   "filename": "models-redstick/sparkfun/production_parts/semiconductors/IC_SMD/SOT/SOT23-3.STL", 
