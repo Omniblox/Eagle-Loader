@@ -75,6 +75,12 @@ THREE.BRDLoader.prototype = {
 
 	load: function ( url, brdParams, onLoad, onProgress, onError, fontPath ) {
 
+		if (brdParams.viewComponents == true) {
+			if (typeof THREE.STLLoader !== 'function'){
+				console.error('You need to add THREE.STLLoader to see components on your BRD file.');
+			}
+		}
+
 		console.log("THREE.BRDLoader " + this.version + " (" + this.revision + ")");
 
 		var i, style, urls,

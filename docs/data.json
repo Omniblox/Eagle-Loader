@@ -369,6 +369,33 @@
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
+                        },
+                        {
+                            "name": "viewComponents",
+                            "description": "Whether to load and\n\t\tdisplay models of the components on the PCB.",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "false"
+                        },
+                        {
+                            "name": "componentMapCfg",
+                            "description": "Alternative standard model\n\t\tlibrary map configuration to use instead of the default.",
+                            "type": "Object",
+                            "optional": true,
+                            "props": [
+                                {
+                                    "name": "mapUrl",
+                                    "description": "URL for the file that\n\t\tcontains the \"component package name\" to \"model file path\" mapping.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "urlPrefix",
+                                    "description": "(Optional) URL\n\t\tprefix to prepend to the model file path when loading model file.",
+                                    "type": "String",
+                                    "optional": true
+                                }
+                            ]
                         }
                     ]
                 },
@@ -400,7 +427,7 @@
         },
         {
             "file": "src/BRDLoader.js",
-            "line": 123,
+            "line": 137,
             "description": "Construct the EagleBrdRenderer object THREE.js geometry (brd.root),\nbearing composited textures from all layers.",
             "itemtype": "method",
             "name": "_parse",
@@ -411,19 +438,20 @@
                     "type": "String"
                 },
                 {
-                    "name": "brdParams",
-                    "description": "Composite parameter object describing params\n\tfor rendering the .brd file",
+                    "name": "params",
+                    "description": "Composite parameter object",
                     "type": "Object",
+                    "optional": true,
                     "props": [
                         {
-                            "name": "color",
-                            "description": "Define custom colors;\n\t\tsee `this.colors`",
+                            "name": "colors",
+                            "description": "Define custom colors; see `this.colors`",
                             "type": "Object",
                             "optional": true
                         },
                         {
                             "name": "composite",
-                            "description": "Whether to\n\t\tcomposite layers, or render them as individual geometries.\n\t\tWarning: individual layers are very slow.",
+                            "description": "Whether to composite layers,\n\t\tor render them as individual geometries. Warning: individual\n\t\tlayers are very slow.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "true"
@@ -436,13 +464,6 @@
                             "optdefault": "0.8"
                         },
                         {
-                            "name": "pixelMicrons",
-                            "description": "Resolution of texture maps.\n\t\tBy default, this is 35 microns, equal to the thickness\n\t\tof a default copper layer. Note that this will affect the\n\t\tsize of the board geometry.",
-                            "type": "Number",
-                            "optional": true,
-                            "optdefault": "35"
-                        },
-                        {
                             "name": "material",
                             "description": "Material shader to use.\n\t\tOptions include `\"phong\"` for realistic lighting,\n\t\t`\"lambert\"` for flat lighting, and `\"basic\"` for no lighting.",
                             "type": "String",
@@ -450,18 +471,58 @@
                             "optdefault": "\"phong\""
                         },
                         {
+                            "name": "pixelMicrons",
+                            "description": "Resolution of texture maps.\n\t\tBy default, this is 35 microns, equal to the thickness\n\t\tof a default copper layer. Note that this will affect the\n\t\tsize of the board geometry.",
+                            "type": "Number",
+                            "optional": true,
+                            "optdefault": "35"
+                        },
+                        {
+                            "name": "thickness",
+                            "description": "Override computed thickness\n\t\tof board. Measured in millimeters. Note that this value will be\n\t\tconverted to pixels for use within the board.",
+                            "type": "Number",
+                            "optional": true
+                        },
+                        {
                             "name": "viewConnectors",
-                            "description": "Whether to\n\t\tvisualize Connector objects",
+                            "description": "Whether to visualize\n\t\tConnector objects",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
                         },
                         {
                             "name": "viewGhosts",
-                            "description": "Whether to\n\t\tdraw approximate ghosts of on-board devices",
+                            "description": "Whether to draw\n\t\tapproximate ghosts of on-board devices",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
+                        },
+                        {
+                            "name": "viewComponents",
+                            "description": "Whether to load and\n\t\tdisplay models of the components on the PCB.",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "false"
+                        },
+                        {
+                            "name": "componentMapCfg",
+                            "description": "Alternative standard model\n\t\tlibrary map configuration to use instead of the default.",
+                            "type": "Object",
+                            "optional": true,
+                            "props": [
+                                {
+                                    "name": "mapUrl",
+                                    "description": "URL for the file that\n\t\tcontains the \"component package name\" to \"model file path\" mapping.",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "urlPrefix",
+                                    "description": "(Optional) URL\n\t\tprefix to prepend to the model file path when loading model file.",
+                                    "type": "String",
+                                    "optional": true
+                                }
+                            ]
                         }
                     ]
                 }

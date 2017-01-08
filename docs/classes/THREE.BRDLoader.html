@@ -202,7 +202,7 @@ into a THREE.js environment</p>
                         <code>data</code>
                 </li>
                 <li class="arg">
-                        <code>brdParams</code>
+                        <code class="optional">[params]</code>
                 </li>
             </ul><span class="paren">)</span>
         </div>
@@ -218,7 +218,7 @@ into a THREE.js environment</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_BRDLoader.js.html#l123"><code>src&#x2F;BRDLoader.js:123</code></a>
+        <a href="../files/src_BRDLoader.js.html#l137"><code>src&#x2F;BRDLoader.js:137</code></a>
         </p>
 
 
@@ -247,25 +247,24 @@ bearing composited textures from all layers.</p>
 
                 </li>
                 <li class="param">
-                        <code class="param-name">brdParams</code>
+                        <code class="param-name optional">[params]</code>
                         <span class="type">Object</span>
+                        <span class="flag optional" title="This parameter is optional.">optional</span>
 
 
                     <div class="param-description">
-                        <p>Composite parameter object describing params
-for rendering the .brd file</p>
+                        <p>Composite parameter object</p>
 
                     </div>
 
                         <ul class="params-list">
                             <li class="param">
-                                    <code class="param-name optional">[color]</code>
+                                    <code class="param-name optional">[colors]</code>
                                     <span class="type">Object</span>
                                     <span class="flag optional" title="This parameter is optional.">optional</span>
 
                                 <div class="param-description">
-                                    <p>Define custom colors;
-see <code>this.colors</code></p>
+                                    <p>Define custom colors; see <code>this.colors</code></p>
 
                                 </div>
 
@@ -276,9 +275,9 @@ see <code>this.colors</code></p>
                                     <span class="flag optional" title="This parameter is optional.">optional</span>
 
                                 <div class="param-description">
-                                    <p>Whether to
-composite layers, or render them as individual geometries.
-Warning: individual layers are very slow.</p>
+                                    <p>Whether to composite layers,
+or render them as individual geometries. Warning: individual
+layers are very slow.</p>
 
                                 </div>
 
@@ -291,6 +290,19 @@ Warning: individual layers are very slow.</p>
                                 <div class="param-description">
                                     <p>Opacity of solder mask;
 opacity is halved over copper traces</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[material=&quot;phong&quot;]</code>
+                                    <span class="type">String</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Material shader to use.
+Options include <code>&quot;phong&quot;</code> for realistic lighting,
+<code>&quot;lambert&quot;</code> for flat lighting, and <code>&quot;basic&quot;</code> for no lighting.</p>
 
                                 </div>
 
@@ -310,14 +322,14 @@ size of the board geometry.</p>
 
                             </li>
                             <li class="param">
-                                    <code class="param-name optional">[material=&quot;phong&quot;]</code>
-                                    <span class="type">String</span>
+                                    <code class="param-name optional">[thickness]</code>
+                                    <span class="type">Number</span>
                                     <span class="flag optional" title="This parameter is optional.">optional</span>
 
                                 <div class="param-description">
-                                    <p>Material shader to use.
-Options include <code>&quot;phong&quot;</code> for realistic lighting,
-<code>&quot;lambert&quot;</code> for flat lighting, and <code>&quot;basic&quot;</code> for no lighting.</p>
+                                    <p>Override computed thickness
+of board. Measured in millimeters. Note that this value will be
+converted to pixels for use within the board.</p>
 
                                 </div>
 
@@ -328,8 +340,8 @@ Options include <code>&quot;phong&quot;</code> for realistic lighting,
                                     <span class="flag optional" title="This parameter is optional.">optional</span>
 
                                 <div class="param-description">
-                                    <p>Whether to
-visualize Connector objects</p>
+                                    <p>Whether to visualize
+Connector objects</p>
 
                                 </div>
 
@@ -340,11 +352,57 @@ visualize Connector objects</p>
                                     <span class="flag optional" title="This parameter is optional.">optional</span>
 
                                 <div class="param-description">
-                                    <p>Whether to
-draw approximate ghosts of on-board devices</p>
+                                    <p>Whether to draw
+approximate ghosts of on-board devices</p>
 
                                 </div>
 
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[viewComponents=false]</code>
+                                    <span class="type">Boolean</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Whether to load and
+display models of the components on the PCB.</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[componentMapCfg]</code>
+                                    <span class="type">Object</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Alternative standard model
+library map configuration to use instead of the default.</p>
+
+                                </div>
+
+                                    <ul class="params-list">
+                                        <li class="param">
+                                                <code class="param-name optional">[mapUrl]</code>
+                                                <span class="type">String</span>
+                                                <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                            <div class="param-description">
+                                                URL for the file that
+		contains the "component package name" to "model file path" mapping.
+                                            </div>
+                                        </li>
+                                        <li class="param">
+                                                <code class="param-name optional">[urlPrefix]</code>
+                                                <span class="type">String</span>
+                                                <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                            <div class="param-description">
+                                                (Optional) URL
+		prefix to prepend to the model file path when loading model file.
+                                            </div>
+                                        </li>
+                                    </ul>
                             </li>
                         </ul>
                 </li>
@@ -528,6 +586,52 @@ approximate ghosts of on-board devices</p>
 
                                 </div>
 
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[viewComponents=false]</code>
+                                    <span class="type">Boolean</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Whether to load and
+display models of the components on the PCB.</p>
+
+                                </div>
+
+                            </li>
+                            <li class="param">
+                                    <code class="param-name optional">[componentMapCfg]</code>
+                                    <span class="type">Object</span>
+                                    <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                <div class="param-description">
+                                    <p>Alternative standard model
+library map configuration to use instead of the default.</p>
+
+                                </div>
+
+                                    <ul class="params-list">
+                                        <li class="param">
+                                                <code class="param-name optional">[mapUrl]</code>
+                                                <span class="type">String</span>
+                                                <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                            <div class="param-description">
+                                                URL for the file that
+		contains the "component package name" to "model file path" mapping.
+                                            </div>
+                                        </li>
+                                        <li class="param">
+                                                <code class="param-name optional">[urlPrefix]</code>
+                                                <span class="type">String</span>
+                                                <span class="flag optional" title="This parameter is optional.">optional</span>
+
+                                            <div class="param-description">
+                                                (Optional) URL
+		prefix to prepend to the model file path when loading model file.
+                                            </div>
+                                        </li>
+                                    </ul>
                             </li>
                         </ul>
                 </li>
