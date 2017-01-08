@@ -1,11 +1,11 @@
 <html>
 	<head>
 		<script src="../lib/three.js"></script>
+		<script src="js/OrbitControls.js"></script>
+
 		<!-- NOTE: STL Loader is required to load component models -->
 		<script src="../lib/STLLoader.js"></script>
 		<script src="../dist/EagleLoader.js"></script>
-
-		<script src="js/OrbitControls.js"></script>
 
 
 		<link rel="stylesheet" type="text/css" href="style.css">
@@ -99,13 +99,8 @@
 				brdParams,
 				function ( board ) {
 					addToScene(board);
-				},
-				undefined,
-				undefined,
-				[
-					"../dist/OCRA.woff",
-					"../dist/OCRA.otf"
-				] );
+				});
+
 		</script>
 	</body>
 </html>

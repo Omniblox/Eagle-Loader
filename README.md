@@ -77,6 +77,70 @@ For an approximate board display, you may include the OCR-A font. Find `OCRA.wof
 
 This version of the OCR-A font was created by Matthew Skala and is public domain. See `assets/fonts/ocr-0.2/` for more information.
 
+## Showing Components
+
+This library has the ability to place components on the rendering of the BRD file. To do that you need to provide the BRD file, a directory of STL models and a component map. The file `examples/components.html` shows how to arrange this correctly.
+
+Start by copying the `THREE.js` library and the `STLLoader.js` library from `lib/` then load the `EagleLoader.js` script from `dist/`.
+
+Here’s how to load the .brd file with components into an existing THREE.js scene:
+
+```javascript
+var url = 'path/to/file.brd';
+
+var brdParams = {
+  colors: {
+    solderMask: "rgb( 255, 0, 0 )"
+  },
+  viewComponents: true,
+  componentMapCfg: {mapUrl: "path/to/components/map.json"},
+};
+
+loader = new THREE.BRDLoader();
+loader.load(
+  url,
+  brdParams,
+  function ( board ) {
+    addToScene(board);
+  });
+```
+
+The component map is a list that maps package names to geometry files. At present these are only STL files. The basic example is:
+
+ ```javascript
+ {
+  "0603-CAP": {
+   "filename": "models/sparkfun/redstick/passive/ceramic_smd/0603/0603-CAP.stl"
+  },
+  "0603-RES": {
+   "filename": "models/sparkfun/redstick/passive/resistors/0603/0603-RES.stl"
+  }
+}
+```
+
+To orient component geometry correctly you can rotate and scale it.
+
+```javascript
+{
+  "SOT23-3": {
+    "filename": "models/sparkfun/redstick/semiconductors/IC_SMD/SOT/SOT23-3.STL",
+    "rotation": {
+      "x": 90,
+      "z": 180
+    }
+  },
+  "TQFP32-08": {
+    "filename": "models/sparkfun/redstick/semiconductors/IC_SMD/TQFP/TQFP32-08/TQFP32-08.stl",
+    "scale": {
+      "x": 0.001,
+      "y": 0.001,
+      "z": 0.001
+    }
+  }
+}
+
+NOTE: If you do not include the STLLoader the BRD file will still render - but no components will display. Look for the following error in your javascript console: `You need to add THREE.STLLoader to see components on your BRD file.`
+
 ## Future Development
 
 We know these features would be great; so we’re working on them:

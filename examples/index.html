@@ -2,6 +2,7 @@
 	<head>
 		<script src="../lib/three.js"></script>
 		<script src="js/OrbitControls.js"></script>
+
 		<script src="../dist/EagleLoader.js"></script>
 
 		<link rel="stylesheet" type="text/css" href="style.css">
@@ -94,14 +95,8 @@
 				brdParams,
 				function ( board ) {
 					addToScene(board);
-				},
-				undefined,
-				undefined,
-				[
-					"../dist/OCRA.woff",
-					"../dist/OCRA.otf"
-				] );
-				
+				});
+
 		</script>
 	</body>
 </html>
