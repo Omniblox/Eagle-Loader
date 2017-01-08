@@ -13,8 +13,8 @@ THREE.BRDLoader = function ( manager ) {
 	@param [manager] {THREE.LoadingManager} Loading manager to use
 	**/
 
-	this.revision = "Welcome to New York by Ryan Adams";
-	this.version = "0.1.2";
+	this.revision = "Blank Space by Ryan Adams";
+	this.version = "0.2.0";
 
 	this.manager = ( manager !== undefined ) ?
 		manager :
@@ -52,6 +52,14 @@ THREE.BRDLoader.prototype = {
 			Connector objects
 		@param [params.viewGhosts=false] {boolean} Whether to draw
 			approximate ghosts of on-board devices
+		@param [params.viewComponents=false] {boolean} Whether to load and
+			display models of the components on the PCB.
+		@param [params.componentMapCfg] {object} Alternative standard model
+			library map configuration to use instead of the default.
+		@param [params.componentMapCfg.mapUrl] {string} URL for the file that
+			contains the "component package name" to "model file path" mapping.
+		@param [params.componentMapCfg.urlPrefix] {string} (Optional) URL
+			prefix to prepend to the model file path when loading model file.
 	@param onLoad {function} Will be called when load completes.
 		The argument will be the loaded Object3D.
 	@param [onProgress] {function} Will be called while load progresses.
@@ -126,26 +134,35 @@ THREE.BRDLoader.prototype = {
 
 	@method _parse
 	@param data {String} Contents of the .brd file as a string
-	@param brdParams {object} Composite parameter object describing params
-		for rendering the .brd file
-		@param [brdParams.color] {object} Define custom colors;
-			see `this.colors`
-		@param [brdParams.composite=true] {boolean} Whether to
-			composite layers, or render them as individual geometries.
-			Warning: individual layers are very slow.
-		@param [brdParams.maskOpacity=0.8] {number} Opacity of solder mask;
+	@param [params] {object} Composite parameter object
+		@param [params.colors] {object} Define custom colors; see `this.colors`
+		@param [params.composite=true] {boolean} Whether to composite layers,
+			or render them as individual geometries. Warning: individual
+			layers are very slow.
+		@param [params.maskOpacity=0.8] {number} Opacity of solder mask;
 			opacity is halved over copper traces
-		@param [brdParams.pixelMicrons=35] {number} Resolution of texture maps.
+		@param [params.material="phong"] {string} Material shader to use.
+			Options include `"phong"` for realistic lighting,
+			`"lambert"` for flat lighting, and `"basic"` for no lighting.
+		@param [params.pixelMicrons=35] {number} Resolution of texture maps.
 			By default, this is 35 microns, equal to the thickness
 			of a default copper layer. Note that this will affect the
 			size of the board geometry.
-		@param [brdParams.material="phong"] {string} Material shader to use.
-			Options include `"phong"` for realistic lighting,
-			`"lambert"` for flat lighting, and `"basic"` for no lighting.
-		@param [brdParams.viewConnectors=false] {boolean} Whether to
-			visualize Connector objects
-		@param [brdParams.viewGhosts=false] {boolean} Whether to
-			draw approximate ghosts of on-board devices
+		@param [params.thickness] {number} Override computed thickness
+			of board. Measured in millimeters. Note that this value will be
+			converted to pixels for use within the board.
+		@param [params.viewConnectors=false] {boolean} Whether to visualize
+			Connector objects
+		@param [params.viewGhosts=false] {boolean} Whether to draw
+			approximate ghosts of on-board devices
+		@param [params.viewComponents=false] {boolean} Whether to load and
+			display models of the components on the PCB.
+		@param [params.componentMapCfg] {object} Alternative standard model
+			library map configuration to use instead of the default.
+		@param [params.componentMapCfg.mapUrl] {string} URL for the file that
+			contains the "component package name" to "model file path" mapping.
+		@param [params.componentMapCfg.urlPrefix] {string} (Optional) URL
+			prefix to prepend to the model file path when loading model file.
 	@private
 	**/
 

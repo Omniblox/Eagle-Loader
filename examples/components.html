@@ -1,8 +1,12 @@
 <html>
 	<head>
 		<script src="../lib/three.js"></script>
-		<script src="js/OrbitControls.js"></script>
+		<!-- NOTE: STL Loader is required to load component models -->
+		<script src="../lib/STLLoader.js"></script>
 		<script src="../dist/EagleLoader.js"></script>
+
+		<script src="js/OrbitControls.js"></script>
+
 
 		<link rel="stylesheet" type="text/css" href="style.css">
 
@@ -16,7 +20,7 @@
 		<p>
 			<ul>
 				<li><a href="complex.html">Click here</a> for a more complex example.</li>
-				<li><a href="components.html">Click here</a> for an example with components.</li>
+				<li><a href="index.html">Click here</a> for a simple example.</li>
 			</ul>
 		</p>
 
@@ -80,15 +84,16 @@
 					animate();
 				};
 
-			url = "brd-files/sparkfun/photon/photon.brd";
+			url = "brd-files/sparkfun/redstick/sparkfun_redstick.brd";
 			brdParams = {
 				colors: {
 					solderMask: "rgb( 255, 0, 0 )"
-				}
-			}
+				},
+				viewComponents: true,
+				componentMapCfg: {mapUrl: "components-redstick.json"},
+			};
 
 			loader = new THREE.BRDLoader();
-
 			loader.load(
 				url,
 				brdParams,
@@ -101,7 +106,6 @@
 					"../dist/OCRA.woff",
 					"../dist/OCRA.otf"
 				] );
-				
 		</script>
 	</body>
 </html>

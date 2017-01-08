@@ -1,12 +1,14 @@
 <html>
   <head>
     <script src="../lib/three.js"></script>
-    <script src="../lib/STLLoader.js"></script>
 
+    <!-- NOTE: STL Loader is required to load component models -->
+    <script src="../lib/STLLoader.js"></script>
+    <script src="../dist/EagleLoader.js"></script>
 
     <script src="js/OrbitControls.js"></script>
     <script src="js/jquery-2.2.3.min.js"></script>
-    <script src="../dist/EagleLoader.js"></script>
+
     <link rel="stylesheet" type="text/css" href="style.css">
 
     <script>
@@ -173,8 +175,11 @@
     <div id="loading">
     </div>
     <p>
-      <a href="index.html">Click here</a> for a simple example.
-    </p>
+			<ul>
+				<li><a href="index.html">Click here</a> for a simple example.</li>
+				<li><a href="components.html">Click here</a> for an example with components (or select 'RedStick' from the dropdown).</li>
+			</ul>
+		</p>
 
     <script>
 
@@ -230,7 +235,7 @@
 
     				brd.root.rotation.x =	0.2 * Math.sin( now * 0.00013 );
     				brd.root.rotation.z =	0.2 * Math.sin( now * 0.00031 );
-    				brd.root.rotation.y = now * 0.00037;
+    				brd.root.rotation.y = now * 0.00020;
 
             controls.update();
     				renderer.render( scene, camera );
