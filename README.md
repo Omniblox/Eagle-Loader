@@ -138,8 +138,9 @@ To orient component geometry correctly you can rotate and scale it.
     }
   }
 }
+```
 
-NOTE: If you do not include the STLLoader the BRD file will still render - but no components will display. Look for the following error in your javascript console: `You need to add THREE.STLLoader to see components on your BRD file.`
+NOTE: If you don't include the STLLoader the BRD file will still render - but no components will display. Look for the following error in your javascript console: `You need to add THREE.STLLoader to see components on your BRD file.`
 
 ## Future Development
 
