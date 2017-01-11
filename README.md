@@ -6,6 +6,9 @@ Benjamin D. Richards,
 David ten Have,
 St. Zeno Exploration Ltd
 
+Philip Lindsay,
+[RancidBacon.com](http://rancidbacon.com/)
+
 Copyright (c) 2016, St. Zeno Exploration Ltd.
 
 ## About Script
