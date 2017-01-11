@@ -145,6 +145,38 @@ To orient component geometry correctly you can rotate and scale it.
 
 NOTE: If you don't include the STLLoader the BRD file will still render - but no components will display. Look for the following error in your javascript console: `You need to add THREE.STLLoader to see components on your BRD file.`
 
+
+## Development
+
+Want to make your own modifications to the library? Here's how to get
+started...
+
+### Setup the development environment
+
+ * Get the source code:
+
+        git clone https://github.com/Omniblox/Eagle-Loader.git
+
+ * Install the build system (we use Grunt, for more details see <http://gruntjs.com/getting-started#installing-the-cli>):
+
+        npm install -g grunt-cli
+
+ * Install the dependencies for the project (see <http://gruntjs.com/getting-started#working-with-an-existing-grunt-project>):
+
+        cd Eagle-Loader
+        npm install
+
+ * Trigger a build with:
+
+        grunt
+
+   This will place the updated library in the `dist/` subdirectory.
+
+   Note: You will need to re-run the `grunt` command whenever you edit
+         the source code in `src` in order for your changes to be
+         available to the included examples.
+
+
 ## Future Development
 
 We know these features would be great; so we’re working on them:
