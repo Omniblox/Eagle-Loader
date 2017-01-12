@@ -3425,6 +3425,29 @@ EagleBrdRenderer.prototype._populateFootprintsWithModel = function( geometry, mo
 		geometry.scale(modelInfo.scale.x || 1.0, modelInfo.scale.y || 1.0, modelInfo.scale.z || 1.0);
 	}
 
+	// Our default behaviour is to center models (on X & Y axis) around the
+	// origin (0, 0) as most footprints have their origins at their center.
+	// Since many models are already centered this is frequently redundant
+	// but there seems little benefit from handling those cases separately.
+	//
+	// If a footprint has an origin that is not at its center then we assume
+	// the model is correctly non-centered also & thus we indicate the library
+	// should not center the model by specifying `"center": false` in the
+	// component map file.
+	//
+	// While we could attempt to handle these variations "automatically" the
+	// footprint file format seems to require us to calculate the origin point
+	// which is non-trivial. Additionally, for the moment, manually specifying
+	// that a model shouldn't be centered seems easier than automatic detection.
+	//
+	// Note also: The footprint origin issue also impacts on the positioning
+	//            of Connectors on component models.
+	if (!(modelInfo.hasOwnProperty("center") && (modelInfo.center == false))) {
+		// Based on `THREE.Geometry.center()` but ignoring Z axis.
+		geometry.computeBoundingBox();
+		var offset = geometry.boundingBox.center().negate();
+		geometry.translate(offset.x, offset.y, 0);
+	}
 
 	// TODO: Document required scale in models for this to work.
 	geometry.scale(this.coordScale, this.coordScale, this.coordScale);
@@ -3452,8 +3475,22 @@ EagleBrdRenderer.prototype._populateFootprintsWithModel = function( geometry, mo
 			component.connector.master = component;
 
 			component.connector.rotation.x = Math.PI / 2; // Horizontal
-			component.connector.position.x = component.geometry.boundingBox.center().x;
-			component.connector.position.y = component.geometry.boundingBox.center().y;
+
+			// The footprint Connector is positioned at the origin (0, 0)
+			// which is usually, but not always, the center of the footprint.
+			//
+			// We position the component model connector at the origin (0, 0)
+			// of the model--which by default is the center of the model
+			// (because we center the model by default) but will not be the
+			// center of correctly modeled components for non-centered
+			// footprints.
+			//
+			// This should result in the correct placement of a component model
+			// in relation to its footprint--if placement is not correct,
+			// either the model needs to be repositioned to match the footprint
+			// or we need to add more sophisticated detection of correct placement.
+			component.connector.position.x = 0;
+			component.connector.position.y = 0;
 
 			component.add(component.connector);
 			component.connector.connectTo(footprintConnector);
