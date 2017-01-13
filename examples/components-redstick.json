@@ -20,7 +20,7 @@
  },
  "LED-0603": {
   "duplicates": [
-   "models-redstick/sparkfun/production_parts/opto/LED_0603/LED-0603.stl"
+   "models/sparkfun/production_parts/opto/LED_0603/LED-0603.stl"
   ],
   "filename": "models-redstick/sparkfun/production_parts/passive/resistors/0603/LED-0603.stl",
   "note": "The sensibly named duplicate has a missing face.",
@@ -30,14 +30,14 @@
  },
  "RESONATOR-SMD": {
   "duplicates": [
-   "models-redstick/sparkfun/production_parts/passive/resonator/RESONATOR-SMD/stl/RESONATOR-SMD.stl"
+   "models/sparkfun/production_parts/passive/resonator/RESONATOR-SMD/stl/RESONATOR-SMD.stl"
   ],
   "filename": "models-redstick/sparkfun/production_parts/passive/resonator/RESONATOR-SMD/stl/RESONATOR_SMD.STL",
   "note": "Possibly needs to be rotated around Z to be completely accurate."
  },
  "SMA-DIODE": {
   "duplicates": [
-   "models-redstick/sparkfun/production_parts/semiconductors/diode/DO-214AC/stl/SMA-DIODE.stl"
+   "models/sparkfun/production_parts/semiconductors/diode/DO-214AC/stl/SMA-DIODE.stl"
   ],
   "filename": "models-redstick/sparkfun/production_parts/semiconductors/diode/DO-214AC/stl/DO-214AC.STL",
   "rotation": {
