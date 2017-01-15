@@ -3398,11 +3398,42 @@ EagleBrdRenderer.prototype._populateAllFootprints = function() {
 };
 
 
+EagleBrdRenderer.prototype._shouldPopulate = function(element) {
+
+	/**
+	Determine if a particular component footprint should be
+	populated. Used to determine if a component package model
+	should be displayed.
+
+	Factors used to determine whether a component should be
+	populated are based on observed conventions in sample
+	`.brd` files. These heuristics are fallible, not least
+	because humans aren't known for their consistency...
+
+	@method _shouldPopulate
+	@param [element] {Element} Eagle `element` instance.
+	@return {boolean} Whether model should be displayed.
+	@private
+	**/
+
+	// TODO: Allow override list...
+
+	var elementValue = element.getAttribute("value");
+
+	// SparkFun sometimes specifies a value in `PROD_ID` Eagle attribute.
+	// TODO: Actually check the attribute is `PROD_ID`?
+	var eagleAttributes = element.getElementsByTagName("attribute")
+
+	return (elementValue != "DNP") // "Do Not Place"
+		&& (!!elementValue || (eagleAttributes.length && !!eagleAttributes[0].getAttribute("value")));
+}
+
+
 EagleBrdRenderer.prototype._populateFootprintsWithModel = function( geometry, modelInfo ) {
 
 	/**
 	Actually place component package models for all the matching footprints
-	on the board (that are not marked "DNP" i.e. "Do Not Place").
+	on the board that the design indicates should be populated.
 
 	@method _populateFootprintsWithModel
 	@param [geometry] {THREE.Geometry} Loaded geometry of component
@@ -3464,7 +3495,7 @@ EagleBrdRenderer.prototype._populateFootprintsWithModel = function( geometry, mo
 	// Now that model is loaded, actually populate the footprints (except those marked "Do Not Populate").
 	this.connectElements.forEach(function (footprintConnector) {
 		if ((footprintConnector.userData.package.getAttribute("name") == modelInfo.packageName) &&
-		    (footprintConnector.userData.element.getAttribute("value") != "DNP")) {
+		    (self._shouldPopulate(footprintConnector.userData.element))) {
 			var cachedRotation = self.root.rotation; // Workaround due to Connector not
 			self.root.rotation.set(0,0,0);           // handling rotation of PCB correctly.
 
