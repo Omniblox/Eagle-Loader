@@ -54,6 +54,9 @@ THREE.BRDLoader.prototype = {
 			approximate ghosts of on-board devices
 		@param [params.viewComponents=false] {boolean} Whether to load and
 			display models of the components on the PCB.
+		@param [params.shouldPopulate] {object} Hash of component names
+			(e.g. `J1`, `LED1`) and whether the associated component model
+			should be displayed or not. Overrides the default heuristics.
 		@param [params.componentMapCfg] {object} Alternative standard model
 			library map configuration to use instead of the default.
 		@param [params.componentMapCfg.mapUrl] {string} URL for the file that
@@ -163,6 +166,9 @@ THREE.BRDLoader.prototype = {
 			approximate ghosts of on-board devices
 		@param [params.viewComponents=false] {boolean} Whether to load and
 			display models of the components on the PCB.
+		@param [params.shouldPopulate] {object} Hash of component names
+			(e.g. `J1`, `LED1`) and whether the associated component model
+			should be displayed or not. Overrides the default heuristics.
 		@param [params.componentMapCfg] {object} Alternative standard model
 			library map configuration to use instead of the default.
 		@param [params.componentMapCfg.mapUrl] {string} URL for the file that
