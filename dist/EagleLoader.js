@@ -374,6 +374,9 @@ var EagleBrdRenderer = function( xml, params ) {
 			approximate ghosts of on-board devices
 		@param [params.viewComponents=false] {boolean} Whether to load and
 			display models of the components on the PCB.
+		@param [params.shouldPopulate] {object} Hash of component names
+			(e.g. `J1`, `LED1`) and whether the associated component model
+			should be displayed or not. Overrides the default heuristics.
 		@param [params.componentMapCfg] {object} Alternative standard model
 			library map configuration to use instead of the default.
 		@param [params.componentMapCfg.mapUrl] {string} URL for the file that
@@ -530,6 +533,16 @@ var EagleBrdRenderer = function( xml, params ) {
 	@private
 	**/
 	this._componentMaps = [];
+
+	/**
+	Hash of component names (e.g. `J1`, `LED1`) and whether the
+	associated model should be displayed or not. Overrides the
+	default heuristics.
+
+	@property _shouldPopulateOverride {object}
+	@private
+	**/
+	this._shouldPopulateOverride = params.shouldPopulate || {};
 
 	this._parseDesignRules();
 
@@ -3717,11 +3730,54 @@ EagleBrdRenderer.prototype._populateAllFootprints = function() {
 };
 
 
+EagleBrdRenderer.prototype._shouldPopulate = function(element) {
+
+	/**
+	Determine if a particular component footprint should be
+	populated. Used to determine if a component package model
+	should be displayed.
+
+	Factors used to determine whether a component should be
+	populated are based on observed conventions in sample
+	`.brd` files. These heuristics are fallible, not least
+	because humans aren't known for their consistency...
+
+	The heuristic can be overridden for a specific element
+	by supplying a `shouldPopulate` hash to `EagleBrdRenderer`
+	constructor.
+
+	@method _shouldPopulate
+	@param [element] {Element} Eagle `element` instance.
+	@return {boolean} Whether model should be displayed.
+	@private
+	**/
+
+	var status = true;
+
+	var elementName = element.getAttribute("name");
+
+	if (this._shouldPopulateOverride.hasOwnProperty(elementName)) {
+		status = this._shouldPopulateOverride[elementName];
+	} else {
+		var elementValue = element.getAttribute("value");
+
+		// SparkFun sometimes specifies a value in `PROD_ID` Eagle attribute.
+		// TODO: Actually check the attribute is `PROD_ID`?
+		var eagleAttributes = element.getElementsByTagName("attribute")
+
+		status = (elementValue != "DNP") // "Do Not Place"
+			&& (!!elementValue || (eagleAttributes.length && !!eagleAttributes[0].getAttribute("value")));
+	}
+
+	return status;
+}
+
+
 EagleBrdRenderer.prototype._populateFootprintsWithModel = function( geometry, modelInfo ) {
 
 	/**
 	Actually place component package models for all the matching footprints
-	on the board (that are not marked "DNP" i.e. "Do Not Place").
+	on the board that the design indicates should be populated.
 
 	@method _populateFootprintsWithModel
 	@param [geometry] {THREE.Geometry} Loaded geometry of component
@@ -3783,7 +3839,7 @@ EagleBrdRenderer.prototype._populateFootprintsWithModel = function( geometry, mo
 	// Now that model is loaded, actually populate the footprints (except those marked "Do Not Populate").
 	this.connectElements.forEach(function (footprintConnector) {
 		if ((footprintConnector.userData.package.getAttribute("name") == modelInfo.packageName) &&
-		    (footprintConnector.userData.element.getAttribute("value") != "DNP")) {
+		    (self._shouldPopulate(footprintConnector.userData.element))) {
 			var cachedRotation = self.root.rotation; // Workaround due to Connector not
 			self.root.rotation.set(0,0,0);           // handling rotation of PCB correctly.
 
@@ -4491,6 +4547,9 @@ THREE.BRDLoader.prototype = {
 			approximate ghosts of on-board devices
 		@param [params.viewComponents=false] {boolean} Whether to load and
 			display models of the components on the PCB.
+		@param [params.shouldPopulate] {object} Hash of component names
+			(e.g. `J1`, `LED1`) and whether the associated component model
+			should be displayed or not. Overrides the default heuristics.
 		@param [params.componentMapCfg] {object} Alternative standard model
 			library map configuration to use instead of the default.
 		@param [params.componentMapCfg.mapUrl] {string} URL for the file that
@@ -4600,6 +4659,9 @@ THREE.BRDLoader.prototype = {
 			approximate ghosts of on-board devices
 		@param [params.viewComponents=false] {boolean} Whether to load and
 			display models of the components on the PCB.
+		@param [params.shouldPopulate] {object} Hash of component names
+			(e.g. `J1`, `LED1`) and whether the associated component model
+			should be displayed or not. Overrides the default heuristics.
 		@param [params.componentMapCfg] {object} Alternative standard model
 			library map configuration to use instead of the default.
 		@param [params.componentMapCfg.mapUrl] {string} URL for the file that
