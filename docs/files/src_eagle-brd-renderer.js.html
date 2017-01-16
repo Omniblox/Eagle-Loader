@@ -142,6 +142,9 @@ var EagleBrdRenderer = function( xml, params ) {
 			approximate ghosts of on-board devices
 		@param [params.viewComponents=false] {boolean} Whether to load and
 			display models of the components on the PCB.
+		@param [params.shouldPopulate] {object} Hash of component names
+			(e.g. &#x60;J1&#x60;, &#x60;LED1&#x60;) and whether the associated component model
+			should be displayed or not. Overrides the default heuristics.
 		@param [params.componentMapCfg] {object} Alternative standard model
 			library map configuration to use instead of the default.
 		@param [params.componentMapCfg.mapUrl] {string} URL for the file that
@@ -298,6 +301,16 @@ var EagleBrdRenderer = function( xml, params ) {
 	@private
 	**/
 	this._componentMaps = [];
+
+	/**
+	Hash of component names (e.g. &#x60;J1&#x60;, &#x60;LED1&#x60;) and whether the
+	associated model should be displayed or not. Overrides the
+	default heuristics.
+
+	@property _shouldPopulateOverride {object}
+	@private
+	**/
+	this._shouldPopulateOverride = params.shouldPopulate || {};
 
 	this._parseDesignRules();
 
@@ -3485,11 +3498,54 @@ EagleBrdRenderer.prototype._populateAllFootprints = function() {
 };
 
 
+EagleBrdRenderer.prototype._shouldPopulate = function(element) {
+
+	/**
+	Determine if a particular component footprint should be
+	populated. Used to determine if a component package model
+	should be displayed.
+
+	Factors used to determine whether a component should be
+	populated are based on observed conventions in sample
+	&#x60;.brd&#x60; files. These heuristics are fallible, not least
+	because humans aren&#x27;t known for their consistency...
+
+	The heuristic can be overridden for a specific element
+	by supplying a &#x60;shouldPopulate&#x60; hash to &#x60;EagleBrdRenderer&#x60;
+	constructor.
+
+	@method _shouldPopulate
+	@param [element] {Element} Eagle &#x60;element&#x60; instance.
+	@return {boolean} Whether model should be displayed.
+	@private
+	**/
+
+	var status = true;
+
+	var elementName = element.getAttribute(&quot;name&quot;);
+
+	if (this._shouldPopulateOverride.hasOwnProperty(elementName)) {
+		status = this._shouldPopulateOverride[elementName];
+	} else {
+		var elementValue = element.getAttribute(&quot;value&quot;);
+
+		// SparkFun sometimes specifies a value in &#x60;PROD_ID&#x60; Eagle attribute.
+		// TODO: Actually check the attribute is &#x60;PROD_ID&#x60;?
+		var eagleAttributes = element.getElementsByTagName(&quot;attribute&quot;)
+
+		status = (elementValue != &quot;DNP&quot;) // &quot;Do Not Place&quot;
+			&amp;&amp; (!!elementValue || (eagleAttributes.length &amp;&amp; !!eagleAttributes[0].getAttribute(&quot;value&quot;)));
+	}
+
+	return status;
+}
+
+
 EagleBrdRenderer.prototype._populateFootprintsWithModel = function( geometry, modelInfo ) {
 
 	/**
 	Actually place component package models for all the matching footprints
-	on the board (that are not marked &quot;DNP&quot; i.e. &quot;Do Not Place&quot;).
+	on the board that the design indicates should be populated.
 
 	@method _populateFootprintsWithModel
 	@param [geometry] {THREE.Geometry} Loaded geometry of component
@@ -3551,7 +3607,7 @@ EagleBrdRenderer.prototype._populateFootprintsWithModel = function( geometry, mo
 	// Now that model is loaded, actually populate the footprints (except those marked &quot;Do Not Populate&quot;).
 	this.connectElements.forEach(function (footprintConnector) {
 		if ((footprintConnector.userData.package.getAttribute(&quot;name&quot;) == modelInfo.packageName) &amp;&amp;
-		    (footprintConnector.userData.element.getAttribute(&quot;value&quot;) != &quot;DNP&quot;)) {
+		    (self._shouldPopulate(footprintConnector.userData.element))) {
 			var cachedRotation = self.root.rotation; // Workaround due to Connector not
 			self.root.rotation.set(0,0,0);           // handling rotation of PCB correctly.
 
