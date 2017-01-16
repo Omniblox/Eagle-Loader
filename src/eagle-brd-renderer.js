@@ -55,6 +55,9 @@ var EagleBrdRenderer = function( xml, params ) {
 			approximate ghosts of on-board devices
 		@param [params.viewComponents=false] {boolean} Whether to load and
 			display models of the components on the PCB.
+		@param [params.shouldPopulate] {object} Hash of component names
+			(e.g. `J1`, `LED1`) and whether the associated component model
+			should be displayed or not. Overrides the default heuristics.
 		@param [params.componentMapCfg] {object} Alternative standard model
 			library map configuration to use instead of the default.
 		@param [params.componentMapCfg.mapUrl] {string} URL for the file that
@@ -211,6 +214,16 @@ var EagleBrdRenderer = function( xml, params ) {
 	@private
 	**/
 	this._componentMaps = [];
+
+	/**
+	Hash of component names (e.g. `J1`, `LED1`) and whether the
+	associated model should be displayed or not. Overrides the
+	default heuristics.
+
+	@property _shouldPopulateOverride {object}
+	@private
+	**/
+	this._shouldPopulateOverride = params.shouldPopulate || {};
 
 	this._parseDesignRules();
 
@@ -3410,22 +3423,34 @@ EagleBrdRenderer.prototype._shouldPopulate = function(element) {
 	`.brd` files. These heuristics are fallible, not least
 	because humans aren't known for their consistency...
 
+	The heuristic can be overridden for a specific element
+	by supplying a `shouldPopulate` hash to `EagleBrdRenderer`
+	constructor.
+
 	@method _shouldPopulate
 	@param [element] {Element} Eagle `element` instance.
 	@return {boolean} Whether model should be displayed.
 	@private
 	**/
 
-	// TODO: Allow override list...
+	var status = true;
 
-	var elementValue = element.getAttribute("value");
+	var elementName = element.getAttribute("name");
 
-	// SparkFun sometimes specifies a value in `PROD_ID` Eagle attribute.
-	// TODO: Actually check the attribute is `PROD_ID`?
-	var eagleAttributes = element.getElementsByTagName("attribute")
+	if (this._shouldPopulateOverride.hasOwnProperty(elementName)) {
+		status = this._shouldPopulateOverride[elementName];
+	} else {
+		var elementValue = element.getAttribute("value");
 
-	return (elementValue != "DNP") // "Do Not Place"
-		&& (!!elementValue || (eagleAttributes.length && !!eagleAttributes[0].getAttribute("value")));
+		// SparkFun sometimes specifies a value in `PROD_ID` Eagle attribute.
+		// TODO: Actually check the attribute is `PROD_ID`?
+		var eagleAttributes = element.getElementsByTagName("attribute")
+
+		status = (elementValue != "DNP") // "Do Not Place"
+			&& (!!elementValue || (eagleAttributes.length && !!eagleAttributes[0].getAttribute("value")));
+	}
+
+	return status;
 }
 
 
