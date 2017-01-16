@@ -1287,7 +1287,7 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 	this.layers.push( new EagleBrdRenderer.Layer( {
 		board: this,
 		height: offset,
-		layers: [ 21, 25, 29, 51 ],
+		layers: [ 21, 25, 29 ],
 		name: "Top Mask",
 		tags: [ "Mask", "Top" ],
 		thickness: thickMask
@@ -1363,7 +1363,7 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 	this.layers.push( new EagleBrdRenderer.Layer( {
 		board: this,
 		height: offset,
-		layers: [ 22, 26, 30, 52 ],
+		layers: [ 22, 26, 30 ],
 		name: "Bottom Mask",
 		tags: [ "Mask", "Bottom" ],
 		thickness: thickMask
