@@ -3356,10 +3356,7 @@ EagleBrdRenderer.prototype._getModelInfo = function( packageName ) {
 			modelInfo.packageName = packageName;
 		}
 		if (!modelInfo.hasOwnProperty("url")) {
-			modelInfo.url = modelInfo.filename;
-			if (activeComponentMapCfg.meta.urlPrefix) {
-				modelInfo.url = activeComponentMapCfg.urlPrefix + modelInfo.url;
-			}
+			modelInfo.url = (activeComponentMapCfg.meta.urlPrefix || "") + modelInfo.filename;
 		}
 	}
 	return modelInfo;
