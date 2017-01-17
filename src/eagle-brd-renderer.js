@@ -3279,7 +3279,7 @@ EagleBrdRenderer.prototype.viewComponents = function( show, componentMapCfg ) {
 		modelUrlPrefix = componentMapCfg.urlPrefix;
 	}
 
-	this.loadComponentMap(componentMapUrl, modelUrlPrefix); // TODO: Load actual standard library component map file here
+	this.loadComponentMap(componentMapUrl, modelUrlPrefix);
 };
 
 
