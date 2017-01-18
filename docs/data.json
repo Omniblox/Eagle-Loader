@@ -2235,7 +2235,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 4014,
+            "line": 4022,
             "description": "Construct layer geometry. Paste the texture onto a rectangle.",
             "itemtype": "method",
             "name": "buildGeometry",
@@ -2245,7 +2245,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 4027,
+            "line": 4035,
             "description": "Geometry for layer, consisting of two flat planes",
             "itemtype": "property",
             "name": "geometry",
@@ -2256,7 +2256,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 4051,
+            "line": 4059,
             "description": "Texture for layer",
             "itemtype": "property",
             "name": "texture",
@@ -2267,7 +2267,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 4066,
+            "line": 4074,
             "description": "Material for layer",
             "itemtype": "property",
             "name": "material",
@@ -2278,7 +2278,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 4073,
+            "line": 4081,
             "description": "Mesh for layer; THREE scene component",
             "itemtype": "property",
             "name": "mesh",
@@ -2289,7 +2289,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 4086,
+            "line": 4094,
             "description": "Return a list of elements. If no tags are passed as parameters,\nall elements will be returned. Otherwise, only elements that match\none of the specified tags are returned.",
             "itemtype": "method",
             "name": "getElements",
@@ -2308,7 +2308,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 4112,
+            "line": 4120,
             "description": "Return whether this layer has the specified tag.",
             "itemtype": "method",
             "name": "hasTag",
@@ -2328,7 +2328,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 4129,
+            "line": 4137,
             "description": "Initialise the buffer for this layer.",
             "itemtype": "method",
             "name": "initBuffer",
@@ -2338,7 +2338,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 4135,
+            "line": 4143,
             "description": "Texture buffer to which layer elements are rendered",
             "itemtype": "property",
             "name": "buffer",
@@ -2349,7 +2349,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 4144,
+            "line": 4152,
             "description": "Texture drawing context for this layer",
             "itemtype": "property",
             "name": "ctx",
@@ -2360,7 +2360,7 @@
         },
         {
             "file": "src/eagle-brd-renderer.js",
-            "line": 4162,
+            "line": 4170,
             "description": "Transform the drawing context according to properties on BRD elements.\n\nNote: this method does not save or restore context transform.",
             "itemtype": "method",
             "name": "orientContext",
