@@ -377,8 +377,13 @@ var EagleBrdRenderer = function( xml, params ) {
 		@param [params.shouldPopulate] {object} Hash of component names
 			(e.g. `J1`, `LED1`) and whether the associated component model
 			should be displayed or not. Overrides the default heuristics.
-		@param [params.componentMapCfg] {object} Alternative standard model
-			library map configuration to use instead of the default.
+		@param [params.componentMapCfg] {object/Array of objects} One or more
+			model library map configuration(s) to use instead of the default
+			standard library map. Including an empty object `{}` will cause
+			the default standard library map to be loaded at that point.
+			Earlier maps override later maps if they share a package name.
+			This makes it possible to override a model in the standard library
+			if desired, e.g. a board is using an outdated footprint.
 		@param [params.componentMapCfg.mapUrl] {string} URL for the file that
 			contains the "component package name" to "model file path" mapping.
 		@param [params.componentMapCfg.urlPrefix] {string} (Optional) URL
@@ -1606,7 +1611,7 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 	this.layers.push( new EagleBrdRenderer.Layer( {
 		board: this,
 		height: offset,
-		layers: [ 21, 25, 29, 51 ],
+		layers: [ 21, 25, 29 ],
 		name: "Top Mask",
 		tags: [ "Mask", "Top" ],
 		thickness: thickMask
@@ -1682,7 +1687,7 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 	this.layers.push( new EagleBrdRenderer.Layer( {
 		board: this,
 		height: offset,
-		layers: [ 22, 26, 30, 52 ],
+		layers: [ 22, 26, 30 ],
 		name: "Bottom Mask",
 		tags: [ "Mask", "Bottom" ],
 		thickness: thickMask
@@ -3580,7 +3585,21 @@ EagleBrdRenderer.prototype.viewComponents = function( show, componentMapCfg ) {
 	@method viewComponents
 	@param [show=false] {boolean} Whether to load and
 	   display models of the components on the PCB or not.
+	@param [componentMapCfg] {object/Array of objects} One or more
+	   model library map configuration(s) to use instead of the default
+	   standard library map. Including an empty object `{}` will cause
+	   the default standard library map to be loaded at that point.
+	   Earlier maps override later maps if they share a package name.
+	   This makes it possible to override a model in the standard library
+	   if desired, e.g. a board is using an outdated footprint.
+	@param [componentMapCfg.mapUrl] {string} URL for the file that
+	   contains the "component package name" to "model file path" mapping.
+	@param [componentMapCfg.urlPrefix] {string} (Optional) URL
+	   prefix to prepend to the model file path when loading model file.
 	**/
+
+	const DEFAULT_MAP_URL = "components.json"; // TODO: Make hosted version the default?
+	var mapsToLoad = [];
 
 	if (!show) {
 		return;
@@ -3589,16 +3608,21 @@ EagleBrdRenderer.prototype.viewComponents = function( show, componentMapCfg ) {
 	this.components = new THREE.Object3D();
 	this.root.add(this.components);
 
-	var componentMapUrl = "components.json";
-	var modelUrlPrefix = undefined;
-
 	if (componentMapCfg) {
-		// TODO: Allow multiple maps to be supplied at initialisation?
-		componentMapUrl = componentMapCfg.mapUrl || componentMapUrl;
-		modelUrlPrefix = componentMapCfg.urlPrefix;
+		mapsToLoad = mapsToLoad.concat(componentMapCfg); // Works for single map or array of maps.
+	} else {
+		mapsToLoad.push({mapUrl: DEFAULT_MAP_URL});
 	}
 
-	this.loadComponentMap(componentMapUrl, modelUrlPrefix); // TODO: Load actual standard library component map file here
+	var self = this;
+
+	mapsToLoad.forEach(function(mapCfg) {
+		// Note: This implementation allows multiple model URL prefixes to be
+		//       supplied for the default map URL, which might be bad, useful or useless.
+		// Note: This implementation also allows the default standard library to be loaded
+		//       by supplying an empty object.
+		self.loadComponentMap(mapCfg.mapUrl || DEFAULT_MAP_URL, mapCfg.urlPrefix);
+	});
 };
 
 
@@ -3675,10 +3699,7 @@ EagleBrdRenderer.prototype._getModelInfo = function( packageName ) {
 			modelInfo.packageName = packageName;
 		}
 		if (!modelInfo.hasOwnProperty("url")) {
-			modelInfo.url = modelInfo.filename;
-			if (activeComponentMapCfg.meta.urlPrefix) {
-				modelInfo.url = activeComponentMapCfg.urlPrefix + modelInfo.url;
-			}
+			modelInfo.url = (activeComponentMapCfg.meta.urlPrefix || "") + modelInfo.filename;
 		}
 	}
 	return modelInfo;
