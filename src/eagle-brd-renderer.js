@@ -3926,6 +3926,14 @@ EagleBrdRenderer.Layer.prototype.assessElementCandidate = function( el ) {
 		layer = parseInt( el.getAttribute( "layer" ), 10 ),
 		swapLayers = function( layerOriginal ) {
 			switch( layerOriginal ) {
+				case 1:
+					el.setAttribute( "layer", "16" );
+					layer = 16;
+					break;
+				case 16:
+					el.setAttribute( "layer", "1" );
+					layer = 1;
+					break;
 				case 21:
 					el.setAttribute( "layer", "22" );
 					layer = 22;
@@ -3967,7 +3975,7 @@ EagleBrdRenderer.Layer.prototype.assessElementCandidate = function( el ) {
 
 		// Flip layers on mirrored elements
 		// NOTE: This might not catch everything.
-		// I've only seen it used for silkscreen elements.
+		// Seen used for silkscreen elements and bottom-side footprint pads.
 		if ( el.elementParent && ( new EagleBrdRenderer.AngleData(
 				el.elementParent.getAttribute( "rot" ) ) ).mirror ) {
 			oldLayer = layer;
