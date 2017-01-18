@@ -17,7 +17,7 @@
                 <h1><img src="../assets/css/logo.png" title="EagleLoader" width="117" height="52"></h1>
         </div>
         <div class="yui3-u-1-4 version">
-            <em>API Docs for: 0.1.2</em>
+            <em>API Docs for: 0.2.0</em>
         </div>
     </div>
     <div id="bd" class="yui3-g">
@@ -141,6 +141,9 @@ THREE.BRDLoader.prototype = {
 			approximate ghosts of on-board devices
 		@param [params.viewComponents=false] {boolean} Whether to load and
 			display models of the components on the PCB.
+		@param [params.shouldPopulate] {object} Hash of component names
+			(e.g. &#x60;J1&#x60;, &#x60;LED1&#x60;) and whether the associated component model
+			should be displayed or not. Overrides the default heuristics.
 		@param [params.componentMapCfg] {object} Alternative standard model
 			library map configuration to use instead of the default.
 		@param [params.componentMapCfg.mapUrl] {string} URL for the file that
@@ -250,6 +253,9 @@ THREE.BRDLoader.prototype = {
 			approximate ghosts of on-board devices
 		@param [params.viewComponents=false] {boolean} Whether to load and
 			display models of the components on the PCB.
+		@param [params.shouldPopulate] {object} Hash of component names
+			(e.g. &#x60;J1&#x60;, &#x60;LED1&#x60;) and whether the associated component model
+			should be displayed or not. Overrides the default heuristics.
 		@param [params.componentMapCfg] {object} Alternative standard model
 			library map configuration to use instead of the default.
 		@param [params.componentMapCfg.mapUrl] {string} URL for the file that

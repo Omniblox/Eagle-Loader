@@ -55,8 +55,16 @@ var EagleBrdRenderer = function( xml, params ) {
 			approximate ghosts of on-board devices
 		@param [params.viewComponents=false] {boolean} Whether to load and
 			display models of the components on the PCB.
-		@param [params.componentMapCfg] {object} Alternative standard model
-			library map configuration to use instead of the default.
+		@param [params.shouldPopulate] {object} Hash of component names
+			(e.g. `J1`, `LED1`) and whether the associated component model
+			should be displayed or not. Overrides the default heuristics.
+		@param [params.componentMapCfg] {object/Array of objects} One or more
+			model library map configuration(s) to use instead of the default
+			standard library map. Including an empty object `{}` will cause
+			the default standard library map to be loaded at that point.
+			Earlier maps override later maps if they share a package name.
+			This makes it possible to override a model in the standard library
+			if desired, e.g. a board is using an outdated footprint.
 		@param [params.componentMapCfg.mapUrl] {string} URL for the file that
 			contains the "component package name" to "model file path" mapping.
 		@param [params.componentMapCfg.urlPrefix] {string} (Optional) URL
@@ -211,6 +219,16 @@ var EagleBrdRenderer = function( xml, params ) {
 	@private
 	**/
 	this._componentMaps = [];
+
+	/**
+	Hash of component names (e.g. `J1`, `LED1`) and whether the
+	associated model should be displayed or not. Overrides the
+	default heuristics.
+
+	@property _shouldPopulateOverride {object}
+	@private
+	**/
+	this._shouldPopulateOverride = params.shouldPopulate || {};
 
 	this._parseDesignRules();
 
@@ -1198,6 +1216,7 @@ EagleBrdRenderer.prototype._parseElement = function( el ) {
 		connector.rotation.y = angle.angle;
 		if ( angle.mirror ) {
 			connector.rotation.x += Math.PI;
+			connector.rotation.y += Math.PI;
 			connector.position.z = -this.thickness;
 		}
 	}
@@ -1273,7 +1292,7 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 	this.layers.push( new EagleBrdRenderer.Layer( {
 		board: this,
 		height: offset,
-		layers: [ 21, 25, 29, 51 ],
+		layers: [ 21, 25, 29 ],
 		name: "Top Mask",
 		tags: [ "Mask", "Top" ],
 		thickness: thickMask
@@ -1349,7 +1368,7 @@ EagleBrdRenderer.prototype._populateLayers = function() {
 	this.layers.push( new EagleBrdRenderer.Layer( {
 		board: this,
 		height: offset,
-		layers: [ 22, 26, 30, 52 ],
+		layers: [ 22, 26, 30 ],
 		name: "Bottom Mask",
 		tags: [ "Mask", "Bottom" ],
 		thickness: thickMask
@@ -3247,7 +3266,21 @@ EagleBrdRenderer.prototype.viewComponents = function( show, componentMapCfg ) {
 	@method viewComponents
 	@param [show=false] {boolean} Whether to load and
 	   display models of the components on the PCB or not.
+	@param [componentMapCfg] {object/Array of objects} One or more
+	   model library map configuration(s) to use instead of the default
+	   standard library map. Including an empty object `{}` will cause
+	   the default standard library map to be loaded at that point.
+	   Earlier maps override later maps if they share a package name.
+	   This makes it possible to override a model in the standard library
+	   if desired, e.g. a board is using an outdated footprint.
+	@param [componentMapCfg.mapUrl] {string} URL for the file that
+	   contains the "component package name" to "model file path" mapping.
+	@param [componentMapCfg.urlPrefix] {string} (Optional) URL
+	   prefix to prepend to the model file path when loading model file.
 	**/
+
+	const DEFAULT_MAP_URL = "components.json"; // TODO: Make hosted version the default?
+	var mapsToLoad = [];
 
 	if (!show) {
 		return;
@@ -3256,16 +3289,21 @@ EagleBrdRenderer.prototype.viewComponents = function( show, componentMapCfg ) {
 	this.components = new THREE.Object3D();
 	this.root.add(this.components);
 
-	var componentMapUrl = "components.json";
-	var modelUrlPrefix = undefined;
-
 	if (componentMapCfg) {
-		// TODO: Allow multiple maps to be supplied at initialisation?
-		componentMapUrl = componentMapCfg.mapUrl || componentMapUrl;
-		modelUrlPrefix = componentMapCfg.urlPrefix;
+		mapsToLoad = mapsToLoad.concat(componentMapCfg); // Works for single map or array of maps.
+	} else {
+		mapsToLoad.push({mapUrl: DEFAULT_MAP_URL});
 	}
 
-	this.loadComponentMap(componentMapUrl, modelUrlPrefix); // TODO: Load actual standard library component map file here
+	var self = this;
+
+	mapsToLoad.forEach(function(mapCfg) {
+		// Note: This implementation allows multiple model URL prefixes to be
+		//       supplied for the default map URL, which might be bad, useful or useless.
+		// Note: This implementation also allows the default standard library to be loaded
+		//       by supplying an empty object.
+		self.loadComponentMap(mapCfg.mapUrl || DEFAULT_MAP_URL, mapCfg.urlPrefix);
+	});
 };
 
 
@@ -3342,10 +3380,7 @@ EagleBrdRenderer.prototype._getModelInfo = function( packageName ) {
 			modelInfo.packageName = packageName;
 		}
 		if (!modelInfo.hasOwnProperty("url")) {
-			modelInfo.url = modelInfo.filename;
-			if (activeComponentMapCfg.meta.urlPrefix) {
-				modelInfo.url = activeComponentMapCfg.urlPrefix + modelInfo.url;
-			}
+			modelInfo.url = (activeComponentMapCfg.meta.urlPrefix || "") + modelInfo.filename;
 		}
 	}
 	return modelInfo;
@@ -3397,11 +3432,54 @@ EagleBrdRenderer.prototype._populateAllFootprints = function() {
 };
 
 
+EagleBrdRenderer.prototype._shouldPopulate = function(element) {
+
+	/**
+	Determine if a particular component footprint should be
+	populated. Used to determine if a component package model
+	should be displayed.
+
+	Factors used to determine whether a component should be
+	populated are based on observed conventions in sample
+	`.brd` files. These heuristics are fallible, not least
+	because humans aren't known for their consistency...
+
+	The heuristic can be overridden for a specific element
+	by supplying a `shouldPopulate` hash to `EagleBrdRenderer`
+	constructor.
+
+	@method _shouldPopulate
+	@param [element] {Element} Eagle `element` instance.
+	@return {boolean} Whether model should be displayed.
+	@private
+	**/
+
+	var status = true;
+
+	var elementName = element.getAttribute("name");
+
+	if (this._shouldPopulateOverride.hasOwnProperty(elementName)) {
+		status = this._shouldPopulateOverride[elementName];
+	} else {
+		var elementValue = element.getAttribute("value");
+
+		// SparkFun sometimes specifies a value in `PROD_ID` Eagle attribute.
+		// TODO: Actually check the attribute is `PROD_ID`?
+		var eagleAttributes = element.getElementsByTagName("attribute")
+
+		status = (elementValue != "DNP") // "Do Not Place"
+			&& (!!elementValue || (eagleAttributes.length && !!eagleAttributes[0].getAttribute("value")));
+	}
+
+	return status;
+}
+
+
 EagleBrdRenderer.prototype._populateFootprintsWithModel = function( geometry, modelInfo ) {
 
 	/**
 	Actually place component package models for all the matching footprints
-	on the board (that are not marked "DNP" i.e. "Do Not Place").
+	on the board that the design indicates should be populated.
 
 	@method _populateFootprintsWithModel
 	@param [geometry] {THREE.Geometry} Loaded geometry of component
@@ -3424,6 +3502,29 @@ EagleBrdRenderer.prototype._populateFootprintsWithModel = function( geometry, mo
 		geometry.scale(modelInfo.scale.x || 1.0, modelInfo.scale.y || 1.0, modelInfo.scale.z || 1.0);
 	}
 
+	// Our default behaviour is to center models (on X & Y axis) around the
+	// origin (0, 0) as most footprints have their origins at their center.
+	// Since many models are already centered this is frequently redundant
+	// but there seems little benefit from handling those cases separately.
+	//
+	// If a footprint has an origin that is not at its center then we assume
+	// the model is correctly non-centered also & thus we indicate the library
+	// should not center the model by specifying `"center": false` in the
+	// component map file.
+	//
+	// While we could attempt to handle these variations "automatically" the
+	// footprint file format seems to require us to calculate the origin point
+	// which is non-trivial. Additionally, for the moment, manually specifying
+	// that a model shouldn't be centered seems easier than automatic detection.
+	//
+	// Note also: The footprint origin issue also impacts on the positioning
+	//            of Connectors on component models.
+	if (!(modelInfo.hasOwnProperty("center") && (modelInfo.center == false))) {
+		// Based on `THREE.Geometry.center()` but ignoring Z axis.
+		geometry.computeBoundingBox();
+		var offset = geometry.boundingBox.center().negate();
+		geometry.translate(offset.x, offset.y, 0);
+	}
 
 	// TODO: Document required scale in models for this to work.
 	geometry.scale(this.coordScale, this.coordScale, this.coordScale);
@@ -3440,7 +3541,7 @@ EagleBrdRenderer.prototype._populateFootprintsWithModel = function( geometry, mo
 	// Now that model is loaded, actually populate the footprints (except those marked "Do Not Populate").
 	this.connectElements.forEach(function (footprintConnector) {
 		if ((footprintConnector.userData.package.getAttribute("name") == modelInfo.packageName) &&
-		    (footprintConnector.userData.element.getAttribute("value") != "DNP")) {
+		    (self._shouldPopulate(footprintConnector.userData.element))) {
 			var cachedRotation = self.root.rotation; // Workaround due to Connector not
 			self.root.rotation.set(0,0,0);           // handling rotation of PCB correctly.
 
@@ -3451,8 +3552,22 @@ EagleBrdRenderer.prototype._populateFootprintsWithModel = function( geometry, mo
 			component.connector.master = component;
 
 			component.connector.rotation.x = Math.PI / 2; // Horizontal
-			component.connector.position.x = component.geometry.boundingBox.center().x;
-			component.connector.position.y = component.geometry.boundingBox.center().y;
+
+			// The footprint Connector is positioned at the origin (0, 0)
+			// which is usually, but not always, the center of the footprint.
+			//
+			// We position the component model connector at the origin (0, 0)
+			// of the model--which by default is the center of the model
+			// (because we center the model by default) but will not be the
+			// center of correctly modeled components for non-centered
+			// footprints.
+			//
+			// This should result in the correct placement of a component model
+			// in relation to its footprint--if placement is not correct,
+			// either the model needs to be repositioned to match the footprint
+			// or we need to add more sophisticated detection of correct placement.
+			component.connector.position.x = 0;
+			component.connector.position.y = 0;
 
 			component.add(component.connector);
 			component.connector.connectTo(footprintConnector);
@@ -3811,6 +3926,14 @@ EagleBrdRenderer.Layer.prototype.assessElementCandidate = function( el ) {
 		layer = parseInt( el.getAttribute( "layer" ), 10 ),
 		swapLayers = function( layerOriginal ) {
 			switch( layerOriginal ) {
+				case 1:
+					el.setAttribute( "layer", "16" );
+					layer = 16;
+					break;
+				case 16:
+					el.setAttribute( "layer", "1" );
+					layer = 1;
+					break;
 				case 21:
 					el.setAttribute( "layer", "22" );
 					layer = 22;
@@ -3852,7 +3975,7 @@ EagleBrdRenderer.Layer.prototype.assessElementCandidate = function( el ) {
 
 		// Flip layers on mirrored elements
 		// NOTE: This might not catch everything.
-		// I've only seen it used for silkscreen elements.
+		// Seen used for silkscreen elements and bottom-side footprint pads.
 		if ( el.elementParent && ( new EagleBrdRenderer.AngleData(
 				el.elementParent.getAttribute( "rot" ) ) ).mirror ) {
 			oldLayer = layer;
