@@ -3652,7 +3652,7 @@ EagleBrdRenderer.prototype.loadComponentMap = function( url, modelUrlPrefix ) {
 
 	var self = this;
 
-	var loader = new THREE.XHRLoader();
+	var loader = new THREE.FileLoader();
 	loader.responseType = "json";
 	loader.load(url, function (response) {
 		// TODO: Ensure values in more recent maps override older maps?
@@ -4612,7 +4612,7 @@ THREE.BRDLoader.prototype = {
 			loadBrd = function() {
 				var scope = this;
 
-				var loader = new THREE.XHRLoader( scope.manager );
+				var loader = new THREE.FileLoader( scope.manager );
 				//loader.setCrossOrigin( this.crossOrigin );
 				loader.load( url, function ( text ) {
 
