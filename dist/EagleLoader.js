@@ -4536,7 +4536,7 @@ EagleBrdRenderer.Layer.prototype.orientContext = function( el, scale ) {
 	**/
 
 	this.revision = "Blank Space by Ryan Adams";
-	this.version = "0.2.0";
+	this.version = "0.2.1";
 
 	this.manager = ( manager !== undefined ) ?
 		manager :

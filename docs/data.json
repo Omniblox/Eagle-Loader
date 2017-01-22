@@ -2,7 +2,7 @@
     "project": {
         "name": "EagleLoader",
         "description": "Visualize EAGLE .brd files in the browser.",
-        "version": "0.2.0",
+        "version": "0.2.1",
         "url": "http://omniblox.io/eagleloader"
     },
     "files": {
