@@ -6,7 +6,7 @@ module.exports = function( grunt ) {
 
 		concat: {
 			options: {
-				separator: ";"
+				separator: ";\n\n"
 			},
 			dist: {
 				src: [
@@ -16,7 +16,15 @@ module.exports = function( grunt ) {
 					"src/BrdLoader.js"
 				],
 				dest: "dist/<%= pkg.name %>.js"
-			}
+			},
+			nofonts: {
+				src: [
+					"lib/connector.js",
+					"src/eagle-brd-renderer.js",
+					"src/BrdLoader.js"
+				],
+				dest: "dist/<%= pkg.name %>.nofonts.js"
+			},
 		},
 
 		clean: {
@@ -84,8 +92,14 @@ module.exports = function( grunt ) {
 		"compile",
 		[
 			"clean:code",
-			"concat",
+			"concat:dist",
 			"copy:fonts"
+		] );
+	grunt.registerTask(
+		"compile-no-fonts",
+		[
+			"clean:code",
+			"concat:nofonts"
 		] );
 	grunt.registerTask(
 		"all",
