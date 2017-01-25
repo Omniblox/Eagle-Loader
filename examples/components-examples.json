@@ -1,0 +1,75 @@
+{
+ "0603-CAP": {
+  "filename": "models-examples/sparkfun/production_parts/passive/ceramic_smd/0603/0603-CAP.stl"
+ },
+ "0603-RES": {
+  "filename": "models-examples/sparkfun/production_parts/passive/resistors/0603/0603-RES.stl"
+ },
+ "CR54": {
+  "filename": "models-examples/sparkfun/production_parts/passive/inductors/CR54/stl/CR54.STL",
+  "note": "Possibly needs to be rotated around Z to be completely accurate?"
+ },
+ "EIA3216": {
+  "filename": "models-examples/sparkfun/production_parts/passive/tantelum_smd/EIA3216.stl"
+ },
+ "EIA3528": {
+  "filename": "models-examples/sparkfun/production_parts/passive/tantelum_smd/EIA3528.stl"
+ },
+ "JST-2-PTH": {
+  "filename": "models-examples/sparkfun/production_parts/connectors/JST/JST_2/JST-2-PTH/stl/JST-2-PTH.STL"
+ },
+ "LED-0603": {
+  "duplicates": [
+   "models/sparkfun/production_parts/opto/LED_0603/LED-0603.stl"
+  ],
+  "filename": "models-examples/sparkfun/production_parts/passive/resistors/0603/LED-0603.stl",
+  "note": "The sensibly named duplicate has a missing face. Also the original version of the footprint was rotated 90 degrees from the latest version."
+ },
+ "RESONATOR-SMD": {
+  "duplicates": [
+   "models/sparkfun/production_parts/passive/resonator/RESONATOR-SMD/stl/RESONATOR_SMD.STL"
+  ],
+  "filename": "models-examples/sparkfun/production_parts/passive/resonator/RESONATOR-SMD/stl/RESONATOR-SMD.stl",
+  "note": "Possibly needs to be rotated around Z to be completely accurate."
+ },
+ "SMA-DIODE": {
+  "duplicates": [
+   "models/sparkfun/production_parts/semiconductors/diode/DO-214AC/stl/SMA-DIODE.stl"
+  ],
+  "filename": "models-examples/sparkfun/production_parts/semiconductors/diode/DO-214AC/stl/DO-214AC.STL",
+  "rotation": {
+   "z": 180
+  }
+ },
+ "SOT23-3": {
+  "filename": "models-examples/sparkfun/production_parts/semiconductors/IC_SMD/SOT/SOT23-3.STL",
+  "rotation": {
+   "x": 90,
+   "z": 180
+  }
+ },
+ "SOT23-5": {
+  "filename": "models-examples/sparkfun/production_parts/semiconductors/IC_SMD/SOT/SOT23-5.stl"
+ },
+ "SOT323": {
+  "filename": "models-examples/sparkfun/production_parts/semiconductors/IC_SMD/SOT/SOT323.STL",
+  "rotation": {
+   "x": 90,
+   "z": 180
+  }
+ },
+ "SSOP20_L": {
+  "filename": "models-examples/sparkfun/production_parts/semiconductors/IC_SMD/SSOP/SSOP20_L.stl"
+ },
+ "TACTILE-SWITCH-SMD": {
+  "filename": "models-examples/sparkfun/production_parts/switches/tactile/TACTILE-SWITCH-SMD.stl"
+ },
+ "TQFP32-08": {
+  "filename": "models-examples/sparkfun/production_parts/semiconductors/IC_SMD/TQFP/TQFP32-08/TQFP32-08.stl",
+  "scale": {
+   "x": 0.001,
+   "y": 0.001,
+   "z": 0.001
+  }
+ }
+}
