@@ -66,6 +66,16 @@
           colors: {solderMask: "rgb( 255, 0, 0 )"}
         }
       },
+      razor: { // Example with components on both sides of board
+        src: "brd-files/sparkfun/razor/sparkfun-9dof-razor-imu.brd",
+        manufacturer: "SparkFun",
+        url: "https://www.sparkfun.com/products/14001",
+        name: "Razor",
+        brdParams: {
+          colors: {solderMask: "rgb( 255, 0, 0 )"},
+          viewComponents: true, componentMapCfg: {mapUrl: "components-examples.json"},
+        }
+      },
       redstick: {
         src: "brd-files/sparkfun/redstick/sparkfun_redstick.brd",
         manufacturer: "SparkFun",
