@@ -114,7 +114,21 @@
           colors: {solderMask: "rgb( 0, 0, 255 )"},
           thickness: 1
         }
-      }
+      },
+      wavtrigger: {
+	// Example with `shouldPopulate` parameter to customise population
+	// Note: Missing `HC49UP` model for the crystal.
+        src: "brd-files/sparkfun/wavtrigger/wavtrigger_v11.brd",
+        manufacturer: "SparkFun",
+        url: "https://www.sparkfun.com/products/13660",
+        name: "WAV Trigger",
+        brdParams: {
+          colors: {solderMask: "rgb( 255, 0, 0 )"},
+          viewComponents: true,
+          componentMapCfg: [{mapUrl: "models-examples/components-outdated-redstick.json"}, {mapUrl: "components-examples.json"}],
+          shouldPopulate: {'J2': true, 'LED1': true, 'S1': true, 'U1': true},
+        }
+      },
     }
 
     </script>
