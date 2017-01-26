@@ -19,11 +19,8 @@
   "filename": "models-examples/sparkfun/production_parts/connectors/JST/JST_2/JST-2-PTH/stl/JST-2-PTH.STL"
  },
  "LED-0603": {
-  "duplicates": [
-   "models/sparkfun/production_parts/opto/LED_0603/LED-0603.stl"
-  ],
-  "filename": "models-examples/sparkfun/production_parts/passive/resistors/0603/LED-0603.stl",
-  "note": "The sensibly named duplicate has a missing face. Also the original version of the footprint was rotated 90 degrees from the latest version."
+  "filename": "models-examples/sparkfun/production_parts/opto/LED_0603/LED-0603.stl",
+  "note": "The original version of the footprint was rotated 90 degrees from the latest version."
  },
  "RESONATOR-SMD": {
   "duplicates": [
