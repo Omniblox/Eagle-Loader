@@ -1,0 +1,176 @@
+{
+ "0603": {
+  "duplicates": [
+   "models/sparkfun/production_parts/passive/ceramic_smd/0603/0603.stl"
+  ],
+  "filename": "models-examples/sparkfun/production_parts/passive/resistors/0603/0603.stl"
+ },
+ "0603-CAP": {
+  "filename": "models-examples/sparkfun/production_parts/passive/ceramic_smd/0603/0603-CAP.stl"
+ },
+ "0603-RES": {
+  "filename": "models-examples/sparkfun/production_parts/passive/resistors/0603/0603-RES.stl"
+ },
+ "0805": {
+  "filename": "models-examples/sparkfun/production_parts/passive/ceramic_smd/0805/0805.stl"
+ },
+ "1206": {
+  "filename": "models-examples/sparkfun/production_parts/passive/ceramic_smd/1206/1206.stl"
+ },
+ "1210": {
+  "filename": "models-examples/sparkfun/production_parts/passive/ceramic_smd/1210/1210.stl"
+ },
+ "1X07": {
+  "duplicates": [
+   "models/sparkfun/production_parts/connectors/ID-12_SMD/stl/1X07.STL"
+  ],
+  "filename": "models-examples/sparkfun/production_parts/connectors/headers/ID-12_SMD/stl/1X07.STL"
+ },
+ "AUDIO-JACK-3.5MM-SMD": {
+  "center": false,
+  "duplicates": [
+   "models/sparkfun/production_parts/connectors/audio/audio_jack/AUDIO-JACK-3.5MM-SMD/stl/AUDIO-JACK.stl",
+   "models/sparkfun/production_parts/connectors/audio/audio_jack/AUDIO-JACK-3.5MM-SMD/stl/AUDIO-JACK-3_5MM-SMD.STL",
+   "models/sparkfun/production_parts/connectors/audio/AUDIO-JACK-3.5MM-SMD/stl/AUDIO-JACK-3_5MM-SMD.STL"
+  ],
+  "filename": "models-examples/sparkfun/production_parts/connectors/audio/AUDIO-JACK-3.5MM-SMD/stl/AUDIO-JACK.stl",
+  "note": "No matching model file exists for the package name variation containing a '.' rather than '_'. Also, the models with the more specific '-3_5MM-SMD' suffix are incorrectly positioned in relation to the origin of the package footprint."
+ },
+ "CR54": {
+  "filename": "models-examples/sparkfun/production_parts/passive/inductors/CR54/stl/CR54.STL",
+  "note": "Possibly needs to be rotated around Z to be completely accurate?"
+ },
+ "CRYSTAL-SMD-3.2X1.5MM": {
+  "filename": "models-examples/sparkfun/production_parts/passive/resonator/CRYSTAL-SMD-3_2X1_5MM/stl/CRYSTAL-SMD-3_2X1_5MM.STL"
+ },
+ "EIA3216": {
+  "filename": "models-examples/sparkfun/production_parts/passive/tantelum_smd/EIA3216.stl"
+ },
+ "EIA3528": {
+  "filename": "models-examples/sparkfun/production_parts/passive/tantelum_smd/EIA3528.stl"
+ },
+ "JST-2-PTH": {
+  "filename": "models-examples/sparkfun/production_parts/connectors/JST/JST_2/JST-2-PTH/stl/JST-2-PTH.STL"
+ },
+ "JST-2-SMD": {
+  "duplicates": [
+   "models/sparkfun/production_parts/connectors/JST/JST_2/JST-2-SMD/stl/JST-2-SMD.STL"
+  ],
+  "filename": "models-examples/sparkfun/production_parts/connectors/JST/JST-2-SMD/stl/JST-2-SMD.STL",
+  "rotation": {
+   "x": 90,
+   "z": 180
+  }
+ },
+ "LED-0603": {
+  "filename": "models-examples/sparkfun/production_parts/opto/LED_0603/LED-0603.stl",
+  "note": "The original version of the footprint was rotated 90 degrees from the latest version."
+ },
+ "MICRO-SD-SOCKET-PP": {
+  "center": false,
+  "duplicates": [
+   "models/sparkfun/production_parts/connectors/JST/JST-2-SMD/MICRO-SD-SOCKET-PP.stl"
+  ],
+  "filename": "models-examples/sparkfun/production_parts/connectors/micro_sd/MICRO-SD-SOCKET-PP.stl"
+ },
+ "POWER_JACK_SMD_OVERPASTE_REDBOARD_0603": {
+  "center": false,
+  "filename": "models-examples/sparkfun/production_parts/connectors/Power_Jack/POWER_JACK_SMD_OVERPASTE_REDBOARD_0603.stl"
+ },
+ "PW_R-PDSO-G20": {
+  "filename": "models-examples/sparkfun/production_parts/semiconductors/IC_SMD/SSOP/TSSOP20.STL",
+  "library": "robertsonics",
+  "rotation": {
+   "x": 90
+  }
+ },
+ "QFN24-3X3": {
+  "filename": "models-examples/sparkfun/production_parts/semiconductors/IC_SMD/QFN/QFN-24/stl/QFN24-3X3.STL"
+ },
+ "RESONATOR-SMD": {
+  "duplicates": [
+   "models/sparkfun/production_parts/passive/resonator/RESONATOR-SMD/stl/RESONATOR_SMD.STL"
+  ],
+  "filename": "models-examples/sparkfun/production_parts/passive/resonator/RESONATOR-SMD/stl/RESONATOR-SMD.stl",
+  "note": "Possibly needs to be rotated around Z to be completely accurate."
+ },
+ "S-PDSO-G08": {
+  "filename": "models-examples/sparkfun/production_parts/semiconductors/IC_SMD/MSOP8/stl/MSOP8.STL",
+  "library": "robertsonics",
+  "note": "This model does not have the pad in the middle of the base of the IC."
+ },
+ "SMA-DIODE": {
+  "duplicates": [
+   "models/sparkfun/production_parts/semiconductors/diode/DO-214AC/stl/SMA-DIODE.stl"
+  ],
+  "filename": "models-examples/sparkfun/production_parts/semiconductors/diode/DO-214AC/stl/DO-214AC.STL",
+  "rotation": {
+   "z": 180
+  }
+ },
+ "SOD-323": {
+  "duplicates": [
+   "models/sparkfun/production_parts/semiconductors/IC_SMD/SOD/SOD-323/stl/SOD-323.STL"
+  ],
+  "filename": "models-examples/sparkfun/production_parts/semiconductors/IC_SMD/SOD-323/stl/SOD-323.STL",
+  "note": "Possibly needs to be rotated around Z to be completely accurate?",
+  "rotation": {
+   "x": 90
+  }
+ },
+ "SOT223": {
+  "filename": "models-examples/sparkfun/production_parts/semiconductors/IC_SMD/SOT/SOT223.stl"
+ },
+ "SOT23-3": {
+  "filename": "models-examples/sparkfun/production_parts/semiconductors/IC_SMD/SOT/SOT23-3.STL",
+  "rotation": {
+   "x": 90,
+   "z": 180
+  }
+ },
+ "SOT23-5": {
+  "filename": "models-examples/sparkfun/production_parts/semiconductors/IC_SMD/SOT/SOT23-5.stl"
+ },
+ "SOT323": {
+  "filename": "models-examples/sparkfun/production_parts/semiconductors/IC_SMD/SOT/SOT323.STL",
+  "rotation": {
+   "x": 90,
+   "z": 180
+  }
+ },
+ "SSOP20_L": {
+  "filename": "models-examples/sparkfun/production_parts/semiconductors/IC_SMD/SSOP/SSOP20_L.stl"
+ },
+ "SWITCH-SPST-SMD-A": {
+  "filename": "models-examples/sparkfun/production_parts/switches/switches/SWITCH-SPST-SMD-A/RIGHT_ANGLE/stl/SWITCH-SPST-SMD-A.STL",
+  "rotation": {
+   "z": 180
+  }
+ },
+ "TACTILE-SWITCH-SMD": {
+  "filename": "models-examples/sparkfun/production_parts/switches/tactile/TACTILE-SWITCH-SMD.stl"
+ },
+ "TACTILE_SWITCH_SMD": {
+  "filename": "models-examples/sparkfun/production_parts/switches/tactile/TACTILE_SWITCH_SMD.stl"
+ },
+ "TQFP-48": {
+  "filename": "models-examples/sparkfun/production_parts/semiconductors/IC_SMD/TQFP/TQFP-48/stl/TQFP-48.STL"
+ },
+ "TQFP32-08": {
+  "filename": "models-examples/sparkfun/production_parts/semiconductors/IC_SMD/TQFP/TQFP32-08/TQFP32-08.stl",
+  "scale": {
+   "x": 0.001,
+   "y": 0.001,
+   "z": 0.001
+  }
+ },
+ "TQFP64": {
+  "filename": "models-examples/sparkfun/production_parts/semiconductors/IC_SMD/TQFP/TQFP-64/stl/PIC24FXXX_TQFP64.STL",
+  "rotation": {
+   "z": 90
+  }
+ },
+ "USB-B-MICRO-SMD_V03": {
+  "filename": "models-examples/sparkfun/production_parts/connectors/usb/USB-B-MICRO-SMD_V03.stl"
+ }
+}

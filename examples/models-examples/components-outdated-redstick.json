@@ -1,0 +1,9 @@
+{
+ "LED-0603": {
+  "filename": "models-examples/sparkfun/production_parts/opto/LED_0603/LED-0603.stl",
+  "note": "The original version of the footprint was rotated 90 degrees from the latest version. Older boards need this meta info to handle the non-backwards compatible rotation change in <https://github.com/sparkfun/SparkFun-Eagle-Libraries/commit/a677709525a0f431931d75963e4c44f6753513ba>.",
+  "rotation": {
+   "z": 90
+  }
+ }
+}
