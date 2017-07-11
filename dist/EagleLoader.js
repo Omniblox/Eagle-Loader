@@ -1096,6 +1096,7 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 			connector.userData.drill = drills[ i ];
 			if ( drills[ i ].elementParent ) {
 				connector.userData.element = drills[ i ].elementParent;
+				connector.name = drills[ i ].elementParent.getAttribute("name") + "." + drills[ i ].getAttribute("name");
 			}
 
 			// Bottom connector
