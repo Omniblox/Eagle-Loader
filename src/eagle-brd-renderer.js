@@ -773,7 +773,7 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 			connector.userData.drill = drills[ i ];
 			if ( drills[ i ].elementParent ) {
 				connector.userData.element = drills[ i ].elementParent;
-				connector.name = drills[ i ].elementParent.getAttribute("name") + "." + drills[ i ].getAttribute("name");
+				connector.name = this._makePinId(drills[ i ].elementParent.getAttribute("name"),  drills[ i ].getAttribute("name"));
 			}
 
 			// Bottom connector
@@ -3257,6 +3257,49 @@ EagleBrdRenderer.prototype.visualizeConnector = function( connector, color ) {
 
 	return mesh;
 };
+
+
+EagleBrdRenderer.prototype._makePinId = function(componentName, pinName) {
+
+	/**
+	Constructs a board-unique canonical identifier for the
+	specified component pin.
+
+	The generated pin ID allows every pin on the board to be
+	uniquely identified even if the pin name (e.g. "4" or "GND")
+	itself is not unique (e.g. components "JP1" and "JP2" might
+	both have pins named "1").
+
+	This is a convenience method to ensure the ID is constructed
+	consistently and allow the ID format to be transparently
+	changed in future.
+
+	Note: The terminology used in this method is somewhat
+	      inconsistent with that used by Eagle and elsewhere in
+	      this library.
+
+	      In part this is due to Eagle separating the concept of
+	      a component pin and the PCB pad to which that pin is
+	      connected--a distinction we don't make here.
+
+	      The other reason is a desire to avoid confusion between
+	      an XML "element" in the `.brd` file and an Eagle board
+	      "element" (e.g. the footprint of an electronic component).
+
+	@method _makePinId
+	@param componentName {string} Name of "component" (a.k.a
+	   "element") to which pin is attached. e.g. "JP8"
+	@param pinName {string} Name of "pin" (a.k.a. "pad").
+	   e.g. "4" or "GND"
+	@return {string} The board-unique canonical ID of the pin.
+	   e.g. "JP8.4"
+	@private
+	**/
+
+	const PIN_ID_SEPARATOR = ".";
+
+	return componentName + PIN_ID_SEPARATOR + pinName;
+}
 
 
 EagleBrdRenderer.prototype.viewComponents = function( show, componentMapCfg ) {
