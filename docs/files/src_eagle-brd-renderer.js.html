@@ -317,6 +317,16 @@ var EagleBrdRenderer = function( xml, params ) {
 	**/
 	this._shouldPopulateOverride = params.shouldPopulate || {};
 
+	/**
+	A mapping from pin identifier to the name of the signal to
+	which that pin is connected.
+
+	@property _pinSignalMap {object}
+	@private
+	**/
+	this._pinSignalMap = {};
+
+
 	this._parseDesignRules();
 
 	this._populateLayers();
@@ -860,7 +870,10 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 			connector.userData.drill = drills[ i ];
 			if ( drills[ i ].elementParent ) {
 				connector.userData.element = drills[ i ].elementParent;
-				connector.name = drills[ i ].elementParent.getAttribute(&quot;name&quot;) + &quot;.&quot; + drills[ i ].getAttribute(&quot;name&quot;);
+				if ( drills[ i ].tagName === &quot;pad&quot; ) {
+					connector.name = this._makePinId(drills[ i ].elementParent.getAttribute(&quot;name&quot;),  drills[ i ].getAttribute(&quot;name&quot;));
+					connector.userData.signal = this._pinSignalMap[connector.name];
+				}
 			}
 
 			// Bottom connector
@@ -1184,6 +1197,28 @@ EagleBrdRenderer.prototype._parseCollection = function( collection ) {
 				for ( j = 0; j &lt; this.layers.length; j++ ) {
 					this.layers[ j ].assessElementCandidate( el );
 				}
+
+			} else if ( ( collection.tagName === &quot;signal&quot; ) &amp;&amp; ( name === &quot;contactref&quot; ) ) {
+				//
+				// Record which pins are connected to each signal to enable a future lookup.
+				//
+				// Note: Duplicate &#x60;&lt;contactref&gt;&#x60; entries for a single pin have
+				//       been observed in the wild but these appear to be an
+				//       application bug rather than intentional, so we just
+				//       silently process the duplicate entry.
+				//
+				// Note: While it appears that it&#x27;s not legitimate to have
+				//       multiple signals connected to a single pin via multiple
+				//       &#x60;&lt;contactref&gt;&#x60; entries, documentation from later Eagle
+				//       versions suggests this functionality might now be
+				//       supported via the &#x60;route&#x60;/&#x60;routetag&#x60; attributes--which
+				//       we do not currently process.
+				//
+				// TODO: Perform this task at a different stage in the parsing process?
+				//
+				var pinId = this._makePinId(el.getAttribute(&quot;element&quot;), el.getAttribute(&quot;pad&quot;));
+				var signalName = collection.getAttribute(&quot;name&quot;);
+				this._pinSignalMap[pinId] = signalName;
 			}
 		}
 	}
@@ -3344,6 +3379,49 @@ EagleBrdRenderer.prototype.visualizeConnector = function( connector, color ) {
 
 	return mesh;
 };
+
+
+EagleBrdRenderer.prototype._makePinId = function(componentName, pinName) {
+
+	/**
+	Constructs a board-unique canonical identifier for the
+	specified component pin.
+
+	The generated pin ID allows every pin on the board to be
+	uniquely identified even if the pin name (e.g. &quot;4&quot; or &quot;GND&quot;)
+	itself is not unique (e.g. components &quot;JP1&quot; and &quot;JP2&quot; might
+	both have pins named &quot;1&quot;).
+
+	This is a convenience method to ensure the ID is constructed
+	consistently and allow the ID format to be transparently
+	changed in future.
+
+	Note: The terminology used in this method is somewhat
+	      inconsistent with that used by Eagle and elsewhere in
+	      this library.
+
+	      In part this is due to Eagle separating the concept of
+	      a component pin and the PCB pad to which that pin is
+	      connected--a distinction we don&#x27;t make here.
+
+	      The other reason is a desire to avoid confusion between
+	      an XML &quot;element&quot; in the &#x60;.brd&#x60; file and an Eagle board
+	      &quot;element&quot; (e.g. the footprint of an electronic component).
+
+	@method _makePinId
+	@param componentName {string} Name of &quot;component&quot; (a.k.a
+	   &quot;element&quot;) to which pin is attached. e.g. &quot;JP8&quot;
+	@param pinName {string} Name of &quot;pin&quot; (a.k.a. &quot;pad&quot;).
+	   e.g. &quot;4&quot; or &quot;GND&quot;
+	@return {string} The board-unique canonical ID of the pin.
+	   e.g. &quot;JP8.4&quot;
+	@private
+	**/
+
+	const PIN_ID_SEPARATOR = &quot;.&quot;;
+
+	return componentName + PIN_ID_SEPARATOR + pinName;
+}
 
 
 EagleBrdRenderer.prototype.viewComponents = function( show, componentMapCfg ) {
