@@ -230,6 +230,16 @@ var EagleBrdRenderer = function( xml, params ) {
 	**/
 	this._shouldPopulateOverride = params.shouldPopulate || {};
 
+	/**
+	A mapping from pin identifier to the name of the signal to
+	which that pin is connected.
+
+	@property _pinSignalMap {object}
+	@private
+	**/
+	this._pinSignalMap = {};
+
+
 	this._parseDesignRules();
 
 	this._populateLayers();
@@ -1099,6 +1109,28 @@ EagleBrdRenderer.prototype._parseCollection = function( collection ) {
 				for ( j = 0; j < this.layers.length; j++ ) {
 					this.layers[ j ].assessElementCandidate( el );
 				}
+
+			} else if ( ( collection.tagName === "signal" ) && ( name === "contactref" ) ) {
+				//
+				// Record which pins are connected to each signal to enable a future lookup.
+				//
+				// Note: Duplicate `<contactref>` entries for a single pin have
+				//       been observed in the wild but these appear to be an
+				//       application bug rather than intentional, so we just
+				//       silently process the duplicate entry.
+				//
+				// Note: While it appears that it's not legitimate to have
+				//       multiple signals connected to a single pin via multiple
+				//       `<contactref>` entries, documentation from later Eagle
+				//       versions suggests this functionality might now be
+				//       supported via the `route`/`routetag` attributes--which
+				//       we do not currently process.
+				//
+				// TODO: Perform this task at a different stage in the parsing process?
+				//
+				var pinId = this._makePinId(el.getAttribute("element"), el.getAttribute("pad"));
+				var signalName = collection.getAttribute("name");
+				this._pinSignalMap[pinId] = signalName;
 			}
 		}
 	}
