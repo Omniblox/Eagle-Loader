@@ -785,6 +785,7 @@ EagleBrdRenderer.prototype._buildDepthHoles = function( add ) {
 				connector.userData.element = drills[ i ].elementParent;
 				if ( drills[ i ].tagName === "pad" ) {
 					connector.name = this._makePinId(drills[ i ].elementParent.getAttribute("name"),  drills[ i ].getAttribute("name"));
+					connector.userData.signal = this._pinSignalMap[connector.name];
 				}
 			}
 
