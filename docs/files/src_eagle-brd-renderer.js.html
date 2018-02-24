@@ -317,6 +317,7 @@ var EagleBrdRenderer = function( xml, params ) {
 	**/
 	this._shouldPopulateOverride = params.shouldPopulate || {};
 
+
 	/**
 	A mapping from pin identifier to the name of the signal to
 	which that pin is connected.
@@ -1197,7 +1198,6 @@ EagleBrdRenderer.prototype._parseCollection = function( collection ) {
 				for ( j = 0; j &lt; this.layers.length; j++ ) {
 					this.layers[ j ].assessElementCandidate( el );
 				}
-
 			} else if ( ( collection.tagName === &quot;signal&quot; ) &amp;&amp; ( name === &quot;contactref&quot; ) ) {
 				//
 				// Record which pins are connected to each signal to enable a future lookup.
@@ -1219,7 +1219,8 @@ EagleBrdRenderer.prototype._parseCollection = function( collection ) {
 				var pinId = this._makePinId(el.getAttribute(&quot;element&quot;), el.getAttribute(&quot;pad&quot;));
 				var signalName = collection.getAttribute(&quot;name&quot;);
 				this._pinSignalMap[pinId] = signalName;
-			}
+ 			}
+
 		}
 	}
 };
@@ -2085,7 +2086,7 @@ EagleBrdRenderer.prototype.drawTexts = function( params ) {
 			only elements with a matching &#x60;layer&#x60; attribute will draw
 	**/
 
-	var angData, flip, fontSize, i, j, spin, text,
+	var angData, flip, fontSize, i, j, x, y, spin, text,
 		textAlign, textAlignX, textAlignY, textText,
 		ctx = params.layer.ctx,
 		fontScale = 1,
@@ -3380,7 +3381,6 @@ EagleBrdRenderer.prototype.visualizeConnector = function( connector, color ) {
 	return mesh;
 };
 
-
 EagleBrdRenderer.prototype._makePinId = function(componentName, pinName) {
 
 	/**
@@ -3418,11 +3418,10 @@ EagleBrdRenderer.prototype._makePinId = function(componentName, pinName) {
 	@private
 	**/
 
-	const PIN_ID_SEPARATOR = &quot;.&quot;;
+	var PIN_ID_SEPARATOR = &quot;.&quot;;
 
 	return componentName + PIN_ID_SEPARATOR + pinName;
 }
-
 
 EagleBrdRenderer.prototype.viewComponents = function( show, componentMapCfg ) {
 
@@ -3445,7 +3444,7 @@ EagleBrdRenderer.prototype.viewComponents = function( show, componentMapCfg ) {
 	   prefix to prepend to the model file path when loading model file.
 	**/
 
-	const DEFAULT_MAP_URL = &quot;components.json&quot;; // TODO: Make hosted version the default?
+	var DEFAULT_MAP_URL = &quot;components.json&quot;; // TODO: Make hosted version the default?
 	var mapsToLoad = [];
 
 	if (!show) {

@@ -13,8 +13,8 @@ THREE.BRDLoader = function ( manager ) {
 	@param [manager] {THREE.LoadingManager} Loading manager to use
 	**/
 
-	this.revision = "Style by Ryan Adams";
-	this.version = "0.2.2";
+	this.revision = "Out of the Woods by Ryan Adams";
+	this.version = "0.2.3";
 
 	this.manager = ( manager !== undefined ) ?
 		manager :
