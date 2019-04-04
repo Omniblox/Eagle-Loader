@@ -4,12 +4,12 @@ Benjamin D. Richards,
 [Gamelab](http://gamefroot.com/)
 
 David ten Have,
-St. Zeno Exploration Ltd
+[omniblox.io](https://omniblox.io)
 
 Philip Lindsay,
 [RancidBacon.com](http://rancidbacon.com/)
 
-Copyright (c) 2016, St. Zeno Exploration Ltd.
+Copyright (c) 2016, Omniblox Ltd.
 
 ## About Script
 
